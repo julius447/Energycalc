@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="sv"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ampy energikalkylatorn · 3 bildspecs (A/B/C)</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+.hd{max-width:1080px;margin:0 auto;padding:34px 20px 4px}
+.hd h1{font-weight:900;font-size:clamp(26px,4vw,40px);margin:8px 0 8px;letter-spacing:-.01em}
+.hd p{font-size:15px;color:#44506a;max-width:780px;line-height:1.6;margin:0}
+.exsec{max-width:1080px;margin:0 auto;padding:12px 20px}
+.exsec .cap2{display:flex;justify-content:space-between;align-items:center;margin:20px 0 9px;gap:10px;flex-wrap:wrap}
+.exsec .cap2 a{font-size:13px;text-decoration:none;font-weight:500}
+iframe.ex{width:100%;border:0;border-radius:18px;background:#e8eef8;display:block}
+.note{max-width:1080px;margin:22px auto 0;padding:18px 20px;font-size:13.5px;color:#44506a;line-height:1.65}
+.note h2{font-size:16px;margin:0 0 8px;font-weight:500}
+.note b{font-weight:500}
+.kv{font-size:12.5px;color:#5a6b86;margin-top:10px}
+</style></head><body>
+<div class="hd">
+  <span class="tag">Ampy · energikalkylatorn</span>
+  <h1>Tre bildspecs att A/B/C-testa</h1>
+  <p>Samma skal, samma hjälte-siffra, samma inputs. Bara <b>signaturdevicen</b> skiljer, vilket är det enda som testas. Siffrorna är platshållare (väntar elektriker- och ägarsignering) och är märkta som sådana. Candour-grind: hero vid stödtjänster=0 och effektavgift=0; pumpen visar ROT 30 %, inte grön teknik.</p>
+</div>
+<div class="exsec">
+  <div class="cap2"><span class="tag">A · systembytet</span><a href="a.html" target="_blank">Öppna A i egen flik &rarr;</a></div>
+  <iframe class="ex" src="a.html" title="Variant A · systembytet" height="600" scrolling="no"></iframe>
+  <div class="cap2"><span class="tag">B · räkningschocken</span><a href="b.html" target="_blank">Öppna B i egen flik &rarr;</a></div>
+  <iframe class="ex" src="b.html" title="Variant B · räkningschocken" height="600" scrolling="no"></iframe>
+  <div class="cap2"><span class="tag">C · hela hemmet</span><a href="c.html" target="_blank">Öppna C i egen flik &rarr;</a></div>
+  <iframe class="ex" src="c.html" title="Variant C · hela hemmet" height="600" scrolling="no"></iframe>
+</div>
+<div class="note">
+  <h2>Vad varje variant testar</h2>
+  <p><b>A · systembytet</b> &middot; 4-systemstapeln, linsen "vilket system". Snabbast vid första ögonkastet, men kategori-default (varmekalkyl.se gör redan stapel).<br>
+  <b>B · räkningschocken</b> &middot; 12-månaderskurvan, linsen "när det gör ont". Äger säsongs-white-spacen ingen konkurrent visar. Rekommenderad, med A:s känd-siffra som N1.<br>
+  <b>C · hela hemmet</b> &middot; energiflödet, linsen "hur allt hänger ihop". Korsförsäljnings-bryggan, behålls som statiska upside-rader, inte N1-device.</p>
+  <p class="kv">Detta repo = de tre bildspecsen (wireframe-stadiet, ingen produktion). Den fullständiga analysen och den djupa uppdateringen ligger i Ampy-arbetsytan (ENERGIKALKYLATORN-DEEP-UPDATE.md).</p>
+</div>
+<script>
+function fit(f){try{var h=f.contentWindow.document.body.scrollHeight;if(h>60){f.style.height=(h+14)+'px';}}catch(e){}}
+function fitAll(){document.querySelectorAll('iframe.ex').forEach(fit);}
+window.addEventListener('load',function(){document.querySelectorAll('iframe.ex').forEach(function(f){f.addEventListener('load',function(){fit(f);});fit(f);});setTimeout(fitAll,500);setTimeout(fitAll,1200);});
+window.addEventListener('resize',fitAll);
+</script>
+</body></html>
