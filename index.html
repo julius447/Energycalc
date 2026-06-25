@@ -5,11 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Energikalkylatorn: vad en värmepump kan sänka din elräkning till</title>
 <meta name="description" content="Räkna ut vad en värmepump kan sänka din uppvärmningskostnad till, månad för månad. Försiktiga schabloner, fält-SPF och ROT 30 % på arbetet, inte grön teknik.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="tool.css">
+<link rel="stylesheet" href="tool.css?v=7">
 </head>
 <body>
 <div class="page">
@@ -18,7 +15,6 @@
     <!-- ============ TOOL HEAD ============ -->
     <div class="toolhead">
       <span class="tag">Energikalkylatorn</span>
-      <span class="lens">Signatur: 12-månaderskurvan</span>
     </div>
 
     <div class="panes">
@@ -36,7 +32,7 @@
             <i class="ti ti-chevron-down" aria-hidden="true"></i>
           </div>
 
-          <div class="lbl lbl-row" style="margin-top:15px">
+          <div class="lbl lbl-row">
             <span>Boyta</span>
             <output id="areaOut" for="areaSlider" class="lbl-val">150 m²</output>
           </div>
@@ -44,23 +40,24 @@
                  min="40" max="400" step="5" value="150"
                  aria-label="Boyta i kvadratmeter">
 
-          <div class="lbl" style="margin-top:16px">Elområde <span class="lbl-soft">styr kurvans form</span></div>
+          <div class="lbl">Elområde <span class="lbl-soft">styr kurvans form</span></div>
           <div class="seg" id="priceAreaSeg" role="radiogroup" aria-label="Elområde"></div>
         </div>
 
         <!-- ---- N2: DIN PROFIL (revealed) ---- -->
         <button type="button" class="reveal" data-reveal="n2" aria-expanded="false" aria-controls="gearN2">
-          <span><i class="ti ti-adjustments-alt" aria-hidden="true"></i> Vill du ha en exaktare siffra?</span>
+          <span>Vill du ha en exaktare siffra?</span>
           <i class="ti ti-chevron-down reveal-caret" aria-hidden="true"></i>
         </button>
         <div class="gear gear-collapsed" data-gear="n2" id="gearN2" hidden>
+          <div class="gear-inner">
           <p class="gearcopy">Nu räknar vi på ditt hus, inte ett snitt.</p>
 
           <label class="lbl" for="annualKwhField">Årlig förbrukning <span class="lbl-soft">(kWh, om du vet)</span></label>
           <input type="number" id="annualKwhField" data-input="annualKwh" class="field"
                  inputmode="numeric" min="0" max="80000" step="100" placeholder="t.ex. 20 000">
 
-          <div class="lbl lbl-row" style="margin-top:15px">
+          <div class="lbl lbl-row">
             <span>Antal boende</span>
             <span class="stepper">
               <button type="button" class="stepbtn" data-step="occupants" data-dir="-1" aria-label="Minska antal boende">−</button>
@@ -70,22 +67,24 @@
           </div>
           <input type="hidden" id="occupantsField" data-input="occupants" value="2">
 
-          <div class="lbl" style="margin-top:15px">Byggår / energiklass</div>
+          <div class="lbl">Byggår / energiklass</div>
           <div class="seg seg-wrap" id="eraSeg" role="radiogroup" aria-label="Byggår"></div>
 
-          <label class="toggle" style="margin-top:15px">
+          <label class="toggle">
             <input type="checkbox" id="waterborneField" data-input="hasWaterborne" checked>
             <span class="toggle-track" aria-hidden="true"><span class="toggle-dot"></span></span>
             <span class="toggle-lbl">Befintligt vattenburet system</span>
           </label>
+          </div>
         </div>
 
         <!-- ---- N3: HELA BILDEN (revealed) ---- -->
         <button type="button" class="reveal" data-reveal="n3" aria-expanded="false" aria-controls="gearN3">
-          <span><i class="ti ti-microscope" aria-hidden="true"></i> Visa hela bilden</span>
+          <span>Visa hela bilden</span>
           <i class="ti ti-chevron-down reveal-caret" aria-hidden="true"></i>
         </button>
         <div class="gear gear-collapsed" data-gear="n3" id="gearN3" hidden>
+          <div class="gear-inner">
 
           <div class="lbl lbl-row">
             <span>Innetemperatur</span>
@@ -94,22 +93,23 @@
           <input type="range" id="tempSlider" data-input="indoorTemp" class="range"
                  min="17" max="24" step="1" value="21" aria-label="Innetemperatur i grader">
 
-          <div class="lbl" style="margin-top:15px">Värmedistribution</div>
+          <div class="lbl">Värmedistribution</div>
           <div class="seg" id="distSeg" role="radiogroup" aria-label="Värmedistribution"></div>
 
-          <div class="lbl" style="margin-top:15px">Elnätsbolag (DSO) <span class="lbl-soft">styr effektavgift-raden</span></div>
+          <div class="lbl">Elnätsbolag (DSO) <span class="lbl-soft">styr effektavgift-raden</span></div>
           <div class="selectwrap">
             <select id="dsoField" data-input="dso" class="field"></select>
             <i class="ti ti-chevron-down" aria-hidden="true"></i>
           </div>
 
-          <label class="toggle" style="margin-top:15px">
+          <label class="toggle">
             <input type="checkbox" id="solarField" data-input="hasSolar">
             <span class="toggle-track" aria-hidden="true"><span class="toggle-dot"></span></span>
             <span class="toggle-lbl">Solel finns eller planeras</span>
           </label>
 
           <div class="hint"><i class="ti ti-upload" aria-hidden="true"></i> Ladda upp timvärden och rita din <b>verkliga</b> kurva. Gör det här på datorn.</div>
+          </div>
         </div>
       </form>
 
@@ -127,18 +127,11 @@
           Jämfört med direktel, efter ROT 30 % på arbetet, vid stödtjänster=0 och effektavgift=0.
         </div>
 
-        <!-- STAT TRIO -->
-        <div class="trio">
-          <div class="c"><div class="k">Nuvarande</div><div class="v" id="statCurrent">0 kr/år</div></div>
-          <div class="c"><div class="k">Med värmepump</div><div class="v" id="statPump">0 kr/år</div></div>
-          <div class="c"><div class="k">Payback</div><div class="v" id="statPayback">0 år</div></div>
-        </div>
-
         <!-- SIGNATURE: the 12-month cost curve (mobile verdict text sits above) -->
         <div class="verdict" id="verdict" data-slot="verdict"></div>
         <div class="legend">
-          <span><i style="background:var(--slate)"></i>nu (<span id="legendCurrent">direktel</span>)</span>
-          <span><i style="background:var(--teal)"></i>med värmepump</span>
+          <span><i aria-hidden="true"></i>nu, <span id="legendCurrent">direktel</span></span>
+          <span><i aria-hidden="true"></i>med värmepump</span>
         </div>
         <div class="device">
           <!-- Chart drawn by app.js into #chart. viewBox + plot margins reserved for zero CLS. -->
@@ -153,16 +146,27 @@
           Luftpump sackar i kyla, bergvärme håller sig stabil. Bandet är vidast i november till februari, där siffran är minst säker.
         </div>
 
+        <!-- STAT TRIO (read-after breakdown, below the curve) -->
+        <div class="trio">
+          <div class="c"><div class="k">Nuvarande</div><div class="v" id="statCurrent">0 kr/år</div></div>
+          <div class="c"><div class="k">Värmepump</div><div class="v" id="statPump">0 kr/år</div></div>
+          <div class="c"><div class="k">Payback</div><div class="v" id="statPayback">0 år</div></div>
+        </div>
+
         <!-- 4-SYSTEM COMPARISON (support; appears with N2) -->
-        <div class="compare" id="compare" hidden>
-          <div class="compare-head">Årlig kostnad per system</div>
-          <div class="compare-bars" id="compareBars"></div>
+        <div class="compare gear-collapsed" id="compare" hidden>
+          <div class="gear-inner">
+            <div class="compare-head">Årlig kostnad per system</div>
+            <div class="compare-bars" id="compareBars"></div>
+          </div>
         </div>
 
         <!-- UPSIDE rows (labelled; appear when solar/DSO unlock them) -->
-        <div class="upside" id="upside" hidden>
-          <div class="upside-head">Möjlig extra besparing <span class="upside-soft">(ej i siffran ovan)</span></div>
-          <div class="upside-rows" id="upsideRows"></div>
+        <div class="upside gear-collapsed" id="upside" hidden>
+          <div class="gear-inner">
+            <div class="upside-head">Möjlig extra besparing <span class="upside-soft">(ej i siffran ovan)</span></div>
+            <div class="upside-rows" id="upsideRows"></div>
+          </div>
         </div>
 
         <!-- CTA -->
@@ -225,8 +229,8 @@
 </div>
 
 <!-- 5-layer chassis: data -> engine -> app -->
-<script src="data.js?v=5"></script>
-<script src="engine.js?v=5"></script>
-<script src="app.js?v=5"></script>
+<script src="data.js?v=7"></script>
+<script src="engine.js?v=7"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>
