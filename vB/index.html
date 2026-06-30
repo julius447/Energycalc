@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Energikalkylatorn: vad en värmepump kan sänka din elräkning till</title>
+<meta name="description" content="Räkna ut vad en värmepump kan sänka din uppvärmningskostnad till, månad för månad. Försiktiga schabloner, fält-SPF och ROT 30 % på arbetet, inte grön teknik.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="tool.css?v=2">
+</head>
+<body>
+<div class="page">
+  <div class="tool" id="ampyTool">
+
+    <!-- ============ TOOL HEAD ============ -->
+    <div class="toolhead">
+      <span class="tag">Energikalkylatorn</span>
+    </div>
+
+    <div class="panes">
+
+      <!-- ============ LEFT: INPUT CARD ============ -->
+      <form class="input" id="inputForm" autocomplete="off" novalidate>
+
+        <!-- ---- N1: SNABBSVAR (renders on load) ---- -->
+        <div class="gear" data-gear="n1">
+          <div class="gearhead"><span class="gearno">1</span> Snabbsvar</div>
+
+          <label class="lbl" for="systemField">Nuvarande uppvärmning <span class="lbl-soft">det som värmer huset mest</span></label>
+          <div class="selectwrap">
+            <select id="systemField" data-input="currentSystem" class="field"></select>
+            <i class="ti ti-chevron-down" aria-hidden="true"></i>
+          </div>
+          <!-- read-only blended-share chip: appears once a complement exists -->
+          <div class="pshare" id="primaryShareChip" hidden></div>
+
+          <div class="lbl lbl-row">
+            <span>Boyta</span>
+            <output id="areaOut" for="areaSlider" class="lbl-val">150 m²</output>
+          </div>
+          <input type="range" id="areaSlider" data-input="area" class="range"
+                 min="40" max="400" step="5" value="150"
+                 aria-label="Boyta i kvadratmeter">
+
+          <div class="lbl">Elområde <span class="lbl-soft">styr kurvans form</span></div>
+          <div class="seg" id="priceAreaSeg" role="radiogroup" aria-label="Elområde"></div>
+        </div>
+
+        <!-- ---- N2: DIN PROFIL (revealed) ---- -->
+        <button type="button" class="reveal" data-reveal="n2" aria-expanded="false" aria-controls="gearN2">
+          <span>Vill du ha en exaktare siffra?</span>
+          <i class="ti ti-chevron-down reveal-caret" aria-hidden="true"></i>
+        </button>
+        <div class="gear gear-collapsed" data-gear="n2" id="gearN2" hidden>
+          <div class="gear-inner">
+          <p class="gearcopy">Nu räknar vi på ditt hus, inte ett snitt.</p>
+
+          <!-- (a) the complement composer: adder -> chips -> per-chip share rows -->
+          <div class="composer">
+            <p class="gearcopy composer-frame">Har du fler värmekällor? Många hus har en kamin eller en luftvärmepump som komplement.</p>
+            <button type="button" class="addsrc" id="addSrcBtn" aria-expanded="false" aria-controls="complementWrap">
+              <span class="addsrc-plus" aria-hidden="true"></span>
+              <span>Lägg till värmekälla</span>
+            </button>
+            <div class="complement-wrap gear-collapsed" id="complementWrap" hidden>
+              <div class="gear-inner">
+                <div class="chips" id="complementChips" role="group" aria-label="Komplement"></div>
+                <div class="shares" id="complementShares"></div>
+                <p class="capnote" id="complementCapNote" role="status" aria-live="polite" hidden>Komplementen kan inte täcka mer än 70 % av värmen.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- (d) the override rung: unit switch + one typed field -->
+          <div class="override">
+            <label class="lbl" for="annualKwhField">Vet du din siffra? <span class="lbl-soft">det slår alla våra schabloner</span></label>
+            <div class="seg seg-unit" id="overrideUnitSeg" role="radiogroup" aria-label="Enhet för din egen siffra"></div>
+            <input type="number" id="annualKwhField" data-input="annualKwh" class="field"
+                   inputmode="numeric" min="0" max="120000" step="100" placeholder="t.ex. 20 000"
+                   aria-describedby="overrideNote">
+            <p class="override-note" id="overrideNote" role="status" aria-live="polite" hidden></p>
+          </div>
+
+          <div class="lbl lbl-row">
+            <span>Antal boende</span>
+            <span class="stepper">
+              <button type="button" class="stepbtn" data-step="occupants" data-dir="-1" aria-label="Minska antal boende">−</button>
+              <output id="occOut" class="stepval">2</output>
+              <button type="button" class="stepbtn" data-step="occupants" data-dir="1" aria-label="Öka antal boende">+</button>
+            </span>
+          </div>
+          <input type="hidden" id="occupantsField" data-input="occupants" value="2">
+
+          <div class="lbl">Byggår / energiklass</div>
+          <div class="seg seg-wrap" id="eraSeg" role="radiogroup" aria-label="Byggår"></div>
+
+          <label class="toggle">
+            <input type="checkbox" id="waterborneField" data-input="hasWaterborne" checked>
+            <span class="toggle-track" aria-hidden="true"><span class="toggle-dot"></span></span>
+            <span class="toggle-lbl">Befintligt vattenburet system</span>
+          </label>
+          </div>
+        </div>
+
+        <!-- ---- N3: HELA BILDEN (revealed) ---- -->
+        <button type="button" class="reveal" data-reveal="n3" aria-expanded="false" aria-controls="gearN3">
+          <span>Visa hela bilden</span>
+          <i class="ti ti-chevron-down reveal-caret" aria-hidden="true"></i>
+        </button>
+        <div class="gear gear-collapsed" data-gear="n3" id="gearN3" hidden>
+          <div class="gear-inner">
+
+          <div class="lbl lbl-row">
+            <span>Innetemperatur</span>
+            <output id="tempOut" class="lbl-val">21 °C</output>
+          </div>
+          <input type="range" id="tempSlider" data-input="indoorTemp" class="range"
+                 min="17" max="24" step="1" value="21" aria-label="Innetemperatur i grader">
+
+          <div class="lbl">Värmedistribution</div>
+          <div class="seg" id="distSeg" role="radiogroup" aria-label="Värmedistribution"></div>
+
+          <div class="lbl">Elnätsbolag (DSO) <span class="lbl-soft">styr effektavgift-raden</span></div>
+          <div class="selectwrap">
+            <select id="dsoField" data-input="dso" class="field"></select>
+            <i class="ti ti-chevron-down" aria-hidden="true"></i>
+          </div>
+
+          <label class="toggle">
+            <input type="checkbox" id="solarField" data-input="hasSolar">
+            <span class="toggle-track" aria-hidden="true"><span class="toggle-dot"></span></span>
+            <span class="toggle-lbl">Solel finns eller planeras</span>
+          </label>
+
+          <div class="hint"><i class="ti ti-upload" aria-hidden="true"></i> Ladda upp timvärden och rita din <b>verkliga</b> kurva. Gör det här på datorn.</div>
+          </div>
+        </div>
+      </form>
+
+      <!-- ============ RIGHT: RESULT CARD ============ -->
+      <div class="result" id="result" aria-live="polite">
+
+        <div class="eyebrow-row">
+          <span class="eyebrow" id="eyebrow" data-slot="eyebrow">Jämfört med din direktverkande el</span>
+          <span class="ownbadge" id="ownBadge" hidden>Räknat på din egen siffra</span>
+        </div>
+
+        <!-- HERO: kr/år saving as a RANGE -->
+        <div class="hero" data-slot="hero">
+          <span id="heroValue">~ 0 kr/år</span>
+          <span class="hero-word">lägre</span>
+        </div>
+        <div class="hero-sub" data-slot="heroSub" id="heroSub">
+          Jämfört med direktel, efter ROT 30 % på arbetet, vid stödtjänster=0 och effektavgift=0.
+        </div>
+
+        <!-- SIGNATURE: the 12-month cost curve (mobile verdict text sits above) -->
+        <div class="verdict" id="verdict" data-slot="verdict"></div>
+        <div class="legend">
+          <button type="button" class="legend-sw" id="legendCurrentSw" aria-pressed="false">
+            <i aria-hidden="true"></i>nu, <span id="legendCurrent">direktel</span>
+          </button>
+          <span><i aria-hidden="true"></i>med värmepump</span>
+        </div>
+        <div class="device">
+          <!-- Chart drawn by app.js into #chart. viewBox + plot margins reserved for zero CLS. -->
+          <svg id="chart" viewBox="0 0 372 196" width="100%" role="img"
+               aria-labelledby="chartTitle chartDesc" preserveAspectRatio="xMidYMid meet">
+            <title id="chartTitle">Månadskurva för kostnad</title>
+            <desc id="chartDesc">Nuvarande uppvärmning toppar i februari. Värmepumpen ligger lägre hela året, med ett osäkerhetsband som vidgas under vintern då luftpumpens årsvärmefaktor sjunker.</desc>
+          </svg>
+          <div class="chart-tip" id="chartTip" hidden></div>
+        </div>
+        <div class="cap" id="chartCap">
+          Luftpump sackar i kyla, bergvärme håller sig stabil. Bandet är vidast i november till februari, där siffran är minst säker.
+        </div>
+
+        <!-- STAT TRIO (read-after breakdown, below the curve) -->
+        <div class="trio">
+          <div class="c"><div class="k">Nuvarande</div><div class="v" id="statCurrent">0 kr/år</div></div>
+          <div class="c"><div class="k">Värmepump</div><div class="v" id="statPump">0 kr/år</div></div>
+          <div class="c"><div class="k">Payback</div><div class="v" id="statPayback">0 år</div></div>
+        </div>
+
+        <!-- 4-SYSTEM COMPARISON (support; appears with N2) -->
+        <div class="compare gear-collapsed" id="compare" hidden>
+          <div class="gear-inner">
+            <div class="compare-head">Årlig kostnad per system</div>
+            <div class="compare-bars" id="compareBars"></div>
+          </div>
+        </div>
+
+        <!-- UPSIDE rows (labelled; appear when solar/DSO unlock them) -->
+        <div class="upside gear-collapsed" id="upside" hidden>
+          <div class="gear-inner">
+            <div class="upside-head">Möjlig extra besparing <span class="upside-soft">(ej i siffran ovan)</span></div>
+            <div class="upside-rows" id="upsideRows"></div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <button type="button" class="cta" id="ctaBtn">Få en skräddarsydd offert</button>
+        <div class="fine">Kostnadsfritt och utan förbindelse.</div>
+
+        <!-- METHODOLOGY -->
+        <details class="method">
+          <summary><i class="ti ti-chevron-right" aria-hidden="true"></i> Så har vi räknat</summary>
+          <div class="method-body" id="methodBody"></div>
+        </details>
+
+        <p class="placeholder-note" id="placeholderNote"></p>
+      </div>
+    </div>
+
+    <!-- ============ LEAD FORM (opens after result, on CTA click) ============ -->
+    <div class="leadwrap" id="leadwrap" hidden>
+      <div class="leadcard">
+        <button type="button" class="leadclose" id="leadClose" aria-label="Stäng formuläret"><i class="ti ti-x" aria-hidden="true"></i></button>
+        <div class="lead-eyebrow">Få offerten</div>
+        <h3 class="lead-title">Vi räknar på just ditt hus</h3>
+        <p class="lead-sub">Ampys behöriga elektriker hör av sig med ett förslag som bygger på kurvan du just byggde, oftast inom en arbetsdag.</p>
+        <form id="leadForm" novalidate>
+          <label class="lead-lbl" for="leadName">Namn</label>
+          <input class="lead-field" type="text" id="leadName" name="name" autocomplete="name" required aria-describedby="errName">
+          <p class="field-err" id="errName" hidden></p>
+
+          <label class="lead-lbl" for="leadPhone">Telefon</label>
+          <input class="lead-field" type="tel" id="leadPhone" name="phone" autocomplete="tel" required aria-describedby="errPhone">
+          <p class="field-err" id="errPhone" hidden></p>
+
+          <label class="lead-lbl" for="leadZip">Postnummer</label>
+          <input class="lead-field" type="text" id="leadZip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="6" required aria-describedby="errZip">
+          <p class="field-err" id="errZip" hidden></p>
+
+          <label class="lead-lbl" for="leadEmail">E-post <span class="lbl-soft">valfritt</span></label>
+          <input class="lead-field" type="email" id="leadEmail" name="email" autocomplete="email" aria-describedby="errEmail">
+          <p class="field-err" id="errEmail" hidden></p>
+
+          <!-- honeypot (hidden from humans) -->
+          <div class="hp" aria-hidden="true">
+            <label for="leadCompany">Lämna tomt</label>
+            <input type="text" id="leadCompany" name="company" tabindex="-1" autocomplete="off">
+          </div>
+
+          <label class="lead-gdpr">
+            <input type="checkbox" id="leadGdpr" name="gdpr" required aria-describedby="errGdpr">
+            <span>Jag godkänner att Ampy hör av sig om min förfrågan.</span>
+          </label>
+          <p class="field-err" id="errGdpr" hidden></p>
+
+          <button type="submit" class="cta lead-submit">Skicka förfrågan</button>
+          <p class="lead-err" id="leadErr" hidden></p>
+        </form>
+        <div class="lead-success" id="leadSuccess" hidden>
+          <i class="ti ti-circle-check" aria-hidden="true"></i>
+          <p>Tack. Vi hör av oss med ett underlag som bygger på kurvan du just byggde.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot" id="foot"></div>
+  </div>
+</div>
+
+<!-- 5-layer chassis: data -> engine -> app -->
+<script src="data.js?v=2"></script>
+<script src="engine.js?v=2"></script>
+<script src="app.js?v=2"></script>
+</body>
+</html>
