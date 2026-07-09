@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Energikollen: vad kostar det att värma ditt hus?</title>
+<meta name="description" content="Tre snabba frågor. Se vad värmen kostar i ditt hus och vad som är värt att göra. Gratis, utan mejl. Försiktiga schabloner, ROT 30 procent på arbetet.">
+<meta property="og:title" content="Energikollen: vad kostar det att värma ditt hus?">
+<meta property="og:description" content="Tre snabba frågor. Se vad värmen kostar i ditt hus och vad som är värt att göra.">
+<link rel="stylesheet" href="tool.css?v=1">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Hoppa till innehållet</a>
+
+<header class="ek-chrome">
+  <span class="ek-mark">Energikollen</span>
+  <span class="ek-progress" id="ekProgress">1 av 3</span>
+</header>
+<button type="button" class="ek-back" id="ekBack" aria-label="Föregående fråga" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6l6 6"/></svg>
+</button>
+
+<main id="main">
+
+  <!-- ============ Q1 — the branch driver (never skippable) ============ -->
+  <section class="view is-active" id="view-q1" aria-labelledby="q1-h">
+    <div class="view-body">
+      <h1 class="q-title" id="q1-h" tabindex="-1">Vad värms huset med i dag?</h1>
+      <p class="q-sub">Tre frågor. Gratis, utan mejl.</p>
+
+      <div class="q-options q-options--icons" id="q1Grid" role="radiogroup" aria-labelledby="q1-h">
+        <button type="button" class="opt-card" role="radio" aria-checked="false" data-value="direktel">
+          <span class="opt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3v7h6l-8 11v-7H5l8-11z"/></svg></span>
+          <span class="opt-lbl">Direktel</span>
+          <svg class="opt-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>
+        </button>
+        <button type="button" class="opt-card" role="radio" aria-checked="false" data-value="fjarrvarme">
+          <span class="opt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l4-4 4 4v14"/><path d="M13 21v-8l6 3v5"/><path d="M9 9h.01"/><path d="M9 13h.01"/></svg></span>
+          <span class="opt-lbl">Fjärrvärme</span>
+          <svg class="opt-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>
+        </button>
+        <button type="button" class="opt-card" role="radio" aria-checked="false" data-value="olja">
+          <span class="opt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c2-2.96 0-7-1-8c0 3.04-1.77 4.74-3 6c-1.23 1.26-2 3.24-2 5a6 6 0 1 0 12 0c0-1.53-1.06-3.94-2-5c-1.79 3-2.79 3-4 2z"/></svg></span>
+          <span class="opt-lbl">Oljepanna</span>
+          <svg class="opt-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>
+        </button>
+        <button type="button" class="opt-card" role="radio" aria-checked="false" data-value="vedpellets">
+          <span class="opt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="16" r="3"/><circle cx="15" cy="16" r="3"/><circle cx="11" cy="8.5" r="3"/></svg></span>
+          <span class="opt-lbl">Ved / pellets</span>
+          <svg class="opt-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>
+        </button>
+        <button type="button" class="opt-card" role="radio" aria-checked="false" data-value="vattenburenEl">
+          <span class="opt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 19.42c2.6 2.11 6.4 2.11 9 0c2.6-2.1 3.26-5.71 1.57-8.55l-4.89-7.26c-.42-.62-1.29-.8-1.94-.4a1.38 1.38 0 0 0-.41.4l-4.89 7.26c-1.7 2.84-1.04 6.44 1.56 8.55z"/><path d="M13 10l-2.5 3h3L11 16"/></svg></span>
+          <span class="opt-lbl">Vattenburen el</span>
+          <svg class="opt-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>
+        </button>
+        <button type="button" class="opt-card" role="radio" aria-checked="false" data-value="franluft">
+          <span class="opt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h8.5a2.5 2.5 0 1 0-2.34-3.24"/><path d="M3 12h15.5a2.5 2.5 0 1 1-2.34 3.24"/><path d="M4 16h5.5a2.5 2.5 0 1 1-2.34 3.24"/></svg></span>
+          <span class="opt-lbl">Frånluftspump</span>
+          <svg class="opt-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>
+        </button>
+        <button type="button" class="opt-card" role="radio" aria-checked="false" data-value="pump">
+          <span class="opt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="10" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M17.5 10h.01"/><path d="M17.5 14h.01"/></svg></span>
+          <span class="opt-lbl">Värmepump finns</span>
+          <svg class="opt-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>
+        </button>
+        <button type="button" class="opt-card opt-card--quiet" role="radio" aria-checked="false" data-value="vetinte">
+          <span class="opt-lbl">Vet inte</span>
+        </button>
+      </div>
+
+      <!-- "Värmepump finns" → pump-kind sub-chips (S-12) -->
+      <div class="q-follow" id="q1PumpKind" role="group" aria-labelledby="q1pkLbl" hidden>
+        <p class="q-follow-lbl" id="q1pkLbl">Vilken sorts pump?</p>
+        <div class="chip-row">
+          <button type="button" class="chip" data-pumpkind="luftluftCur">Luft-luft</button>
+          <button type="button" class="chip" data-pumpkind="luftvattenCur">Luft-vatten</button>
+          <button type="button" class="chip" data-pumpkind="bergvarmeCur">Bergvärme</button>
+        </div>
+      </div>
+
+      <p class="q-ack" id="q1Ack" role="status" hidden></p>
+
+      <!-- komplement follow-up (same screen, after primary tap) -->
+      <div class="q-follow" id="q1Follow" role="group" aria-labelledby="q1fLbl" hidden>
+        <p class="q-follow-lbl" id="q1fLbl">Värmer något mer?</p>
+        <div class="chip-row">
+          <button type="button" class="chip" aria-pressed="false" data-comp="kamin">Braskamin</button>
+          <button type="button" class="chip" aria-pressed="false" data-comp="luftluftCur">Luft-luft</button>
+        </div>
+        <button type="button" class="btn-advance" id="q1Next">Nej, bara det</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Q2 — storlek ============ -->
+  <section class="view" id="view-q2" aria-labelledby="q2-h" hidden>
+    <div class="view-body">
+      <h1 class="q-title" id="q2-h" tabindex="-1">Hur stort är huset?</h1>
+      <p class="q-sub">Ungefär räcker.</p>
+      <div class="q-options q-options--bands" role="radiogroup" aria-labelledby="q2-h" data-q="m2">
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="b1"><span class="opt-lbl">Under 100 m²</span></button>
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="b2"><span class="opt-lbl">100-150 m²</span></button>
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="b3"><span class="opt-lbl">150-200 m²</span></button>
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="b4"><span class="opt-lbl">Över 200 m²</span></button>
+      </div>
+      <button type="button" class="ek-skip" data-skipfrom="q2">Hoppa till resultatet</button>
+      <div class="ek-trace" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ============ Q3 — byggår ============ -->
+  <section class="view" id="view-q3" aria-labelledby="q3-h" hidden>
+    <div class="view-body">
+      <h1 class="q-title" id="q3-h" tabindex="-1">När är det byggt, ungefär?</h1>
+      <div class="q-options q-options--bands" role="radiogroup" aria-labelledby="q3-h" data-q="era">
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="e1"><span class="opt-lbl">Före 1940</span></button>
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="e2"><span class="opt-lbl">1940-1990</span></button>
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="e3"><span class="opt-lbl">1990-2010</span></button>
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="e4"><span class="opt-lbl">Efter 2010</span></button>
+        <button type="button" class="opt-card opt-card--band opt-card--quiet" role="radio" aria-checked="false" data-value="x"><span class="opt-lbl">Vet inte</span></button>
+      </div>
+      <p class="q-ack" id="q3Ack" role="status" hidden></p>
+      <button type="button" class="ek-skip" data-skipfrom="q3">Hoppa till resultatet</button>
+      <div class="ek-trace" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ============ Q3b — conditional: vattenburet ============ -->
+  <section class="view" id="view-q3b" aria-labelledby="q3b-h" hidden>
+    <div class="view-body">
+      <h1 class="q-title" id="q3b-h" tabindex="-1">Finns element med vatten i?</h1>
+      <p class="q-sub">Radiatorer med vattenburen värme.</p>
+      <div class="q-options q-options--bands q-options--three" role="radiogroup" aria-labelledby="q3b-h" data-q="vb">
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="1"><span class="opt-lbl">Ja</span></button>
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="0"><span class="opt-lbl">Nej</span></button>
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="x"><span class="opt-lbl">Vet inte</span></button>
+      </div>
+      <button type="button" class="ek-skip" data-skipfrom="q3b">Hoppa till resultatet</button>
+      <div class="ek-trace" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ============ Q4 — optional: årsförbrukning ============ -->
+  <section class="view" id="view-q4" aria-labelledby="q4-h" hidden>
+    <div class="view-body">
+      <h1 class="q-title" id="q4-h" tabindex="-1">Vet du ungefär vad huset drar per år?</h1>
+      <p class="q-sub">Med din riktiga siffra blir kalkylen skarpare. Annars räknar vi försiktigt.</p>
+      <div class="q-options q-options--stack" role="radiogroup" aria-labelledby="q4-h" data-q="q4">
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="kr"><span class="opt-lbl">Ja, i kronor</span></button>
+        <div class="q4-field" id="q4FieldKr" hidden>
+          <label class="sr-only" for="q4InputKr">Årskostnad i kronor</label>
+          <div class="q4-fieldrow">
+            <input class="field" id="q4InputKr" type="number" inputmode="numeric" min="0" max="120000" step="100" placeholder="t.ex. 25 000" aria-describedby="q4Note">
+            <span class="q4-unit">kr per år</span>
+          </div>
+          <p class="q4-note" id="q4Note" role="status" hidden></p>
+          <button type="button" class="btn-advance" id="q4UseKr">Använd min siffra</button>
+        </div>
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="kwh"><span class="opt-lbl">Ja, i kWh</span></button>
+        <div class="q4-field" id="q4FieldKwh" hidden>
+          <label class="sr-only" for="q4InputKwh">Årsförbrukning i kilowattimmar</label>
+          <div class="q4-fieldrow">
+            <input class="field" id="q4InputKwh" type="number" inputmode="numeric" min="0" max="120000" step="100" placeholder="t.ex. 20 000" aria-describedby="q4NoteKwh">
+            <span class="q4-unit">kWh per år</span>
+          </div>
+          <p class="q4-note" id="q4NoteKwh" role="status" hidden></p>
+          <button type="button" class="btn-advance" id="q4UseKwh">Använd min siffra</button>
+        </div>
+        <button type="button" class="opt-card opt-card--band" role="radio" aria-checked="false" data-value="skip"><span class="opt-lbl">Vet inte</span></button>
+      </div>
+      <div class="ek-trace" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ============ THE REVEAL — one living page, built as an argument ============ -->
+  <section class="view view--reveal" id="view-reveal" aria-labelledby="anchorH" hidden>
+    <div class="rev">
+
+      <!-- R1 verdict -->
+      <p class="verdict" id="verdict" tabindex="-1"></p>
+
+      <!-- R2 anchor: the midnight plate (Direction A) -->
+      <section class="anchor" aria-labelledby="anchorH">
+        <div class="anchor-head">
+          <h2 class="anchor-h" id="anchorH">Så använder ditt hus energi i dag</h2>
+          <span class="ownbadge" id="ownBadge" hidden>Din egen siffra</span>
+        </div>
+        <p class="anchor-num" id="anchorNum">&#8212;</p>
+        <p class="anchor-sub" id="anchorSub">uppvärmning och varmvatten</p>
+        <div class="storybar" id="storyBar" aria-hidden="true">
+          <span class="sb-seg sb-heat"></span><span class="sb-seg sb-vv"></span><span class="sb-seg sb-house"></span>
+        </div>
+        <ul class="sb-legend" id="sbLegend">
+          <li><i class="sb-dot sb-dot-heat" aria-hidden="true"></i>Uppvärmning <b id="sbHeatKr">&#8212;</b></li>
+          <li><i class="sb-dot sb-dot-vv" aria-hidden="true"></i>Varmvatten <b id="sbVvKr">&#8212;</b></li>
+          <li class="sb-house-row"><i class="sb-dot sb-dot-house" aria-hidden="true"></i>Hushållsel <b id="sbHouseKr">&#8212;</b> <span>den rör vi inte</span></li>
+        </ul>
+        <p class="anchor-note" id="bandNote" hidden></p>
+        <span class="anchor-mark" aria-hidden="true">ampy.se</span>
+      </section>
+
+      <!-- R3 house chips (the editable trace) -->
+      <div class="chips-wrap">
+        <div class="chips" id="chips" role="group" aria-label="Dina svar"></div>
+        <div class="chip-pop" id="chipPop" hidden></div>
+      </div>
+
+      <!-- R4 åtgärdsstegen -->
+      <section class="ladder" aria-labelledby="ladderH" id="ladderSec">
+        <div class="ladder-head">
+          <h2 class="ladder-h" id="ladderH">Vad som är värt att göra</h2>
+          <div class="lever" id="lever" role="radiogroup" aria-label="Visa åtgärder för budget">
+            <button type="button" role="radio" aria-checked="true" data-lever="all">Alla</button>
+            <button type="button" role="radio" aria-checked="false" data-lever="r0">Under 15 tkr</button>
+            <button type="button" role="radio" aria-checked="false" data-lever="r1">Under 60 tkr</button>
+          </div>
+        </div>
+        <div id="ladder"></div>
+      </section>
+
+      <!-- R5 Finjustera -->
+      <details class="fine" id="fine">
+        <summary class="fine-sum">Finjustera <span class="fine-hint">boende, temperatur, elområde, din siffra</span></summary>
+        <div class="fine-body" id="fineBody"></div>
+      </details>
+
+      <!-- R6 CTA + inline lead form (the earned ask) -->
+      <section class="claim">
+        <button type="button" class="cta" id="ctaBtn" aria-expanded="false" aria-controls="lead">Få en plan för ditt hus</button>
+        <p class="claim-foot">Kostnadsfritt. Vi jobbar i Stockholmsområdet i dag.</p>
+        <div class="lead" id="lead" hidden>
+          <div class="lead-body">
+            <button type="button" class="leadclose" id="leadClose" aria-label="Stäng formuläret">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+            </button>
+            <div class="lead-eyebrow">Få en plan</div>
+            <h3 class="lead-title">Vi räknar på just ditt hus</h3>
+            <p class="lead-sub">Våra behöriga elektriker hör av sig med ett förslag för ditt hus, oftast inom en arbetsdag. Kostnadsfritt och utan förbindelse.</p>
+            <form id="leadForm" novalidate>
+              <label class="lead-lbl" for="leadName">Namn</label>
+              <input class="lead-field" type="text" id="leadName" name="name" autocomplete="name" required aria-describedby="errName">
+              <p class="field-err" id="errName" hidden></p>
+
+              <label class="lead-lbl" for="leadPhone">Telefon</label>
+              <input class="lead-field" type="tel" id="leadPhone" name="phone" autocomplete="tel" required aria-describedby="errPhone">
+              <p class="field-err" id="errPhone" hidden></p>
+
+              <label class="lead-lbl" for="leadZip">Postnummer</label>
+              <input class="lead-field" type="text" id="leadZip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="6" required aria-describedby="errZip">
+              <p class="field-err" id="errZip" hidden></p>
+
+              <label class="lead-lbl" for="leadEmail">E-post <span class="lead-opt">valfritt</span></label>
+              <input class="lead-field" type="email" id="leadEmail" name="email" autocomplete="email" aria-describedby="errEmail">
+              <p class="field-err" id="errEmail" hidden></p>
+
+              <!-- honeypot (hidden from humans) -->
+              <div class="hp" aria-hidden="true">
+                <label for="leadCompany">Lämna tomt</label>
+                <input type="text" id="leadCompany" name="company" tabindex="-1" autocomplete="off">
+              </div>
+
+              <label class="lead-gdpr">
+                <input type="checkbox" id="leadGdpr" name="gdpr" required aria-describedby="errGdpr">
+                <span>Jag godkänner att Ampy hör av sig om min förfrågan.</span>
+              </label>
+              <p class="field-err" id="errGdpr" hidden></p>
+
+              <button type="submit" class="cta cta--submit">Skicka förfrågan</button>
+              <p class="lead-err" id="leadErr" hidden></p>
+            </form>
+            <div class="lead-success" id="leadSuccess" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3l5 -6"/></svg>
+              <p>Tack. Vi hör av oss med ett underlag för ditt hus, oftast inom en arbetsdag.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- R7 metod (the curve's new home) -->
+      <details class="method" id="method">
+        <summary>Så har vi räknat</summary>
+        <div class="method-body">
+          <p id="methodText">Vi räknar försiktigt. Värmebehovet uppskattas från boyta och byggår med offentliga schabloner från Energimyndigheten, eller från din egen siffra när du anger den. Värmepumpar räknas på verklig årsvärmefaktor från fälttester, aldrig tillverkarnas energimärkning. Luftvärmepumpar tappar verkningsgrad i kyla. Kurvan nedan visar hur det slår månad för månad. Avdraget är ROT, 30 procent på arbetskostnaden, aldrig grön teknik. Solel, batteri och stödtjänster ligger aldrig i huvudsiffran. Rangordningen är enkel: vi tar bort det som inte går att installera i ditt hus och sorterar resten på återbetalningstid efter ROT, grupperat efter investeringens storlek. Allt visas som spann, eftersom schabloner kan slå fel. Det här är uppskattningar, inte ett erbjudande.</p>
+          <figure class="method-curve">
+            <svg id="curve" viewBox="0 0 372 196" role="img" aria-labelledby="curveT curveD">
+              <title id="curveT">Kostnad månad för månad</title>
+              <desc id="curveD">Nuvarande uppvärmning toppar i februari. En luftvärmepump tappar i kyla, därför vidgas bandet på vintern. Bergvärme ligger stabilt.</desc>
+            </svg>
+            <figcaption id="curveCap">Luftpumpens tapp i kyla, månad för månad. Det är beviset för raden på korten ovan.</figcaption>
+          </figure>
+          <p class="method-gaps" id="methodGaps">Vissa schabloner väntar på slutlig signering och är satta i försiktigaste änden.</p>
+        </div>
+      </details>
+
+      <!-- R8 dela -->
+      <section class="share">
+        <button type="button" class="share-btn" id="shareBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M8.2 10.9l7.5-3.8"/><path d="M8.2 13.1l7.5 3.8"/></svg>
+          <span id="shareLbl">Dela din kalkyl</span>
+        </button>
+      </section>
+
+      <!-- R9 foot (the ONE disclaimer, said once) -->
+      <p class="foot-line">Försiktiga schabloner, inte ett erbjudande. Din verkliga siffra kan bli både högre och lägre.</p>
+
+    </div>
+  </section>
+</main>
+
+<noscript>
+  <div class="noscript">
+    <h1>Energikollen: vad kostar det att värma ditt hus?</h1>
+    <p>Tre snabba frågor. Se vad värmen kostar i ditt hus och vad som är värt att göra. Gratis, utan mejl.</p>
+    <p>Verktyget behöver JavaScript. Så här räknar det: värmebehovet uppskattas från boyta och byggår med offentliga schabloner från Energimyndigheten, eller från din egen siffra. Värmepumpar räknas på verklig årsvärmefaktor från fälttester, aldrig tillverkarnas energimärkning. Avdraget är ROT, 30 procent på arbetskostnaden, aldrig grön teknik. Allt visas som spann.</p>
+    <p>Åtgärderna verktyget rangordnar för ditt hus:</p>
+    <ul>
+      <li>Behåll det du har</li>
+      <li>Smart styrning av värmen</li>
+      <li>Luft-luft värmepump som komplement</li>
+      <li>Luft-vatten värmepump</li>
+      <li>Bergvärme</li>
+      <li>Kamin som spets de kallaste dagarna</li>
+    </ul>
+    <p><a href="https://ampy.se/kontakt/">Kontakta Ampy</a> så räknar vi på just ditt hus. Kostnadsfritt. Vi jobbar i Stockholmsområdet i dag.</p>
+  </div>
+</noscript>
+
+<!-- 6-layer chassis: data -> engine -> rank -> app -->
+<script src="data.js?v=1"></script>
+<script src="engine.js?v=1"></script>
+<script src="rank.js?v=1"></script>
+<script src="app.js?v=1"></script>
+</body>
+</html>
