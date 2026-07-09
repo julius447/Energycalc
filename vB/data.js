@@ -300,5 +300,55 @@ window.AMPY_DATA = {
    * If the user's PRIMARY current system is already a heat pump, the honest verdict
    * is "liten besparing" regardless of the kr delta. These ids trip efficientFlag.
    * [MODEL] derived from currentSystems.isComplementClass + franluft. */
-  heatPumpCurrentIds: ['luftluftCur', 'luftvattenCur', 'bergvarmeCur', 'franluft'] // [MODEL] primary-is-a-pump ⇒ already-efficient branch
+  heatPumpCurrentIds: ['luftluftCur', 'luftvattenCur', 'bergvarmeCur', 'franluft'], // [MODEL] primary-is-a-pump ⇒ already-efficient branch
+
+  /* ==========================================================================
+   * V4 DELTA (V4-engine-delta.md §3) — the neutral ranked-options registry.
+   * Read ONLY by rankOptions (rank.js). Every new coefficient [GAP]-tagged with
+   * its signer; unsigned ⇒ conservative end + meta.placeholderNote, or qualitative.
+   * ======================================================================== */
+
+  /* --- 3.1 D.measures — the option registry ---------------------------------- */
+  measures: {
+    /* S1 — smart styrning. Ships a NUMBER only when signed:false flips (V4 §5.2 rule 6).
+     * Until then rankOptions emits the row with numeric:false and NO kr fields at all. */
+    styrning: {
+      id: 'styrning', label: 'Smart styrning',
+      signed: false,                 // [GAP-V4-2] energy expert flips this WITH the numbers below
+      invest: [3000, 15000],         // [GAP-V4-1] kr, owner+electrician sign package + what Ampy installs
+      heatingCostCut: [0.05, 0.10],  // [GAP-V4-2] conservative share of space-HEATING COST (supplier 20–45 % claims rejected; spot-shifting moves kWh in time, it does not remove them)
+      laborShare: null,              // [GAP-V4-1] null ⇒ NO ROT applied (conservative until signed)
+      needsControllable: true        // gate: see rank.controllablePrimaries
+    }
+    /* S2–S4 need no registry rows: they ARE D.pumps (luftluft/luftvatten/bergvarme).
+     * S0 behåll is generated unconditionally. S5 kamin-spets: see D.combi. */
+  },
+
+  /* --- 3.2 D.rank — the deterministic ranking constants ---------------------- */
+  rank: {
+    /* Investment rungs (V4 §5.2 rule 3; the neutrality device). Assign by netInvest MIDPOINT. */
+    rungs: [                                   // [GAP-V4-5] owner signs the stops
+      { id: 'r0', max: 15000,   label: '0-15 tkr'  },
+      { id: 'r1', max: 60000,   label: '20-55 tkr' },
+      { id: 'r2', max: Infinity, label: '90+ tkr'  }
+    ],
+    /* Primaries on which styrning has a controllable load (pump, vattenburet, or smart
+     * thermostats on direktel). direktel included WITH caveat (thermostat retrofit). */
+    controllablePrimaries: ['direktel', 'vattenburenEl', 'olja', 'fjarrvarme', 'franluft',
+                            'luftluftCur', 'luftvattenCur', 'bergvarmeCur'], // [MODEL] everything but ved/pellets-primary; [GAP-V4-2] expert confirms
+    /* Q1 primaries that IMPLY a waterborne system (Q3b skipped, hasWaterborne inferred true). */
+    waterborneImplies: ['olja', 'fjarrvarme', 'vattenburenEl', 'luftvattenCur', 'bergvarmeCur'], // [MODEL] app-layer inference, engine untouched
+    /* An existing luft-luft complement at/above this coverage removes S2 headroom (greyed, never hidden). */
+    complementHeadroomMax: 0.20   // [GAP-V4-9] expert signs; conservative (any real existing luft-luft ⇒ greyed at the 0.40 default stop)
+  },
+
+  /* --- 3.3 D.combi — future-stack combinations (S5 machinery) ---------------- */
+  combi: {
+    enabled: false,            // v1 ships FALSE: kamin-spets = verdict sentence (V4-systems §1 S5); flip for v1.1 computed combos
+    keepable: ['kamin'],       // [MODEL] complements that may stay on the FUTURE side (vedpellets excluded v1: labour/comfort framing, R1 §3b)
+    maxKeptShare: 0.20,        // [GAP-V4-7] cap on the kept complement's FUTURE coverage — spets, not workhorse. CONSERVATIVE direction verified: kamin heat (fuelPrice 0.55 kr/kWh) is CHEAPER than modelled pump heat, so a LOWER cap yields a SMALLER claimed saving. Flat across months (winter-weighting would only ENLARGE the modelled benefit; a signed winter-weight profile is [GAP-V4-8])
+    spetsSentenceKey: 'kaminSpets' // [GAP-V4-6] the qualitative sentence, rost finalises; attached as a caveat when enabled:false and kamin is in the current stack
+  }
+  /* Rename note (delta §3.4): D.marginalPriceSE3 is used with pa.factor for ALL areas.
+   * Decision: KEEP marginalPriceSE3, no rename. Written here so nobody "cleans it up". */
 };

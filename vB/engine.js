@@ -224,9 +224,14 @@
      * (4) MONTHLY HEAT to deliver (kWh) — space heat follows degree-days,
      *     hot water near-flat. This shape draws the februari-stapeln. UNCHANGED.
      * ===================================================================== */
+    /* V4 E1 (V4-engine-delta §2): retain the two terms so the rank wrapper can split
+     * the blended current COST exactly (story bar + styrning). Additive; no caller breaks. */
     var monthHeat = new Array(12);
+    var spaceHeatMonthly = new Array(12), vvMonthly = new Array(12);
     for (var m = 0; m < 12; m++) {
-      monthHeat[m] = spaceHeat * ddShape[m] + vvEff * vvShape[m];
+      spaceHeatMonthly[m] = spaceHeat * ddShape[m];
+      vvMonthly[m]        = vvEff * vvShape[m];
+      monthHeat[m]        = spaceHeatMonthly[m] + vvMonthly[m];
     }
 
     /* =====================================================================
@@ -303,6 +308,18 @@
      *     different across months), then PIN the annual to the typed number so the
      *     real bill is never silently changed.
      * ===================================================================== */
+    /* V4 E2 (V4-engine-delta §2, OPTIONAL, flag-gated [GAP-V4-11]): when the typed kr
+     * is the WHOLE electric bill (actual.includesHousehold === true) on an all-electric
+     * stack, strip the household schablon before the back-solve. Flag absent (all existing
+     * callers) ⇒ byte-identical to vB. The strip is surfaced in ctx (shown, never silent).
+     * Mixed/fuel stacks: never strip (different invoices; app-layer copy owns the framing). */
+    var householdCostStripped = null;
+    if (ovrCost != null && actual.includesHousehold === true && stackAllElectric) {
+      var householdCostE2 = D.household * D.marginalPriceSE3 * pa.factor;
+      ovrCost = clamp0(ovrCost - householdCostE2);
+      householdCostStripped = householdCostE2;
+    }
+
     if (ovrCost != null) {
       var schVvEff = Math.min(vv, schablonCombined);
       var schSpace = clamp0(schablonCombined - schVvEff);
@@ -314,7 +331,12 @@
       combined = clamp0(schablonCombined * demandScale);
       vvEff = Math.min(vv, combined);
       spaceHeat = clamp0(combined - vvEff);
-      for (var rm = 0; rm < 12; rm++) monthHeat[rm] = spaceHeat * ddShape[rm] + vvEff * vvShape[rm];
+      /* V4 E1: keep the two terms in sync where monthHeat is REBUILT (delta §2 E1). */
+      for (var rm = 0; rm < 12; rm++) {
+        spaceHeatMonthly[rm] = spaceHeat * ddShape[rm];
+        vvMonthly[rm]        = vvEff * vvShape[rm];
+        monthHeat[rm]        = spaceHeatMonthly[rm] + vvMonthly[rm];
+      }
 
       blended = blendCurrentCost(monthHeat, 1);
       currentCost = pinSumTo(blended.cost, ovrCost); // curve SHAPE from the blend, SUM from the user
@@ -510,12 +532,15 @@
         usedTypedKwh: !!(annualKwh != null && stackAllElectric),
         overrideMode: ovrCost != null ? 'cost' : (ovrKwh != null ? 'kwh' : null),
         demandMeasured: demandMeasured,
-        footprintFlag: pump.footprintFlag || null
+        footprintFlag: pump.footprintFlag || null,
+        householdCostStripped: householdCostStripped   // V4 E2: shown by the renderer, never silent
       },
       // demand
       combined: combined, spaceHeat: spaceHeat, vv: vv,
       // monthly series (kr) — the chart
       monthHeat: monthHeat, currentCost: currentCost, pumpCost: pumpCost,
+      // V4 E1 (additive): the two terms of monthHeat, for the exact cost split
+      spaceHeatMonthly: spaceHeatMonthly, vvMonthly: vvMonthly,
       pumpCostLow: pumpCostLow, pumpCostHigh: pumpCostHigh, SPFeff: SPFeff, price: price,
       // the blended current-state split (WOW-1 stacked area + the readout)
       currentBreakdown: currentBreakdown,

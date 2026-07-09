@@ -2,11 +2,10 @@
 <html lang="sv">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Energikalkylatorn: vad en värmepump sänker din elräkning till</title>
-<meta name="description" content="Se vad en värmepump gör med din uppvärmningskostnad, månad för månad. Försiktiga schabloner, fält-SPF, ROT 30 % på arbetet, inte grön teknik.">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="tool.css?v=4">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Energikalkylatorn: vad kostar det att värma ditt hus?</title>
+<meta name="description" content="Se vad värmen kostar i ditt hus och vad som är värt att göra. Försiktiga spann, fält-SPF, ROT 30 % på arbetet. Gratis, utan mejl.">
+<link rel="stylesheet" href="tool.css?v=6">
 </head>
 <body>
 <div class="page">
@@ -15,7 +14,8 @@
     <!-- ============ TOOL HEAD ============ -->
     <div class="toolhead">
       <span class="tag">Energikalkylatorn</span>
-      <h1 class="th-title">Se vad en värmepump gör med din elräkning.</h1>
+      <h1 class="th-title">Vad kostar det att värma ditt hus?</h1>
+      <p class="th-sub">Se din kostnad och vad som är värt att göra. Gratis, utan mejl.</p>
     </div>
 
     <div class="panes">
@@ -23,194 +23,161 @@
       <!-- ============ LEFT: INPUT CARD ============ -->
       <form class="input" id="inputForm" autocomplete="off" novalidate>
 
-        <!-- ---- N1: SNABBSVAR (renders on load) ---- -->
         <div class="gear" data-gear="n1">
-          <div class="gearhead"><span class="gearno">1</span> Snabbsvar</div>
+          <div class="gearhead">Ditt hus</div>
 
-          <!-- icon-based, clickable, multi-select heat picker -->
+          <!-- 1. icon-based, clickable, multi-select heat picker -->
           <fieldset class="heatpicker" id="heatPicker">
             <legend class="hp-legend">Vad värmer huset i dag?<span class="hp-legend-soft">Välj en eller flera</span></legend>
             <div class="hp-grid" id="hpGrid" role="group" aria-describedby="hpHint"><!-- cards built by app.js --></div>
             <p class="hp-hint" id="hpHint" role="status" aria-live="polite" hidden></p>
-            <div class="hp-shares" id="hpShares" hidden></div>
-            <p class="capnote" id="complementCapNote" role="status" aria-live="polite" hidden>Komplementen kan inte täcka mer än 70 % av värmen.</p>
+            <div class="hp-shares" id="hpShares" hidden>
+              <div class="hp-shares-head">Hur mycket värmer var och en?</div>
+              <p class="hp-summary" id="hpSummary" role="status" aria-live="polite"></p>
+            </div>
+            <p class="capnote" id="complementCapNote" role="status" aria-live="polite" hidden>Komplementen täcker tillsammans högst 70 % av värmen.</p>
           </fieldset>
 
+          <!-- 2. boyta -->
           <div class="lbl lbl-row">
-            <span><i class="ti ti-ruler-2" aria-hidden="true"></i>Boyta</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3l4 4l-14 14l-4 -4z"/><path d="M16 7l-1.5 -1.5"/><path d="M13 10l-1.5 -1.5"/><path d="M10 13l-1.5 -1.5"/><path d="M7 16l-1.5 -1.5"/></svg>Boyta</span>
             <output id="areaOut" for="areaSlider" class="lbl-val">150 m²</output>
           </div>
           <input type="range" id="areaSlider" data-input="area" class="range"
-                 min="40" max="400" step="5" value="150"
+                 min="40" max="400" step="10" value="150"
                  aria-label="Boyta i kvadratmeter">
 
-          <div class="lbl"><i class="ti ti-map-pin" aria-hidden="true"></i>Elområde <span class="lbl-soft">styr kurvan</span></div>
-          <div class="seg" id="priceAreaSeg" role="radiogroup" aria-label="Elområde"></div>
+          <!-- 3. byggår (promoted) -->
+          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/></svg>Byggår <span class="lbl-soft">ungefär räcker</span> <span class="antag" id="eraAsm">(antagande)</span></div>
+          <div class="seg seg-wrap" id="eraSeg" role="radiogroup" aria-label="Byggår"></div>
+
+          <!-- 4. the override — promoted, benefit-labelled disclosure -->
+          <button type="button" class="reveal" data-reveal="own" aria-expanded="false" aria-controls="gearOwn">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/><path d="M11 7l-2.5 3.5h3l-2.5 3.5"/></svg>Vet du vad huset drar per år?</span>
+            <svg class="reveal-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg>
+          </button>
+          <div class="gear gear-collapsed" data-gear="own" id="gearOwn" hidden>
+            <div class="gear-inner">
+              <p class="gearcopy">Din siffra slår våra schabloner.</p>
+              <div class="seg seg-unit" id="overrideUnitSeg" role="radiogroup" aria-label="Enhet för din egen siffra"></div>
+              <input type="number" id="annualKwhField" data-input="annualKwh" class="field"
+                     inputmode="numeric" min="0" max="200000" step="100" placeholder="t.ex. 28 000"
+                     aria-describedby="overrideNote">
+              <p class="override-note" id="overrideNote" role="status" aria-live="polite" hidden></p>
+            </div>
+          </div>
         </div>
 
-        <!-- ---- N2: DIN PROFIL (revealed) ---- -->
-        <button type="button" class="reveal" data-reveal="n2" aria-expanded="false" aria-controls="gearN2">
-          <span>Räkna på just ditt hus</span>
-          <i class="ti ti-chevron-down reveal-caret" aria-hidden="true"></i>
+        <!-- 5. the ONE reveal -->
+        <button type="button" class="reveal" data-reveal="all" aria-expanded="false" aria-controls="gearAll">
+          <span>Visa alla detaljer</span>
+          <svg class="reveal-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg>
         </button>
-        <div class="gear gear-collapsed" data-gear="n2" id="gearN2" hidden>
+        <div class="gear gear-collapsed" data-gear="all" id="gearAll" hidden>
           <div class="gear-inner">
 
-          <!-- the override rung: unit switch + one typed field -->
-          <div class="override">
-            <label class="lbl" for="annualKwhField"><i class="ti ti-input-search" aria-hidden="true"></i>Vet du din siffra? <span class="lbl-soft">den slår våra schabloner</span></label>
-            <div class="seg seg-unit" id="overrideUnitSeg" role="radiogroup" aria-label="Enhet för din egen siffra"></div>
-            <input type="number" id="annualKwhField" data-input="annualKwh" class="field"
-                   inputmode="numeric" min="0" max="120000" step="100" placeholder="t.ex. 20 000"
-                   aria-describedby="overrideNote">
-            <p class="override-note" id="overrideNote" role="status" aria-live="polite" hidden></p>
-          </div>
+          <div class="gr-subhead">Huset</div>
 
           <div class="lbl lbl-row">
-            <span><i class="ti ti-users" aria-hidden="true"></i>Boende</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/></svg>Boende <span class="lbl-soft">styr varmvattnet</span></span>
             <span class="stepper">
               <button type="button" class="stepbtn" data-step="occupants" data-dir="-1" aria-label="Minska antal boende">−</button>
-              <output id="occOut" class="stepval">2</output>
+              <output id="occOut" class="stepval" aria-live="polite">2</output>
               <button type="button" class="stepbtn" data-step="occupants" data-dir="1" aria-label="Öka antal boende">+</button>
             </span>
           </div>
           <input type="hidden" id="occupantsField" data-input="occupants" value="2">
 
-          <div class="lbl">Byggår</div>
-          <div class="seg seg-wrap" id="eraSeg" role="radiogroup" aria-label="Byggår"></div>
-
-          <label class="toggle">
-            <input type="checkbox" id="waterborneField" data-input="hasWaterborne" checked>
-            <span class="toggle-track" aria-hidden="true"><span class="toggle-dot"></span></span>
-            <span class="toggle-lbl">Vattenburet system finns</span>
-          </label>
-          </div>
-        </div>
-
-        <!-- ---- N3: HELA BILDEN (revealed) ---- -->
-        <button type="button" class="reveal" data-reveal="n3" aria-expanded="false" aria-controls="gearN3">
-          <span>Visa alla detaljer</span>
-          <i class="ti ti-chevron-down reveal-caret" aria-hidden="true"></i>
-        </button>
-        <div class="gear gear-collapsed" data-gear="n3" id="gearN3" hidden>
-          <div class="gear-inner">
+          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v8a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1z"/><path d="M7 7v9"/><path d="M11 7v9"/><path d="M15 7v9"/></svg>Finns element med vatten i?
+            <span class="lbl-soft">även vattenburen golvvärme</span>
+            <span class="antag" id="vbAsm">(antagande)</span></div>
+          <div class="seg" id="vbSeg" role="radiogroup" aria-label="Vattenburet system"></div>
 
           <div class="lbl lbl-row">
-            <span><i class="ti ti-temperature" aria-hidden="true"></i>Innetemperatur</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13.5a4 4 0 1 0 4 0v-8.5a2 2 0 0 0 -4 0v8.5"/><path d="M10 9h4"/></svg>Innetemperatur <span class="lbl-soft">varje grad märks</span></span>
             <output id="tempOut" class="lbl-val">21 °C</output>
           </div>
           <input type="range" id="tempSlider" data-input="indoorTemp" class="range"
                  min="17" max="24" step="1" value="21" aria-label="Innetemperatur i grader">
 
-          <div class="lbl"><i class="ti ti-versions" aria-hidden="true"></i>Hur värmen sprids</div>
+          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="10" y="4" width="10" height="16" rx="2"/><path d="M7 6v12"/><path d="M4 8v8"/></svg>Hur värmen sprids</div>
           <div class="seg" id="distSeg" role="radiogroup" aria-label="Hur värmen sprids"></div>
 
-          <div class="lbl"><i class="ti ti-plug-connected" aria-hidden="true"></i>Elnätsbolag <span class="lbl-soft">styr effektavgift-raden</span></div>
+          <div class="gr-subhead">El</div>
+
+          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/></svg>Elområde <span class="lbl-soft">SE3 gäller Stockholmsområdet</span> <span class="antag" id="seAsm">(antagande)</span></div>
+          <div class="seg" id="priceAreaSeg" role="radiogroup" aria-label="Elområde"></div>
+
+          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.785 6l8.215 8.215l-2.054 2.054a5.81 5.81 0 1 1 -8.215 -8.215z"/><path d="M4 20l3.5 -3.5"/><path d="M15 4l-3.5 3.5"/><path d="M20 9l-3.5 3.5"/></svg>Elnätsbolag <span class="lbl-soft">vissa bolag tar effektavgift</span></div>
           <div class="selectwrap">
             <select id="dsoField" data-input="dso" class="field"></select>
-            <i class="ti ti-chevron-down" aria-hidden="true"></i>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg>
           </div>
 
           <label class="toggle">
             <input type="checkbox" id="solarField" data-input="hasSolar">
             <span class="toggle-track" aria-hidden="true"><span class="toggle-dot"></span></span>
-            <span class="toggle-lbl"><i class="ti ti-sun" aria-hidden="true"></i>Solel finns eller planeras</span>
+            <span class="toggle-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 12h1"/><path d="M12 3v1"/><path d="M20 12h1"/><path d="M12 20v1"/><path d="M5.6 5.6l.7 .7"/><path d="M18.4 5.6l-.7 .7"/><path d="M17.7 17.7l.7 .7"/><path d="M6.3 17.7l-.7 .7"/></svg>Solel finns eller planeras</span>
           </label>
-
-          <div class="hint"><i class="ti ti-upload" aria-hidden="true"></i> Ladda upp timvärden och rita din <b>verkliga</b> kurva. Enklast på datorn.</div>
           </div>
         </div>
       </form>
 
       <!-- ============ RIGHT: RESULT CARD ============ -->
-      <div class="result" id="result" aria-live="polite">
+      <div class="result" id="result">
 
-        <!-- A. eyebrow -->
+        <!-- A. head -->
         <div class="eyebrow-row">
-          <span class="eyebrow" id="eyebrow" data-slot="eyebrow">Jämfört med din direktel</span>
+          <span class="eyebrow" id="eyebrow">Så använder ditt hus energi i dag</span>
+          <span class="typbadge" id="typBadge">Räknat på startvärden</span>
           <span class="ownbadge" id="ownBadge" hidden>Din egen siffra</span>
         </div>
 
-        <!-- B. HERO: kr/år saving as a RANGE -->
-        <div class="hero" data-slot="hero">
-          <span id="heroValue">~ 0 kr/år</span>
-          <span class="hero-word">lägre</span>
+        <!-- B. anchor -->
+        <p class="anchor-num" id="anchorNum">&#8212;</p>
+        <p class="anchor-sub">uppvärmning och varmvatten</p>
+
+        <!-- C. story bar -->
+        <div class="storybar" id="storyBar" aria-hidden="true">
+          <span class="sb-seg sb-heat"></span><span class="sb-seg sb-vv"></span><span class="sb-seg sb-house"></span>
         </div>
-        <div class="hero-sub" data-slot="heroSub" id="heroSub">
-          Med luft-vatten, efter ROT 30 % på arbetet. Vi räknar bara på lägre uppvärmning, inte solel eller stödtjänster.
+        <ul class="sb-legend">
+          <li><i class="sb-dot sb-dot-heat" aria-hidden="true"></i>Uppvärmning <b id="sbHeatKr">&#8212;</b></li>
+          <li><i class="sb-dot sb-dot-vv" aria-hidden="true"></i>Varmvatten <b id="sbVvKr">&#8212;</b></li>
+          <li class="sb-house-row"><i class="sb-dot sb-dot-house" aria-hidden="true"></i>Hushållsel <b id="sbHouseKr">&#8212;</b> <span>den rör vi inte</span></li>
+        </ul>
+        <p class="sb-mix" id="sbMix" hidden></p>
+        <p class="anchor-note" id="bandNote" hidden></p>
+
+        <!-- D. verdict -->
+        <p class="verdict" id="verdict"></p>
+
+        <!-- E. ladder -->
+        <h2 class="ladder-h" id="ladderH">Vad som är värt att göra</h2>
+        <div id="ladder"><!-- built by app.js --></div>
+
+        <!-- sr-only live region (the ONE result announcer) -->
+        <div class="sr-only" id="resultLive" aria-live="polite" aria-atomic="true"></div>
+
+        <!-- F. UPSIDE rows (labelled; always rendered, rows conditional) -->
+        <div class="upside" id="upside">
+          <div class="upside-head">Kan komma ovanpå <span class="upside-soft">(ej i siffran ovan)</span></div>
+          <div class="upside-rows" id="upsideRows"></div>
         </div>
 
-        <!-- C. verdict (mobile) + legend -->
-        <div class="verdict" id="verdict" data-slot="verdict"></div>
-        <div class="legend">
-          <button type="button" class="legend-sw" id="legendCurrentSw" aria-pressed="false">
-            <i aria-hidden="true"></i>nu, <span id="legendCurrent">direktel</span>
-          </button>
-          <span><i aria-hidden="true"></i>med värmepump</span>
-        </div>
+        <!-- G. CTA + share -->
+        <button type="button" class="cta" id="ctaBtn">Få en plan för ditt hus</button>
+        <button type="button" class="share-btn" id="shareBtn">Dela din kalkyl</button>
+        <p class="sr-only" id="shareLive" role="status"></p>
 
-        <!-- D. BAR BLOCK — before->after cost bar (ALWAYS visible, the money shot) -->
-        <div class="bar-block" id="barBlock">
-          <div class="bar-head">Din kostnad i dag, och med en värmepump<span class="bar-hint" id="barHint">Tryck på en pump för att jämföra</span></div>
-          <div class="bar-plate">
-            <svg id="barSvg" viewBox="0 0 520 300" width="100%" role="img"
-                 aria-labelledby="barTitle barDesc" preserveAspectRatio="xMidYMid meet">
-              <title id="barTitle">Jämförelse av årlig uppvärmningskostnad</title>
-              <desc id="barDesc"></desc>
-            </svg>
-            <div class="bar-tip" id="barTip" hidden></div>
-          </div>
-          <div class="sr-only" id="barLive" aria-live="polite"></div>
-        </div>
-
-        <!-- E. CURVE — the 12-month cost curve (kept) -->
-        <div class="bar-head" style="margin-top:var(--sp-6)">Så ser räkningen ut över året</div>
-        <div class="device">
-          <!-- Chart drawn by app.js into #chart. viewBox + plot margins reserved for zero CLS. -->
-          <svg id="chart" viewBox="0 0 372 196" width="100%" role="img"
-               aria-labelledby="chartTitle chartDesc" preserveAspectRatio="xMidYMid meet">
-            <title id="chartTitle">Kostnad månad för månad</title>
-            <desc id="chartDesc">Nuvarande uppvärmning toppar i februari. Värmepumpen ligger lägre hela året, med ett osäkerhetsband som vidgas under vintern då luftpumpens årsvärmefaktor sjunker.</desc>
-          </svg>
-          <div class="chart-tip" id="chartTip" hidden></div>
-        </div>
-        <div class="cap" id="chartCap">
-          Luftpump sackar i kyla, bergvärme ligger stabilt. Bandet är vidast nov-feb, där siffran är minst säker.
-        </div>
-
-        <!-- F. STAT TRIO (read-after breakdown) -->
-        <div class="trio">
-          <div class="c"><div class="k">Nuvarande</div><div class="v" id="statCurrent">0 kr/år</div></div>
-          <div class="c"><div class="k">Värmepump</div><div class="v" id="statPump">0 kr/år</div></div>
-          <div class="c"><div class="k">Återbetalt</div><div class="v" id="statPayback">0 år</div></div>
-        </div>
-
-        <!-- G. HORIZON strip (15-year cumulative; conditional, sacrificial) -->
-        <div class="horizon" id="horizon" hidden>
-          <div class="horizon-row"><span class="horizon-lbl">Över 15 år, med samma antaganden</span>
-            <span class="horizon-val" id="horizonVal"></span></div>
-          <div class="horizon-track"><span class="horizon-fill" id="horizonFill"></span></div>
-        </div>
-
-        <!-- H. UPSIDE rows (labelled; appear when solar/DSO unlock them) -->
-        <div class="upside gear-collapsed" id="upside" hidden>
-          <div class="gear-inner">
-            <div class="upside-head">Kan komma ovanpå <span class="upside-soft">(ej i siffran ovan)</span></div>
-            <div class="upside-rows" id="upsideRows"></div>
-          </div>
-        </div>
-
-        <!-- I. CTA -->
-        <button type="button" class="cta" id="ctaBtn">Få en skräddarsydd offert</button>
-
-        <!-- I2. INLINE LEAD FORM (opens IN the midnight card, after CTA) -->
+        <!-- G2. INLINE LEAD FORM (opens IN the midnight card, after CTA) -->
         <div class="lead-inline gear-collapsed" id="leadInline" hidden>
           <div class="gear-inner">
             <div class="lead-inline-body">
-              <button type="button" class="leadclose" id="leadClose" aria-label="Stäng formuläret"><i class="ti ti-x" aria-hidden="true"></i></button>
-              <div class="lead-eyebrow">Få offerten</div>
-              <h3 class="lead-title">Vi räknar på just ditt hus</h3>
-              <p class="lead-sub">Våra behöriga elektriker hör av sig med ett förslag på din kurva, oftast inom en arbetsdag. Kostnadsfritt och utan förbindelse.</p>
+              <button type="button" class="leadclose" id="leadClose" aria-label="Stäng formuläret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
+              <div class="lead-eyebrow">Få en plan</div>
+              <h3 class="lead-title">En elektriker räknar på ditt hus</h3>
+              <p class="lead-sub">Våra behöriga elektriker hör av sig med ett förslag för ditt hus, oftast inom en arbetsdag. Kostnadsfritt och utan förbindelse.</p>
               <form id="leadForm" novalidate>
                 <label class="lead-lbl" for="leadName">Namn</label>
                 <input class="lead-field" type="text" id="leadName" name="name" autocomplete="name" required aria-describedby="errName">
@@ -241,20 +208,33 @@
                 <p class="field-err" id="errGdpr" hidden></p>
 
                 <button type="submit" class="cta lead-submit">Skicka förfrågan</button>
-                <p class="lead-err" id="leadErr" hidden></p>
+                <p class="lead-err" id="leadErr" role="alert" hidden></p>
               </form>
-              <div class="lead-success" id="leadSuccess" hidden>
-                <i class="ti ti-circle-check" aria-hidden="true"></i>
-                <p>Tack. Vi hör av oss med ett underlag på din kurva, oftast inom en arbetsdag.</p>
+              <div class="lead-success" id="leadSuccess" role="status" tabindex="-1" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/></svg>
+                <p>Tack. Vi hör av oss med ett förslag för ditt hus, oftast inom en arbetsdag.</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- J. METHODOLOGY (disclaimer lives inside here now) -->
+        <!-- H. METHODOLOGY (prose + the 12-month curve) -->
         <details class="method">
-          <summary><i class="ti ti-chevron-right" aria-hidden="true"></i> Så har vi räknat</summary>
-          <div class="method-body" id="methodBody"></div>
+          <summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"/></svg> Så har vi räknat</summary>
+          <div class="method-body">
+            <div id="methodBody"></div>
+            <div class="device">
+              <!-- Chart drawn by app.js into #chart. viewBox + plot margins reserved for zero CLS. -->
+              <svg id="chart" viewBox="0 0 372 196" width="100%" role="img"
+                   aria-label="Månadskurva. Bläddra med piltangenterna."
+                   aria-labelledby="chartTitle chartDesc" preserveAspectRatio="xMidYMid meet">
+                <title id="chartTitle">Kostnad månad för månad</title>
+                <desc id="chartDesc"></desc>
+              </svg>
+              <div class="chart-tip" id="chartTip" hidden></div>
+            </div>
+            <div class="cap" id="chartCap"></div>
+          </div>
         </details>
 
         <p class="placeholder-note" id="placeholderNote"></p>
@@ -265,9 +245,19 @@
   </div>
 </div>
 
-<!-- 5-layer chassis: data -> engine -> app -->
-<script src="data.js?v=4"></script>
-<script src="engine.js?v=4"></script>
-<script src="app.js?v=4"></script>
+<!-- sticky mobile result bar (outside .page) -->
+<div class="msum" id="msum" role="region" aria-label="Ditt resultat">
+  <div class="msum-txt">
+    <span class="msum-k">I dag</span>
+    <b class="msum-v" id="msumVal">&#8212;</b>
+  </div>
+  <button type="button" class="msum-go" id="msumGo">Se resultatet</button>
+</div>
+
+<!-- 5-layer chassis: data -> engine -> rank -> app -->
+<script src="data.js?v=6"></script>
+<script src="engine.js?v=6"></script>
+<script src="rank.js?v=6"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
