@@ -1,12 +1,14 @@
 /* =============================================================================
- * tool.css — Ampy energikalkylatorn — vB · B2R refinement (B2R-SPEC.md)
- * Two-pane single-canvas calculator. LEFT white input card / RIGHT midnight
- * result card: DAGENS KOSTNAD anchor → story bar → verdict → åtgärdsstegen →
- * upside → CTA + share → method (curve inside). Sticky mobile result bar #msum.
+ * tool.css — Ampy energikalkylatorn — vB · v7 (V7-SPEC.md)
+ * Two-pane single-canvas calculator. LEFT white input card (7 flat controls) /
+ * RIGHT midnight result card: DAGENS KOSTNAD anchor → story bar → the comparison
+ * visual (#compare) → Våra rekommendationer (#recs) → CTA block → method
+ * (bullets + legal, NO curve). Sticky mobile result bar #msum.
  * Single font (Outfit) canonical; hierarchy by weight (300/500/900).
  * All spacing on --sp-* (4px grid, rem on 10px base); all type on --ty-*.
  * Motion is opacity / transform / grid-fraction, <=300ms, reduced-motion safe.
  * Breakpoints 992 / 768 / 480. No em-dashes in copy. Fonts at ../fonts/.
+ * v7 components reuse the EXISTING token set — zero new colors, zero new type sizes.
  * ========================================================================== */
 
 /* ---- self-host Outfit (woff2 in ../fonts/; system-ui fallback holds until present) ---- */
@@ -43,7 +45,7 @@ body{margin:0;font-size:1.6rem;font-family:'Outfit',system-ui,-apple-system,sans
   /* ---- TYPE (Outfit, weight hierarchy 300/500/900 canonical) ---- */
   --ty-display:clamp(3.2rem, 2.4rem + 3vw, 5.2rem);  /* the anchor number */
   --ty-h:2.0rem;           /* lead-title, section heads */
-  --ty-lead:clamp(1.8rem,1.5rem+0.8vw,2.2rem);
+  --ty-lead:clamp(1.8rem, 1.5rem + 0.8vw, 2.2rem);
   --ty-sub:1.55rem;        /* lead-sub */
   --ty-body:1.6rem;        /* fields, toggles, body */
   --ty-label:1.35rem;      /* lbl, gearcopy, hints, caption */
@@ -96,8 +98,7 @@ button{font-family:inherit}
 
 /* ---- tabular numerals: SINGLE owner ---- */
 .result,.input{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1}
-.anchor-sub,.lead-sub,.cap,.gearcopy,.method-body p,.foot{font-variant-numeric:normal}
-#chart text{font-variant-numeric:tabular-nums}
+.anchor-sub,.lead-sub,.gearcopy,.method-body p,.foot{font-variant-numeric:normal}
 
 /* ============================ LAYOUT — the wide, de-boxed shell ============================ */
 .page{max-width:var(--shell-max);margin:0 auto;padding:var(--sp-8) var(--shell-gutter) var(--sp-9)}
@@ -106,7 +107,7 @@ button{font-family:inherit}
 .tag{display:inline-block;font-size:var(--ty-eyebrow);font-weight:500;letter-spacing:var(--tr-eyebrow);
   text-transform:uppercase;color:#04342c;background:var(--mint);border-radius:var(--r-pill);padding:var(--sp-1) var(--sp-3);line-height:1.2}
 .toolhead{display:flex;flex-direction:column;align-items:flex-start;gap:var(--sp-2);margin-bottom:var(--sp-6)}
-.toolhead .th-title{font-size:clamp(2.0rem,1.7rem+0.8vw,2.6rem);font-weight:500;line-height:var(--lh-tight);
+.toolhead .th-title{font-size:clamp(2.0rem, 1.7rem + 0.8vw, 2.6rem);font-weight:500;line-height:var(--lh-tight);
   letter-spacing:-.01em;color:var(--ink);max-width:44rem;margin:0}
 .toolhead .th-sub{font-size:var(--ty-label);font-weight:300;color:var(--muted);margin:0;line-height:var(--lh-body)}
 
@@ -128,6 +129,10 @@ button{font-family:inherit}
 .gear > * + *{margin-top:var(--sp-5)}
 .gear .range{margin-top:var(--sp-2)}
 .gear .seg{margin-top:var(--sp-2)}
+/* the two v7 gear groups (Ditt hus / Din el) separate with a quiet hairline */
+.gear[data-gear="n2"]{margin-top:var(--sp-6);border-top:1px solid #eef2f9;padding-top:var(--sp-5)}
+#ownRow > * + *{margin-top:var(--sp-2)}
+.gear-inner > .gearcopy{margin-top:var(--sp-2)}
 .gearhead{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--ty-eyebrow);letter-spacing:var(--tr-eyebrow);
   text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:var(--sp-3)}
 .gearcopy{font-size:var(--ty-label);font-weight:300;line-height:var(--lh-body);color:var(--muted);margin:0}
@@ -141,20 +146,9 @@ button{font-family:inherit}
 /* the reusable assumption tag — real text, never colour-only */
 .antag{font-size:1.05rem;color:var(--footnote);font-weight:300}
 .antag[hidden]{display:none}
-/* micro-group heads inside the reveal */
-.gr-subhead{font-size:var(--ty-eyebrow);letter-spacing:var(--tr-eyebrow);text-transform:uppercase;
-  color:var(--slate);font-weight:500;border-top:1px solid #eef2f9;padding-top:var(--sp-3)}
-.gear-inner > .gr-subhead:first-child{border-top:0;padding-top:0}
-
-.selectwrap{position:relative}
-.selectwrap > svg{position:absolute;right:1.1rem;top:50%;transform:translateY(-50%);width:1.6rem;height:1.6rem;
-  color:var(--muted);pointer-events:none}
-.field{width:100%;appearance:none;-webkit-appearance:none;padding:1.1rem 3.2rem 1.1rem 1.2rem;border:var(--bd-light-2);
-  border-radius:var(--r-sm);font-size:var(--ty-body);font-weight:300;font-family:inherit;color:var(--ink);background:#fff;line-height:var(--lh-snug);
-  transition:border-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
-.field:focus-visible{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal);box-shadow:var(--ring-light)}
-input.field{padding-right:1.2rem;scroll-margin-bottom:8rem}
-select.field{min-height:4.4rem}
+/* the own-slider status note */
+.own-note{margin-top:var(--sp-2)}
+.gearcopy[hidden]{display:none}
 
 /* native range — 44px touch body, visible track drawn inside it */
 .range{-webkit-appearance:none;appearance:none;width:100%;height:4.4rem;background:transparent;cursor:pointer}
@@ -249,13 +243,8 @@ select.field{min-height:4.4rem}
 .reveal .reveal-caret{width:1.6rem;height:1.6rem;transition:transform var(--t-fast) var(--ease)}
 .reveal[aria-expanded="true"] .reveal-caret{transform:rotate(180deg)}
 .reveal:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:var(--r-xs)}
-.gear[data-gear="own"],.gear[data-gear="all"]{padding-top:.2rem}
-
-/* override rung */
-.seg-unit{margin-top:var(--sp-2);margin-bottom:var(--sp-2)}
-.seg-unit button{flex:1 1 50%}
-.override-note{font-size:var(--ty-label);color:var(--muted);margin:var(--sp-2) 0 0;line-height:var(--lh-body)}
-.override-note[hidden]{display:none}
+.gear[data-gear="own"],.gear[data-gear="sol"]{padding-top:.2rem}
+#ownRow[hidden]{display:none}
 
 /* stepper */
 .stepper{display:inline-flex;align-items:center;gap:.2rem;border:var(--bd-light-2);border-radius:var(--r-xs);overflow:hidden}
@@ -268,29 +257,11 @@ select.field{min-height:4.4rem}
   transition:transform var(--t-fast) var(--ease-out),opacity var(--t-fast) var(--ease-out)}
 .stepval.bump{transform:translateY(-2px);opacity:.55}
 
-/* toggle */
-.toggle{display:flex;align-items:center;gap:var(--sp-3);cursor:pointer;font-size:var(--ty-body);font-weight:300;color:var(--ink);min-height:4.4rem}
-.toggle input{position:absolute;opacity:0;width:0;height:0}
-.toggle-track{position:relative;width:3.8rem;height:2.2rem;border-radius:var(--r-pill);background:#d7deeb;flex:0 0 auto;
-  transition:background var(--t-fast) var(--ease)}
-.toggle-dot{position:absolute;top:.2rem;left:.2rem;width:1.8rem;height:1.8rem;border-radius:50%;background:#fff;
-  box-shadow:0 1px 2px rgba(9,11,50,.2);transition:transform var(--t-fast) var(--ease)}
-.toggle input:checked + .toggle-track{background:var(--teal)}
-.toggle input:checked + .toggle-track .toggle-dot{transform:translateX(16px)}
-.toggle input:active + .toggle-track .toggle-dot{transform:scaleX(1.12)}
-.toggle input:checked:active + .toggle-track .toggle-dot{transform:translateX(16px) scaleX(1.12)}
-.toggle input:focus-visible + .toggle-track{outline:2px solid var(--teal);outline-offset:2px}
-.toggle-lbl{user-select:none;display:flex;align-items:center;gap:.5rem}
-.toggle-lbl svg{width:1.5rem;height:1.5rem;color:var(--slate);flex:0 0 auto}
-
 /* ============================ RESULT ============================ */
 .eyebrow-row{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap}
 .eyebrow{font-size:var(--ty-eyebrow);letter-spacing:var(--tr-eyebrow);color:var(--eyebrow);text-transform:uppercase;font-weight:500;line-height:1.2}
 .eyebrow::before{content:'';display:inline-block;width:2.4rem;height:2px;background:var(--teal-bright);
   vertical-align:middle;margin-right:var(--sp-2)}
-.ownbadge{font-size:var(--ty-eyebrow);font-weight:500;letter-spacing:.02em;color:var(--midnight);
-  background:var(--neon);border-radius:var(--r-pill);padding:.25rem var(--sp-3);line-height:1.3;white-space:nowrap}
-.ownbadge[hidden]{display:none}
 .typbadge{font-size:var(--ty-eyebrow);letter-spacing:.04em;padding:.2rem .8rem;border-radius:var(--r-pill);
   background:rgba(255,255,255,.08);color:var(--subtext);white-space:nowrap;
   transition:opacity var(--t-mid) var(--ease)}
@@ -327,103 +298,114 @@ select.field{min-height:4.4rem}
 .sb-mix[hidden],.anchor-note[hidden],.sb-mix:empty{display:none}
 .anchor-note{font-size:var(--ty-micro);font-weight:300;color:var(--footnote);margin:var(--sp-3) 0 0;line-height:var(--lh-body)}
 
-/* D. verdict — all viewports, quiet emphasis plate */
-.verdict{display:block;font-size:clamp(1.7rem,1.5rem+0.6vw,2.1rem);font-weight:300;line-height:var(--lh-snug);
+/* the verdict plate — KEPT verbatim (the owner-loved artefact, now #recPlate) */
+.verdict{display:block;font-size:clamp(1.7rem, 1.5rem + 0.6vw, 2.1rem);font-weight:300;line-height:var(--lh-snug);
   color:#fff;margin:var(--sp-6) 0 0;padding:var(--sp-4);background:rgba(0,196,167,.10);
   border:var(--bd-teal-dark);border-radius:var(--r-md)}
 .verdict b{font-weight:500;color:#dffbe9;font-variant-numeric:tabular-nums}
 .verdict:empty{display:none}
 
-/* E. ladder — mcard family on the midnight surface */
-.ladder-h{font-size:var(--ty-eyebrow);font-weight:500;text-transform:uppercase;letter-spacing:var(--tr-eyebrow);
-  color:var(--footnote);margin:var(--sp-6) 0 var(--sp-2)}
-.rung{font-size:var(--ty-micro);font-weight:500;text-transform:uppercase;letter-spacing:var(--tr-eyebrow);
-  color:var(--footnote);margin:var(--sp-4) 0 var(--sp-2)}
-.mcard{background:var(--chip);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-md);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);margin-bottom:var(--sp-2)}
-.mcard--off{opacity:.55}
-.mcard-head{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:var(--sp-3);
-  width:100%;min-height:4.4rem;padding:var(--sp-3) var(--sp-4);border:0;background:none;color:inherit;
-  font-family:inherit;text-align:left;cursor:pointer;border-radius:var(--r-md)}
-.mcard-head:hover{background:rgba(255,255,255,.03)}
-.mcard-head:focus-visible{outline:2px solid var(--neon);outline-offset:-2px}
-.mcard-rank{display:inline-flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;
-  border-radius:50%;border:1px solid rgba(255,255,255,.18);font-size:1.2rem;font-weight:500;color:var(--subtext)}
-.mcard-rank--keep{color:var(--midnight);background:var(--mint);border-color:var(--mint)}
-.mcard-name{font-size:var(--ty-body);font-weight:500;color:#fff;line-height:var(--lh-snug)}
-.mcard-save{font-size:var(--ty-label);font-weight:500;color:var(--neon);white-space:nowrap;font-variant-numeric:tabular-nums}
-.mcard-save--none{color:var(--footnote);font-weight:300}
-.mcard-caret{width:1.8rem;height:1.8rem;color:var(--footnote);transition:transform var(--t-mid) var(--ease)}
-.mcard-head[aria-expanded="true"] .mcard-caret{transform:rotate(180deg)}
-.mcard-bwrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--t-mid) var(--ease-out)}
-.mcard-bwrap.open{grid-template-rows:1fr}
-.mcard-body{overflow:hidden;min-height:0;padding:0 var(--sp-4)}
-.mcard-bwrap.open .mcard-body{padding-bottom:var(--sp-4)}
-.mcard-facts{display:grid;gap:var(--sp-1);margin:var(--sp-3) 0 0}
-.mcard-facts div{display:flex;justify-content:space-between;gap:var(--sp-3);font-size:var(--ty-label)}
-.mcard-facts dt{color:var(--footnote);font-weight:300;margin:0}
-.mcard-facts dd{color:#fff;font-weight:500;margin:0;text-align:right;font-variant-numeric:tabular-nums}
-.mcard-caveat,.mcard-note{font-size:var(--ty-label);font-weight:300;color:var(--subtext);
-  line-height:var(--lh-body);margin:var(--sp-3) 0 0}
-/* the pair — the owner-liked idag→efter bar, per option */
-.pair{display:flex;flex-direction:column;gap:var(--sp-2);margin-top:var(--sp-3)}
-.pair-row{display:grid;grid-template-columns:4.4rem 1fr auto;gap:var(--sp-2);align-items:center}
-.pair-lbl{font-size:var(--ty-micro);font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--footnote)}
-.pair-track{position:relative;height:2rem;border-radius:var(--r-xs);background:rgba(255,255,255,.06);overflow:hidden}
-.pair-fill{position:absolute;left:0;top:0;bottom:0;border-radius:var(--r-xs);transition:width var(--t-slow) var(--ease)}
-.pair-today{background:rgba(124,134,176,.6)}
-.pair-after{background:var(--teal-on-dark)}
-.pair-band{position:absolute;top:0;bottom:0;background:rgba(0,196,167,.22);transition:left var(--t-slow) var(--ease),width var(--t-slow) var(--ease)}
-.pair-val{font-size:var(--ty-label);font-weight:500;color:#fff;white-space:nowrap;font-variant-numeric:tabular-nums}
+/* ============================ D. THE COMPARISON VISUAL (#compare, V7-visual) ============================ */
+.compare{display:block;margin-top:var(--sp-6);border:0;padding:0}
+.compare-h{font-size:var(--ty-h);font-weight:500;color:#fff;margin:0;line-height:var(--lh-tight)}
+.compare-sub{font-size:var(--ty-label);font-weight:300;color:var(--subtext);margin:var(--sp-1) 0 0;line-height:var(--lh-body)}
+.compare-legend{list-style:none;display:flex;gap:var(--sp-4);flex-wrap:wrap;margin:var(--sp-2) 0 0;padding:0;
+  font-size:var(--ty-micro);color:var(--footnote)}
+.compare-legend li{display:flex;align-items:center;gap:var(--sp-1h)}
+.cl-swatch{display:inline-block;width:1.4rem;height:.8rem;border-radius:var(--r-pill)}
+.cl-after{background:var(--teal-on-dark)}
+.cl-band{background:rgba(159,225,203,.34)}
+.cl-idag{width:0;height:1.2rem;border-radius:0;border-left:1px dashed rgba(255,255,255,.45)}
+/* the list + the ONE container-positioned dashed i dag line */
+.compare-list{position:relative;margin-top:var(--sp-4);min-height:24rem}
+.c-line{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed rgba(255,255,255,.35);pointer-events:none;z-index:0}
+.c-line[hidden]{display:none}
+/* row = one whole-row button (≥44px), labels above bars — one DOM both breakpoints */
+/* NOTE: zero horizontal padding — the track's x-axis must equal the list's so the
+ * ONE container-positioned i dag line lines up with every bar. */
+.crow{position:relative;z-index:1;display:block;width:100%;text-align:left;border:0;background:none;color:inherit;
+  font-family:inherit;cursor:pointer;padding:var(--sp-2) 0;margin:0;min-height:4.4rem;
+  border-radius:var(--r-xs);transition:background var(--t-fast) var(--ease)}
+.crow+.crow, .crow+div>.crow{margin-top:var(--sp-2h)}
+@media (hover:hover) and (pointer:fine){ .crow:hover{background:rgba(255,255,255,.04)} .crow:hover .crow-name{color:#fff} }
+.crow:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
+.crow--idag{cursor:default;pointer-events:none}
+.crow-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3)}
+.crow-name{font-size:var(--ty-body);font-weight:300;color:var(--subtext);line-height:var(--lh-snug);min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color var(--t-fast) var(--ease)}
+/* the lead rec's name must never truncate on a phone — let it wrap to two lines */
+@media (max-width:480px){ .crow-name{white-space:normal} }
+.crow-val{font-size:var(--ty-body);font-weight:500;color:#fff;white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.crow-val--soft{color:var(--footnote);font-weight:300;font-size:var(--ty-label)}
+.crow.is-best .crow-name,.crow.is-selected .crow-name{color:#fff;font-weight:500}
+/* bar: inset track full-width to scaleMax; solid fill to low; mint band low→high */
+.crow-track{position:relative;display:block;height:1.2rem;margin-top:var(--sp-2);border-radius:var(--r-pill);
+  background:var(--inset);overflow:visible}
+.crow-fill{position:absolute;left:0;top:.1rem;bottom:.1rem;border-radius:var(--r-pill);background:var(--teal-on-dark);
+  transform-origin:left center;transition:width var(--t-mid) var(--ease-out)}
+.crow-band{position:absolute;top:.1rem;bottom:.1rem;background:rgba(159,225,203,.34);border-radius:0 var(--r-pill) var(--r-pill) 0;
+  opacity:1;transition:opacity var(--t-fast) var(--ease),left var(--t-mid) var(--ease-out),width var(--t-mid) var(--ease-out)}
+.crow-over{position:absolute;top:.1rem;bottom:.1rem;background:rgba(240,180,41,.55);border-radius:0 var(--r-pill) var(--r-pill) 0}
+.crow--idag .crow-fill,.crow--behall .crow-fill{background:rgba(139,149,189,.55)}
+/* the neon best-ring (NEVER when paybackMid >= 15 — the weak-case rule made visual) */
+.crow.is-best .crow-fill{box-shadow:0 0 0 1px var(--neon)}
+/* selected = teal rail just OUTSIDE the bar zone (the DV2 .is-chosen pattern;
+ * kept off the track so the shared x-scale stays exact) */
+.crow.is-selected{box-shadow:-0.8rem 0 0 -0.6rem var(--teal-on-dark);background:rgba(255,255,255,.03)}
+/* greyed-with-reason: whole row .4, fill desaturated, reason replaces the micro-line */
+.crow.is-off{opacity:.4}
+.crow.is-off .crow-fill{background:rgba(139,149,189,.45)}
+.crow-micro{display:block;font-size:var(--ty-label);font-weight:300;color:var(--footnote);
+  margin-top:var(--sp-1h);line-height:var(--lh-body)}
+.crow-micro .pb-weak{opacity:.75}
+.crow-micro b{font-weight:500;color:var(--subtext)}
+/* behåll pin tag + fjärrvärme price tag */
+.crow-tag{display:inline-block;font-size:var(--ty-micro);font-weight:500;color:var(--midnight);background:var(--mint);
+  border-radius:var(--r-pill);padding:.15rem var(--sp-2);margin-left:var(--sp-2);vertical-align:.1rem;white-space:nowrap}
+.crow-tag--soft{background:rgba(124,134,176,.22);color:#c4ccdf}
+/* desktop in-gap delta (≥90 px only; JS-gated): sits INSIDE the empty track gap,
+ * vertically centered on the bar, right-aligned to the i dag line */
+.crow-gap{position:absolute;top:50%;font-size:var(--ty-micro);font-weight:500;color:var(--mint);
+  white-space:nowrap;transform:translate(-100%,-50%);padding-right:var(--sp-2);line-height:1}
+/* the battery chip — text only, hairline above, no bar (income never gets a bar on a cost scale) */
+.c-chip{margin-top:var(--sp-3);border-top:var(--bd-dark);padding-top:var(--sp-3);
+  font-size:var(--ty-label);font-weight:300;color:var(--subtext);line-height:var(--lh-body)}
+.c-chip[hidden]{display:none}
+.c-chip button{display:flex;align-items:flex-start;gap:var(--sp-2);width:100%;min-height:4.4rem;text-align:left;
+  border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:var(--sp-1) 0;border-radius:var(--r-xs)}
+.c-chip button:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
+.c-chip svg{width:1.6rem;height:1.6rem;color:var(--mint);flex:0 0 auto;margin-top:.2rem}
+.c-chip b{font-weight:500;color:var(--mint);font-variant-numeric:tabular-nums}
+.c-chip .c-chip-hint{display:flex;align-items:flex-start;gap:var(--sp-2);color:var(--footnote)}
 
-/* the one recessed plate (curve device — lives inside the method) */
-.device{background:radial-gradient(120% 80% at 50% 0%,rgba(0,196,167,.06),transparent 60%),var(--inset);
-  border-radius:var(--r-md);padding:var(--sp-4) var(--sp-2) var(--sp-2);position:relative;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 1px 0 rgba(255,255,255,.03);margin-top:var(--sp-4)}
-#chart{display:block;width:100%;height:auto;overflow:visible}
-#chart:focus-visible{outline:2px solid var(--neon);outline-offset:3px;border-radius:8px}
-#_ind{transition:opacity var(--t-fast) ease}
-#_ind line,#_ind circle{transition:cx var(--t-fast) ease,cy var(--t-fast) ease,x1 var(--t-fast) ease,x2 var(--t-fast) ease}
-/* stacked-fan layers: kept for the frozen drawChart (fan stays merged) */
-.fan-merged,.fan-split{transition:opacity var(--t-mid) var(--ease-out)}
+/* ============================ E. VÅRA REKOMMENDATIONER (#recs) ============================ */
+.recs{display:block;margin-top:var(--sp-6);border:0;padding:0}
+.recs-h{font-size:var(--ty-h);font-weight:500;color:#fff;margin:0;line-height:var(--lh-tight)}
+.recs .verdict{margin-top:var(--sp-3)}
+.recs-toggle{border-top:0;margin-top:var(--sp-1);color:var(--subtext)}
+.recs-toggle:hover{color:#fff}
+#recBody .gear-inner{padding-top:var(--sp-2)}
+.rec-text{font-size:var(--ty-sub);font-weight:300;color:var(--subtext);line-height:var(--lh-body)}
+.rec-text p{margin:0 0 var(--sp-3)}
+.rec-text p:last-child{margin-bottom:0}
+.rec-text b{font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
+.rec-sec-h{font-size:var(--ty-eyebrow);font-weight:500;letter-spacing:var(--tr-eyebrow);text-transform:uppercase;
+  color:var(--footnote);margin:var(--sp-4) 0 var(--sp-1)}
+.rec-sec{font-size:var(--ty-label);font-weight:300;color:var(--footnote);line-height:var(--lh-body);margin:0 0 var(--sp-1)}
 
-.chart-tip{position:absolute;pointer-events:none;background:#fff;color:var(--ink);font-size:var(--ty-micro);
-  border-radius:8px;padding:.7rem .9rem;min-width:13rem;z-index:5;
-  box-shadow:var(--shadow-3);border:1px solid rgba(9,11,50,.06);font-variant-numeric:tabular-nums;
-  opacity:0;transform:translate(-50%,-115%) scale(.96);transform-origin:50% 100%;
-  transition:opacity var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
-.chart-tip.show{opacity:1;transform:translate(-50%,-115%) scale(1)}
-.chart-tip.below{transform:translate(-50%,0) scale(.96)}
-.chart-tip.below.show{transform:translate(-50%,0) scale(1)}
-.chart-tip .tip-m{font-weight:500;margin-bottom:.3rem}
-.chart-tip .tip-r{display:flex;justify-content:space-between;gap:1.2rem}
-.chart-tip .tip-r span:first-child{color:var(--muted)}
-.chart-tip .tip-split{margin-top:.3rem;padding-top:.3rem;border-top:1px solid rgba(9,11,50,.08);color:var(--muted);font-size:1.0rem}
-.chart-tip .tip-split span{display:inline-block;margin-right:.8rem;white-space:nowrap}
-.chart-tip .tip-d{margin-top:.3rem;color:var(--teal);font-weight:500}
-.cap{font-size:var(--ty-eyebrow);color:var(--subtext);margin-top:var(--sp-2);line-height:var(--lh-body)}
+/* ============================ F. THE CTA BLOCK (R9) ============================ */
+.ctablock{margin-top:var(--sp-7)}
+.cta-lede{font-size:var(--ty-sub);font-weight:300;color:var(--subtext);margin:0 0 var(--sp-3);line-height:var(--lh-body)}
+.cta-lede:empty{display:none}
+.cta-trust{font-size:var(--ty-micro);font-weight:300;color:var(--footnote);text-align:center;margin:var(--sp-2) 0 0;line-height:var(--lh-body)}
 
-/* upside */
-.upside{margin-top:var(--sp-5)}
-.upside-head{font-size:var(--ty-eyebrow);color:var(--subtext);margin-bottom:var(--sp-2);
-  border-top:1px solid rgba(0,196,167,.18);padding-top:var(--sp-3)}
-.upside-soft{color:var(--footnote)}
-.upside-rows > .upside-soft{margin-top:var(--sp-2)}
-.urow{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);padding:.8rem var(--sp-3);
-  border-radius:8px;background:var(--chip);margin:var(--sp-1) 0;font-size:var(--ty-label)}
-.urow .ut{display:flex;align-items:center;gap:var(--sp-1h);min-width:0}
-.utier{font-size:.9rem;padding:.2rem var(--sp-1h);border-radius:var(--r-pill);white-space:nowrap}
-.utier.durable{background:rgba(0,169,145,.22);color:var(--mint)}
-.utier.effektavgift{background:rgba(240,180,41,.18);color:#f3cd7a}
-.utier.atrisk{background:rgba(124,134,176,.22);color:#c4ccdf}
-.urow .uv{font-weight:500;white-space:nowrap;text-align:right}
-.urow .uv.soft{color:var(--footnote);font-weight:300}
-
-/* cta — the decision earns the biggest gap above it */
+/* cta — the ONE loud element on the card */
 .cta{display:block;width:100%;background:var(--teal);color:#fff;text-align:center;font-weight:500;
-  font-size:clamp(1.6rem,1.5rem+0.3vw,1.8rem);font-family:inherit;padding:var(--cta-y) var(--sp-4);border:1px solid transparent;
+  font-size:clamp(1.6rem, 1.5rem + 0.3vw, 1.8rem);font-family:inherit;padding:var(--cta-y) var(--sp-4);border:1px solid transparent;
   border-radius:var(--r-md);cursor:pointer;margin-top:var(--sp-7);
   transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
+.ctablock .cta{margin-top:0}
+.cta--primary{min-height:5.2rem}
 .cta:hover{transform:translateY(-2px);background:#00b89e;box-shadow:var(--shadow-teal)}
 .cta:active{transform:scale(.99)}
 .cta:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
@@ -435,12 +417,12 @@ select.field{min-height:4.4rem}
 .cta--ghost{background:transparent;border:1px solid rgba(255,255,255,.18)}
 .cta--ghost:hover{background:rgba(255,255,255,.06);box-shadow:none}
 
-/* share — the quiet second action under the CTA */
-.share-btn{display:block;width:100%;min-height:4.4rem;margin-top:var(--sp-2);border-radius:var(--r-md);
-  background:transparent;border:1px solid rgba(255,255,255,.18);color:#fff;font-family:inherit;
-  font-size:var(--ty-label);font-weight:500;cursor:pointer;
-  transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
-.share-btn:hover{background:rgba(255,255,255,.05)}
+/* share — DEMOTED to a quiet text-level action (R9); still a full ≥44px target */
+.share-btn{display:block;width:100%;min-height:4.4rem;margin-top:var(--sp-1);border-radius:var(--r-md);
+  background:transparent;border:1px solid transparent;color:var(--subtext);font-family:inherit;
+  font-size:var(--ty-label);font-weight:300;cursor:pointer;
+  transition:color var(--t-fast) var(--ease)}
+.share-btn--quiet:hover{color:#fff;text-decoration:underline;text-underline-offset:.3em}
 .share-btn:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
 
 /* methodology */
@@ -450,9 +432,12 @@ select.field{min-height:4.4rem}
 .method summary svg{width:1.6rem;height:1.6rem;color:var(--mint);flex:0 0 auto;transition:transform var(--t-fast) var(--ease)}
 .method[open] summary svg{transform:rotate(90deg)}
 .method-body{font-size:var(--ty-label);font-weight:300;color:var(--footnote);line-height:var(--lh-body);margin-top:var(--sp-3)}
-.method-body h4{font-size:var(--ty-label);color:var(--subtext);margin:var(--sp-3) 0 .3rem;font-weight:500}
-.method-body code{font-family:inherit;color:var(--mint)}
-.method-body ul{margin:var(--sp-1) 0;padding-left:1.6rem}
+.method-body b{font-weight:500;color:var(--subtext)}
+/* V7: the technical bullet list + the legal fritext (the curve is GONE) */
+.method-list{list-style:disc;margin:0;padding-left:1.8rem}
+.method-list li{margin:0 0 var(--sp-2)}
+.method-legal{margin:var(--sp-4) 0 0;padding-top:var(--sp-3);border-top:1px solid rgba(255,255,255,.08);
+  font-size:var(--ty-micro);color:var(--footnote);line-height:var(--lh-body)}
 .placeholder-note{font-size:var(--ty-micro);color:var(--footnote);margin-top:var(--sp-3);font-style:normal}
 
 /* ============================ INLINE LEAD FORM (inside the midnight card) ============================ */
@@ -521,13 +506,16 @@ select.field{min-height:4.4rem}
 .result.enter > .anchor-num{animation-delay:calc(var(--t-stagger)*1)}
 .result.enter > .storybar{animation-delay:calc(var(--t-stagger)*2)}
 .result.enter > .sb-legend{animation-delay:calc(var(--t-stagger)*3)}
-.result.enter > .verdict{animation-delay:calc(var(--t-stagger)*4)}
-.result.enter > .ladder-h,.result.enter > #ladder{animation-delay:calc(var(--t-stagger)*5)}
-.result.enter > .cta{animation-delay:calc(var(--t-stagger)*6)}
+.result.enter > .compare{animation-delay:calc(var(--t-stagger)*4)}
+.result.enter > .recs{animation-delay:calc(var(--t-stagger)*5)}
+.result.enter > .ctablock{animation-delay:calc(var(--t-stagger)*6)}
 .input{animation:ampyRise var(--t-mid) var(--ease-out) both}
 
-/* chart entrance fills */
-.ch-fills{transition:opacity var(--t-mid) var(--ease-out)}
+/* comparison-bar entrance: scaleX per row, staggered by app.js inline delay */
+.compare-list.is-drawing .crow-fill{transform:scaleX(0)}
+.compare-list.is-drawing .crow-band{opacity:0}
+.compare-list.is-drawn .crow-fill{transform:scaleX(1);transition:transform var(--t-mid) var(--ease-out)}
+.compare-list.is-drawn .crow-band{opacity:1;transition:opacity var(--t-fast) var(--ease) 140ms}
 
 /* ============================ RESPONSIVE ============================ */
 @media (max-width:992px){
@@ -537,16 +525,20 @@ select.field{min-height:4.4rem}
   .panes{flex-direction:column}
   /* inputs-first on mobile: the visitor builds the number, the bar mirrors it */
   .input{flex:auto;order:1;width:100%;max-width:none;position:static}
-  .result{order:2}
+  /* explicit width: .panes has align-items:flex-start (no stretch), and the
+   * comparison rows carry nowrap min-content — the card must never grow past
+   * the pane (the no-h-scroll floor at 375px) */
+  .result{order:2;width:100%}
   /* touch-target floor (>=44px) on every tappable control */
   .seg button{min-height:44px}
   .hp-card{min-height:8.4rem}
   .hp-card--quiet{min-height:4.8rem}
   .stepbtn{width:44px;height:44px}
-  .toggle{min-height:44px}
   .reveal{padding:1.4rem 0}
   .leadclose{width:44px;height:44px}
   .lead-gdpr input{width:20px;height:20px}
+  /* comparison bars: 12px on mobile, names may ellipsize, values never truncate */
+  .crow-track{height:1.2rem}
   /* zero CLS: reserve the hint slot so a fjärrvärme/vet-inte notice never shifts the picker */
   .hp-hint{display:block;min-height:3.6rem;margin:var(--sp-2) 0 0}
   .hp-hint[hidden]{display:block;visibility:hidden}
@@ -557,15 +549,16 @@ select.field{min-height:4.4rem}
   .page{padding:var(--sp-4) var(--sp-3) var(--sp-8)}
   .result{padding:var(--sp-4)}
   .input{padding:var(--sp-5)}
-  .seg-unit button{flex:1 1 50%}
   .hp-card{min-height:7.6rem}
   .hp-ic{width:3.4rem;height:3.4rem}
   .hp-ic svg{width:1.9rem;height:1.9rem}
   .storybar{height:3.2rem}
-  .mcard-head{grid-template-columns:auto 1fr auto;row-gap:.2rem}
-  .mcard-save{grid-column:2;justify-self:start}
-  .mcard-caret{grid-row:1;grid-column:3}
-  .pair-row{grid-template-columns:3.8rem 1fr auto}
+  .crow-micro{white-space:normal}
+}
+@media (min-width:993px){
+  /* desktop: 10px bars, rows tighten, in-gap delta may print (JS-gated ≥90px) */
+  .crow-track{height:1rem}
+  .crow+.crow, .crow+div>.crow{margin-top:var(--sp-2)}
 }
 
 /* reduced motion — belt and braces on top of the zeroed tokens */

@@ -235,17 +235,34 @@
     }
 
     /* =====================================================================
-     * (5) FIELD SPF per month (pump) — bergvärme flat; air-source sags in cold. UNCHANGED.
+     * (5) FIELD SPF per month (pump) — bergvärme flat; air-source sags in cold.
+     *
+     * V7 CHANGE ONE (Defect A, V7-SPEC §1.2): the sag vector is renormalised to
+     * SHAPE-ONLY. The old airWinter = 1 − S·dd[m] had a heat-weighted mean of
+     * ~0,827, so every air pump ran ~17–21 % worse than its signed field SPF —
+     * a double count (field SPF is already an ANNUAL average) that stretched
+     * every payback (a direct cause of both R7 absurdities). Now the
+     * heat-weighted annual mean of the sag vector is EXACTLY 1,0: the
+     * februari-sag stays visible, the annual SPF equals the signed field value.
+     * [GAP-E7-1 → energiexpert signs that field-SPF is treated as annual.]
      * ===================================================================== */
+    var airSagMean = 0;
+    for (var msag = 0; msag < 12; msag++) {
+      airSagMean += ddSE3[msag] * (1 - D.airSagStrength * ddSE3[msag]); // heat-weighted mean = 1 − S·Σdd²
+    }
+    if (!(airSagMean > 0)) airSagMean = 1; // degenerate guard (never binds on the SE3 vector)
+    function airWinterAt(i) {
+      var aw = (1 - D.airSagStrength * ddSE3[i]) / airSagMean; // heat-weighted annual mean EXACTLY 1,0
+      if (aw < 0.2) aw = 0.2; // existing floor kept (post-normalisation; QA asserts it never binds at S=1,4/SE3)
+      return aw;
+    }
     function spfSeries(spfBase) {
       var s = new Array(12);
       for (var i = 0; i < 12; i++) {
         if (pump.isGround) {
           s[i] = spfBase * fram;                              // flat across the year
         } else {
-          var airWinter = 1 - D.airSagStrength * ddSE3[i];    // sags where degree-days peak
-          if (airWinter < 0.2) airWinter = 0.2;               // floor: COP never below ~ground in model
-          s[i] = spfBase * fram * zone.airSpf * airWinter;
+          s[i] = spfBase * fram * zone.airSpf * airWinterAt(i);
         }
       }
       return s;
@@ -292,6 +309,45 @@
         });
       }
       return { cost: cc, breakdown: breakdown };
+    }
+
+    /* V7 CHANGE TWO (L6, V7-SPEC §1.3) — solar self-consumption offset helper.
+     * Lowers the CURRENT side's ELECTRIC cost by the self-consumed share of the
+     * user's stated production, month-shaped (R4 §1.1 Otovo, normalised), capped
+     * per month at that month's electric cost (winter barely moves, December ≈ 0).
+     * Fuel members untouched. Surplus/export is NEVER folded in (60-öre abolished
+     * 2026, [FACT] foretagsdata §6.4). Uses the engine's own price[m] (one price
+     * truth). selfUseShare 0,30 [GAP-E7-6]. Gated OFF when demand is MEASURED —
+     * a typed kWh/bill already nets self-consumed solar (double-deduction guard).
+     * `solarActive` is resolved AFTER the override step; every call site below it. */
+    var solarActive = false, solShapeN = null;
+    function applySolarOffsetTo(costArr, breakdownArr) {
+      if (!solarActive) return 0;
+      var selfUseKwh = inputs.solarKwh * D.solar.selfUseShare;
+      var applied = 0;
+      for (var sm2 = 0; sm2 < 12; sm2++) {
+        var elCostM = 0, bi2;
+        for (bi2 = 0; bi2 < breakdownArr.length; bi2++) {
+          if (breakdownArr[bi2].isElectric) elCostM += breakdownArr[bi2].monthly[sm2];
+        }
+        var offset = selfUseKwh * solShapeN[sm2] * price[sm2];
+        if (offset > elCostM) offset = elCostM;            // capped: never below zero, fuel untouched
+        if (offset <= 0) continue;
+        costArr[sm2] = clamp0(costArr[sm2] - offset);
+        if (elCostM > 0) {
+          // subtract proportionally from the electric members so the story-bar
+          // member lines stay consistent with the total
+          for (bi2 = 0; bi2 < breakdownArr.length; bi2++) {
+            var bm = breakdownArr[bi2];
+            if (bm.isElectric) bm.monthly[sm2] = clamp0(bm.monthly[sm2] - offset * (bm.monthly[sm2] / elCostM));
+          }
+        }
+        applied += offset;
+      }
+      if (applied > 0) {
+        for (var ba = 0; ba < breakdownArr.length; ba++) breakdownArr[ba].annual = sum(breakdownArr[ba].monthly);
+      }
+      return applied;
     }
 
     /* =====================================================================
@@ -346,6 +402,12 @@
       SPFeff = spfSeries(pump.spf); // re-affirm against the rebuilt monthHeat (no-op, kept explicit)
     }
 
+    /* V7 CHANGE TWO — apply the solar offset to the CURRENT side (post-override,
+     * pre-annuals). demandMeasured is final here, so the double-deduction guard holds. */
+    solarActive = isFinitePos(inputs.solarKwh) && !demandMeasured;
+    if (solarActive) solShapeN = normalise(D.solar.monthShape);
+    var solarOffsetAnnual = applySolarOffsetTo(currentCost, currentBreakdown);
+
     /* =====================================================================
      * (9) PUMP MONTHLY COST — field SPF, winter sag. luft-luft served-share cap
      *     blends BACK toward the BLENDED currentCost (automatically correct). UNCHANGED logic.
@@ -393,12 +455,18 @@
     function annualCurrentCostFor(demandMult) {
       // when the cost was pinned, the current annual is fixed regardless of the band
       if (ovrCost != null) return currentAnnual;
-      return sum(blendCurrentCost(monthHeat, demandMult).cost);
+      var bl = blendCurrentCost(monthHeat, demandMult);
+      applySolarOffsetTo(bl.cost, bl.breakdown);   // V7: one offset truth across the ± band
+      return sum(bl.cost);
     }
     function annualPumpCostFor(spfBase, demandMult) {
       var s = spfSeries(spfBase);
-      var blendC = (pump.isComplement && servedShare < 1.0)
-                 ? blendCurrentCost(monthHeat, demandMult).cost : null;
+      var blendC = null;
+      if (pump.isComplement && servedShare < 1.0) {
+        var blc = blendCurrentCost(monthHeat, demandMult);
+        applySolarOffsetTo(blc.cost, blc.breakdown); // V7: complement blends back toward the post-solar cost
+        blendC = blc.cost;
+      }
       var tot = 0;
       for (var i = 0; i < 12; i++) {
         var pc = (monthHeat[i] * demandMult / s[i]) * price[i];
@@ -446,8 +514,9 @@
         if (puRec.isGround) {
           localSpf = puRec.spf * fram;
         } else {
-          var aw = 1 - D.airSagStrength * ddSE3[i]; if (aw < 0.2) aw = 0.2;
-          localSpf = puRec.spf * fram * zone.airSpf * aw;
+          // V7: same renormalised sag as spfSeries — keeps the stated invariant
+          // (the chosen pump's comparison annual === pumpAnnual) intact post-Defect-A.
+          localSpf = puRec.spf * fram * zone.airSpf * airWinterAt(i);
         }
         var pc = (monthHeat[i] / localSpf) * price[i];
         if (puRec.isComplement && localServed < 1.0) {
@@ -532,6 +601,8 @@
         usedTypedKwh: !!(annualKwh != null && stackAllElectric),
         overrideMode: ovrCost != null ? 'cost' : (ovrKwh != null ? 'kwh' : null),
         demandMeasured: demandMeasured,
+        solarApplied: solarActive,                     // V7: offset live on this run
+        solarKwh: solarActive ? inputs.solarKwh : null, // V7: the production the offset used
         footprintFlag: pump.footprintFlag || null,
         householdCostStripped: householdCostStripped   // V4 E2: shown by the renderer, never silent
       },
@@ -551,6 +622,8 @@
       payback: paybackMid, paybackLow: paybackLow, paybackHigh: paybackHigh,
       // verdict branches
       efficientFlag: efficientFlag, noSaving: noSaving,
+      // V7: the applied annual solar offset (kr) — the sbMix line + method bullet read this
+      solarOffsetAnnual: solarOffsetAnnual,
       // support
       comparison: comparison, upside: upside, co2Tons: co2Tons, savedKwh: savedKwh
     };

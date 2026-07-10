@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Energikalkylatorn: vad kostar det att värma ditt hus?</title>
 <meta name="description" content="Se vad värmen kostar i ditt hus och vad som är värt att göra. Försiktiga spann, fält-SPF, ROT 30 % på arbetet. Gratis, utan mejl.">
-<link rel="stylesheet" href="tool.css?v=6">
+<link rel="stylesheet" href="tool.css?v=8">
 </head>
 <body>
 <div class="page">
@@ -20,13 +20,13 @@
 
     <div class="panes">
 
-      <!-- ============ LEFT: INPUT CARD ============ -->
+      <!-- ============ LEFT: INPUT CARD (V7 — 7 controls, flat, zero keyboards) ============ -->
       <form class="input" id="inputForm" autocomplete="off" novalidate>
 
         <div class="gear" data-gear="n1">
           <div class="gearhead">Ditt hus</div>
 
-          <!-- 1. icon-based, clickable, multi-select heat picker -->
+          <!-- 1. the ONE merged heat list (L2): all eleven cards, multi-select -->
           <fieldset class="heatpicker" id="heatPicker">
             <legend class="hp-legend">Vad värmer huset i dag?<span class="hp-legend-soft">Välj en eller flera</span></legend>
             <div class="hp-grid" id="hpGrid" role="group" aria-describedby="hpHint"><!-- cards built by app.js --></div>
@@ -38,7 +38,7 @@
             <p class="capnote" id="complementCapNote" role="status" aria-live="polite" hidden>Komplementen täcker tillsammans högst 70 % av värmen.</p>
           </fieldset>
 
-          <!-- 2. boyta -->
+          <!-- 2. boyta (KEEP) -->
           <div class="lbl lbl-row">
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3l4 4l-14 14l-4 -4z"/><path d="M16 7l-1.5 -1.5"/><path d="M13 10l-1.5 -1.5"/><path d="M10 13l-1.5 -1.5"/><path d="M7 16l-1.5 -1.5"/></svg>Boyta</span>
             <output id="areaOut" for="areaSlider" class="lbl-val">150 m²</output>
@@ -47,37 +47,11 @@
                  min="40" max="400" step="10" value="150"
                  aria-label="Boyta i kvadratmeter">
 
-          <!-- 3. byggår (promoted) -->
+          <!-- 3. byggår (KEEP) -->
           <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/></svg>Byggår <span class="lbl-soft">ungefär räcker</span> <span class="antag" id="eraAsm">(antagande)</span></div>
           <div class="seg seg-wrap" id="eraSeg" role="radiogroup" aria-label="Byggår"></div>
 
-          <!-- 4. the override — promoted, benefit-labelled disclosure -->
-          <button type="button" class="reveal" data-reveal="own" aria-expanded="false" aria-controls="gearOwn">
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/><path d="M11 7l-2.5 3.5h3l-2.5 3.5"/></svg>Vet du vad huset drar per år?</span>
-            <svg class="reveal-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg>
-          </button>
-          <div class="gear gear-collapsed" data-gear="own" id="gearOwn" hidden>
-            <div class="gear-inner">
-              <p class="gearcopy">Din siffra slår våra schabloner.</p>
-              <div class="seg seg-unit" id="overrideUnitSeg" role="radiogroup" aria-label="Enhet för din egen siffra"></div>
-              <input type="number" id="annualKwhField" data-input="annualKwh" class="field"
-                     inputmode="numeric" min="0" max="200000" step="100" placeholder="t.ex. 28 000"
-                     aria-describedby="overrideNote">
-              <p class="override-note" id="overrideNote" role="status" aria-live="polite" hidden></p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 5. the ONE reveal -->
-        <button type="button" class="reveal" data-reveal="all" aria-expanded="false" aria-controls="gearAll">
-          <span>Visa alla detaljer</span>
-          <svg class="reveal-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg>
-        </button>
-        <div class="gear gear-collapsed" data-gear="all" id="gearAll" hidden>
-          <div class="gear-inner">
-
-          <div class="gr-subhead">Huset</div>
-
+          <!-- 4. boende (moved up from the dead reveal) -->
           <div class="lbl lbl-row">
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/></svg>Boende <span class="lbl-soft">styr varmvattnet</span></span>
             <span class="stepper">
@@ -88,56 +62,67 @@
           </div>
           <input type="hidden" id="occupantsField" data-input="occupants" value="2">
 
-          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v8a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1z"/><path d="M7 7v9"/><path d="M11 7v9"/><path d="M15 7v9"/></svg>Finns element med vatten i?
-            <span class="lbl-soft">även vattenburen golvvärme</span>
-            <span class="antag" id="vbAsm">(antagande)</span></div>
-          <div class="seg" id="vbSeg" role="radiogroup" aria-label="Vattenburet system"></div>
-
-          <div class="lbl lbl-row">
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13.5a4 4 0 1 0 4 0v-8.5a2 2 0 0 0 -4 0v8.5"/><path d="M10 9h4"/></svg>Innetemperatur <span class="lbl-soft">varje grad märks</span></span>
-            <output id="tempOut" class="lbl-val">21 °C</output>
-          </div>
-          <input type="range" id="tempSlider" data-input="indoorTemp" class="range"
-                 min="17" max="24" step="1" value="21" aria-label="Innetemperatur i grader">
-
-          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="10" y="4" width="10" height="16" rx="2"/><path d="M7 6v12"/><path d="M4 8v8"/></svg>Hur värmen sprids</div>
-          <div class="seg" id="distSeg" role="radiogroup" aria-label="Hur värmen sprids"></div>
-
-          <div class="gr-subhead">El</div>
-
-          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/></svg>Elområde <span class="lbl-soft">SE3 gäller Stockholmsområdet</span> <span class="antag" id="seAsm">(antagande)</span></div>
+          <!-- 5. elområde (PROMOTED, relabelled) -->
+          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/></svg>Var ligger huset? <span class="lbl-soft">elområdet styr elpriset</span> <span class="antag" id="seAsm">(antagande)</span></div>
           <div class="seg" id="priceAreaSeg" role="radiogroup" aria-label="Elområde"></div>
+          <p class="gearcopy">SE1 är längst norrut, SE4 längst söderut. Stockholm ligger i SE3.</p>
+        </div>
 
-          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.785 6l8.215 8.215l-2.054 2.054a5.81 5.81 0 1 1 -8.215 -8.215z"/><path d="M4 20l3.5 -3.5"/><path d="M15 4l-3.5 3.5"/><path d="M20 9l-3.5 3.5"/></svg>Elnätsbolag <span class="lbl-soft">vissa bolag tar effektavgift</span></div>
-          <div class="selectwrap">
-            <select id="dsoField" data-input="dso" class="field"></select>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg>
+        <div class="gear" data-gear="n2">
+          <div class="gearhead">Din el</div>
+
+          <!-- 6. the own-figure kWh slider (L4 — the rebuilt override; all-electric stacks only) -->
+          <div id="ownRow">
+            <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/><path d="M11 7l-2.5 3.5h3l-2.5 3.5"/></svg>Vet du vad huset drar per år?</div>
+            <div class="seg" id="ownSeg" role="radiogroup" aria-label="Vet du husets årsförbrukning"></div>
+            <div class="gear gear-collapsed" data-gear="own" id="gearOwn" hidden>
+              <div class="gear-inner">
+                <div class="lbl lbl-row">
+                  <span>Husets elförbrukning</span>
+                  <output id="ownOut" for="ownSlider" class="lbl-val">20 000 kWh per år</output>
+                </div>
+                <input type="range" id="ownSlider" class="range"
+                       min="5000" max="45000" step="500" value="20000"
+                       aria-label="Husets elförbrukning i kilowattimmar per år" aria-describedby="ownNote">
+                <p class="gearcopy">Ett normalstort elvärmt hus drar 15 000-25 000 kWh om året. Siffran står på elnätsfakturan.</p>
+                <p class="gearcopy own-note" id="ownNote" role="status" aria-live="polite">Din siffra används i stället för boyta och byggår. Spannet smalnar.</p>
+              </div>
+            </div>
           </div>
 
-          <label class="toggle">
-            <input type="checkbox" id="solarField" data-input="hasSolar">
-            <span class="toggle-track" aria-hidden="true"><span class="toggle-dot"></span></span>
-            <span class="toggle-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 12h1"/><path d="M12 3v1"/><path d="M20 12h1"/><path d="M12 20v1"/><path d="M5.6 5.6l.7 .7"/><path d="M18.4 5.6l-.7 .7"/><path d="M17.7 17.7l.7 .7"/><path d="M6.3 17.7l-.7 .7"/></svg>Solel finns eller planeras</span>
-          </label>
+          <!-- 7. solceller (L6 — Nej / Finns / Planeras) -->
+          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 12h1"/><path d="M12 3v1"/><path d="M20 12h1"/><path d="M12 20v1"/><path d="M5.6 5.6l.7 .7"/><path d="M18.4 5.6l-.7 .7"/><path d="M17.7 17.7l.7 .7"/><path d="M6.3 17.7l-.7 .7"/></svg>Solceller <span class="lbl-soft">påverkar dagens kostnad</span></div>
+          <div class="seg" id="solarSeg" role="radiogroup" aria-label="Solceller"></div>
+          <div class="gear gear-collapsed" data-gear="sol" id="gearSol" hidden>
+            <div class="gear-inner">
+              <div class="lbl lbl-row">
+                <span>Ungefärlig produktion</span>
+                <output id="solarOut" for="solarSlider" class="lbl-val">8 000 kWh per år</output>
+              </div>
+              <input type="range" id="solarSlider" class="range"
+                     min="2000" max="12000" step="500" value="8000"
+                     aria-label="Ungefärlig solelsproduktion i kilowattimmar per år">
+              <p class="gearcopy">En vanlig villaanläggning på 10 kW ger runt 9 000-11 000 kWh om året.</p>
+            </div>
           </div>
+          <p class="gearcopy" id="solarPlanNote" role="status" aria-live="polite" hidden>Solel som inte finns än räknar vi inte med. Vi tar med den i planen.</p>
         </div>
       </form>
 
       <!-- ============ RIGHT: RESULT CARD ============ -->
       <div class="result" id="result">
 
-        <!-- A. head -->
+        <!-- A. head (#ownBadge deleted — R1) -->
         <div class="eyebrow-row">
           <span class="eyebrow" id="eyebrow">Så använder ditt hus energi i dag</span>
           <span class="typbadge" id="typBadge">Räknat på startvärden</span>
-          <span class="ownbadge" id="ownBadge" hidden>Din egen siffra</span>
         </div>
 
-        <!-- B. anchor -->
+        <!-- B. anchor (KEEP — R2) -->
         <p class="anchor-num" id="anchorNum">&#8212;</p>
         <p class="anchor-sub">uppvärmning och varmvatten</p>
 
-        <!-- C. story bar -->
+        <!-- C. story bar (KEEP + member-line upgrade — R2) -->
         <div class="storybar" id="storyBar" aria-hidden="true">
           <span class="sb-seg sb-heat"></span><span class="sb-seg sb-vv"></span><span class="sb-seg sb-house"></span>
         </div>
@@ -149,35 +134,53 @@
         <p class="sb-mix" id="sbMix" hidden></p>
         <p class="anchor-note" id="bandNote" hidden></p>
 
-        <!-- D. verdict -->
-        <p class="verdict" id="verdict"></p>
+        <!-- D. THE COMPARISON VISUAL (NEW — R4/R5) -->
+        <section class="compare" id="compare" aria-labelledby="compareH">
+          <h2 class="compare-h" id="compareH">Årlig kostnad, väg för väg</h2>
+          <p class="compare-sub" id="compareSub">Dagens kostnad överst. Tryck på en rad så läser du vår rekommendation för just den vägen.</p>
+          <ul class="compare-legend" aria-hidden="true">
+            <li><i class="cl-swatch cl-after"></i>efter åtgärd</li>
+            <li><i class="cl-swatch cl-band"></i>spann</li>
+            <li><i class="cl-swatch cl-idag"></i>i dag</li>
+          </ul>
+          <div class="compare-list" id="compareList" role="list">
+            <span class="c-line" id="cLine" aria-hidden="true" hidden></span>
+            <!-- rows built by app.js -->
+          </div>
+          <div class="c-chip" id="compareChip" hidden></div>
+        </section>
 
-        <!-- E. ladder -->
-        <h2 class="ladder-h" id="ladderH">Vad som är värt att göra</h2>
-        <div id="ladder"><!-- built by app.js --></div>
+        <!-- E. VÅRA REKOMMENDATIONER (NEW — R3/R6): plate always visible + expander -->
+        <section class="recs" id="recs" aria-labelledby="recsH">
+          <h2 class="recs-h" id="recsH">Våra rekommendationer</h2>
+          <p class="verdict" id="recPlate"></p>
+          <button type="button" class="reveal recs-toggle" id="recToggle" aria-expanded="false" aria-controls="recBody">
+            <span>Läs hela rekommendationen</span>
+            <svg class="reveal-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg>
+          </button>
+          <div class="gear gear-collapsed" id="recBody" hidden><div class="gear-inner" id="recText"></div></div>
+        </section>
 
         <!-- sr-only live region (the ONE result announcer) -->
         <div class="sr-only" id="resultLive" aria-live="polite" aria-atomic="true"></div>
 
-        <!-- F. UPSIDE rows (labelled; always rendered, rows conditional) -->
-        <div class="upside" id="upside">
-          <div class="upside-head">Kan komma ovanpå <span class="upside-soft">(ej i siffran ovan)</span></div>
-          <div class="upside-rows" id="upsideRows"></div>
+        <!-- F. CTA BLOCK (REDESIGNED — R9): dominant primary + quiet share -->
+        <div class="ctablock">
+          <p class="cta-lede" id="ctaLede"></p>
+          <button type="button" class="cta cta--primary" id="ctaBtn">Få en plan för ditt hus</button>
+          <p class="cta-trust">Kostnadsfritt · utan förbindelse · svar oftast inom en arbetsdag</p>
+          <button type="button" class="share-btn share-btn--quiet" id="shareBtn">Dela din kalkyl</button>
         </div>
-
-        <!-- G. CTA + share -->
-        <button type="button" class="cta" id="ctaBtn">Få en plan för ditt hus</button>
-        <button type="button" class="share-btn" id="shareBtn">Dela din kalkyl</button>
         <p class="sr-only" id="shareLive" role="status"></p>
 
-        <!-- G2. INLINE LEAD FORM (opens IN the midnight card, after CTA) -->
+        <!-- F2. INLINE LEAD FORM (opens IN the midnight card, after CTA) -->
         <div class="lead-inline gear-collapsed" id="leadInline" hidden>
           <div class="gear-inner">
             <div class="lead-inline-body">
               <button type="button" class="leadclose" id="leadClose" aria-label="Stäng formuläret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
               <div class="lead-eyebrow">Få en plan</div>
               <h3 class="lead-title">En elektriker räknar på ditt hus</h3>
-              <p class="lead-sub">Våra behöriga elektriker hör av sig med ett förslag för ditt hus, oftast inom en arbetsdag. Kostnadsfritt och utan förbindelse.</p>
+              <p class="lead-sub">Vi utgår från kalkylen du just gjort. En behörig elektriker hör av sig med ett förslag, oftast inom en arbetsdag. Kostnadsfritt och utan förbindelse.</p>
               <form id="leadForm" novalidate>
                 <label class="lead-lbl" for="leadName">Namn</label>
                 <input class="lead-field" type="text" id="leadName" name="name" autocomplete="name" required aria-describedby="errName">
@@ -207,33 +210,22 @@
                 </label>
                 <p class="field-err" id="errGdpr" hidden></p>
 
-                <button type="submit" class="cta lead-submit">Skicka förfrågan</button>
+                <button type="submit" class="cta lead-submit">Skicka, så hör vi av oss</button>
                 <p class="lead-err" id="leadErr" role="alert" hidden></p>
               </form>
               <div class="lead-success" id="leadSuccess" role="status" tabindex="-1" hidden>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/></svg>
-                <p>Tack. Vi hör av oss med ett förslag för ditt hus, oftast inom en arbetsdag.</p>
+                <p>Tack. Vi hör av oss med ett förslag för ditt hus, oftast inom en arbetsdag. Under tiden kan du dela kalkylen med någon som borde se den.</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- H. METHODOLOGY (prose + the 12-month curve) -->
+        <!-- G. METHODOLOGY (bullets + legal — the curve is GONE, R10) -->
         <details class="method">
           <summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"/></svg> Så har vi räknat</summary>
           <div class="method-body">
             <div id="methodBody"></div>
-            <div class="device">
-              <!-- Chart drawn by app.js into #chart. viewBox + plot margins reserved for zero CLS. -->
-              <svg id="chart" viewBox="0 0 372 196" width="100%" role="img"
-                   aria-label="Månadskurva. Bläddra med piltangenterna."
-                   aria-labelledby="chartTitle chartDesc" preserveAspectRatio="xMidYMid meet">
-                <title id="chartTitle">Kostnad månad för månad</title>
-                <desc id="chartDesc"></desc>
-              </svg>
-              <div class="chart-tip" id="chartTip" hidden></div>
-            </div>
-            <div class="cap" id="chartCap"></div>
           </div>
         </details>
 
@@ -255,9 +247,9 @@
 </div>
 
 <!-- 5-layer chassis: data -> engine -> rank -> app -->
-<script src="data.js?v=6"></script>
-<script src="engine.js?v=6"></script>
-<script src="rank.js?v=6"></script>
-<script src="app.js?v=6"></script>
+<script src="data.js?v=8"></script>
+<script src="engine.js?v=8"></script>
+<script src="rank.js?v=8"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>

@@ -303,6 +303,133 @@
   }
 
   /* =========================================================================
+   * recommend(R, inputs, D) — V7 the additive ADVICE layer (V7-rec-engine §5,
+   * lifted as the implementation contract; V7-SPEC §1.4).
+   *
+   * rankOptions stays the TRUTH TABLE (every option, deterministic sort — feeds
+   * the comparison visual). recommend() decides WHAT IS ADVICE:
+   *   - leadPool gate (H1+H4): paybackMid ≤ D.rec.pbLeadMax AND saving[1] ≥
+   *     D.rec.leadSavingFloor. A lead outside the pool cannot exist, ever.
+   *   - mention band (H2): paybackMid ∈ (lead, 15] år, max 2, payback printed.
+   *   - neverAdvice (H3): >15 år → comparison visual only, never in rec text.
+   *   - the branch ladder (order IS the logic; first hit wins).
+   * Pure + deterministic: no DOM, no Date, no rounding, does NOT mutate R.
+   * ========================================================================= */
+  function recommend(R, inputs, D) {
+    var base = R.baseline.results;
+    var primaryId = base.ctx.primaryId;
+    var hp = D.heatPumpCurrentIds || [];
+
+    /* -- classify the house */
+    var pumpShare = 0, kaminShare = 0, luftluftCov = 0;
+    base.currentBreakdown.forEach(function (b) {
+      if (b.isPrimary) return;
+      if (hp.indexOf(b.id) !== -1) pumpShare += b.share;
+      if (b.id === 'kamin') kaminShare += b.share;
+      if (b.id === 'luftluftCur') luftluftCov += b.share;
+    });
+    // heatPumpCurrentIds is UNCHANGED as data; franluft is carved out of the
+    // BRANCH test only (it gets its own honest 'halvvags' branch below).
+    var primaryIsPump = hp.indexOf(primaryId) !== -1 && primaryId !== 'franluft';
+
+    /* -- the lead pool (H1 + H4) */
+    var full = R.options.filter(function (o) {
+      return o.eligible && o.numeric !== false &&
+             (o.kind === 'replace' || o.kind === 'complement' || o.kind === 'combo');
+    });
+    var leadPool = full.filter(function (o) {
+      return o.paybackMid != null && o.paybackMid <= D.rec.pbLeadMax &&
+             o.saving[1] >= D.rec.leadSavingFloor;
+    });
+
+    /* -- mention band (H2) + advice exclusion (H3) */
+    var mention = [], excluded = [];
+    full.forEach(function (o) {
+      if (leadPool.indexOf(o) !== -1) return;
+      if (o.paybackMid != null && o.paybackMid <= D.rec.pbMentionMax) mention.push(o);
+      else excluded.push(o);                       // comparison visual only
+    });
+    mention.sort(function (a, b) { return a.paybackMid - b.paybackMid; });
+    mention = mention.slice(0, 2);
+
+    /* -- the branch ladder (V7-SPEC §1.4 order; first hit wins) */
+    var branch =
+        primaryIsPump                             ? 'redanEffektiv'
+      : primaryId === 'franluft'                  ? 'halvvags'
+      : primaryId === 'fjarrvarme'                ? 'fjarrvarmePris'
+      : pumpShare >= D.rec.partialShareMin        ? 'delvisLost'
+      : R.verdict.bestSavingMid <= 0              ? 'ingenBesparing'
+      : R.verdict.bestSavingMid <=
+          ((D.multi && D.multi.smallSavingThreshold != null)
+            ? D.multi.smallSavingThreshold : 1500) ? 'litenBesparing'
+      /* H8 + neverSay ledger: ved/pellets primary is ALWAYS the arbete/komfort
+       * frame — a kr-saving lead on a ved house is banned copy (the ladder's
+       * original leadPool-empty clause assumed the old 0,80 price; the blocking
+       * QA gate T3 and the unconditional neverSay row outrank it). The pump
+       * numbers stay fully visible in the comparison visual. */
+      : (primaryId === 'vedpellets' ||
+         primaryId === 'kamin')                   ? 'komfortFraga'  /* M2: kamin primary = wood-heated house, same arbete/komfort frame */
+      : leadPool.length > 0                       ? 'standard'
+      :                                             'langsiktig';
+
+    /* -- the lead (H5: composite behåll+styrning wherever no option clears the bar) */
+    var ctrl = (D.rank.controllablePrimaries || []).indexOf(primaryId) !== -1;
+    var lead;
+    if (branch === 'standard') {
+      var pool = leadPool.slice();
+      /* Matrix rule (V7-rec-engine §3.1 rows 2-3, QA gate T7): on a house WITH
+       * waterborne distribution the honest full solution rides the system that
+       * already exists — a whole-house pump outranks a complement for the LEAD
+       * when it clears the gate. The complement keeps its numbers in the
+       * mention band / comparison visual. Direktel houses (wb false) keep the
+       * luft-luft complement lead (T8). */
+      if (inputs.hasWaterborne === true) {
+        var whole = pool.filter(function (o) { return o.kind !== 'complement'; });
+        if (whole.length) pool = whole;
+      }
+      pool.sort(function (a, b) {
+        if (a.paybackMid !== b.paybackMid) return a.paybackMid - b.paybackMid;
+        if (a.saving[1] !== b.saving[1])   return b.saving[1] - a.saving[1];
+        return a.rangeWidth - b.rangeWidth;
+      });
+      lead = { type: 'option', id: pool[0].id };
+    } else {
+      lead = { type: 'composite', id: 'behall',
+               withStyrning: ctrl && primaryId !== 'vedpellets' }; // styrning qualitative until [GAP-V4-2] signs
+    }
+
+    /* -- orthogonal add-ons (V7-rec-engine §2.3) */
+    var addOns = [];
+    var isWholeHousePump = lead.type === 'option' &&
+        D.pumps[lead.id] && !D.pumps[lead.id].isComplement;
+    if (inputs.hasSolar) addOns.push('batteri');           // H9; featured on behåll-type branches (renderer)
+    else if (inputs.solarPlanned) addOns.push('batteriPlaneras'); // A10: qualitative only, no numbers
+    if (kaminShare > 0 && isWholeHousePump) addOns.push('kaminSpets');
+    if (D.rec.merLuftluftEnabled && branch === 'delvisLost' &&
+        luftluftCov > 0 && luftluftCov < D.rec.merLuftluftMaxCov &&
+        (inputs.area || 0) >= D.rec.merLuftluftMinM2) addOns.push('merLuftluft'); // OFF until [GAP-V7-8]
+    if (primaryId === 'olja' || primaryId === 'franluft') addOns.push('endOfLife');
+    if (inputs.vetinte) addOns.push('vetinteHedge');
+    if (lead.type === 'option' && ctrl) addOns.push('styrning');
+
+    /* -- marginal-honesty payload for delvisLost (the copy names the residual target) */
+    var residual = null;
+    if (branch === 'delvisLost') {
+      var prim = base.currentBreakdown.filter(function (b) { return b.isPrimary; })[0];
+      if (prim) residual = { share: prim.share, annualKr: prim.annual, label: prim.label, id: prim.id };
+    }
+
+    return {
+      branch: branch,
+      lead: lead,
+      secondary: mention.map(function (o) { return o.id; }),
+      excluded: excluded.map(function (o) { return o.id; }),   // neverAdvice ids (H3)
+      addOns: addOns,
+      residual: residual
+    };
+  }
+
+  /* =========================================================================
    * AmpyCodec — URL codec (§13.3). One codec, two jobs: share link + ad deep-link.
    *   ?sys=direktel&kmp=kamin.2,luftluft.2&m2=b3&era=e2&vb=0&kwh=18000 (or kr=32000)&se=SE3
    * Params present → answers pre-filled (NOT assumed). NO identity, NO tracking. Ever.
@@ -314,13 +441,22 @@
   };
   var SYS_ID = {};   // reverse
   Object.keys(SYS_TOKEN).forEach(function (t) { SYS_ID[SYS_TOKEN[t]] = t; });
-  var KMP_TOKEN = { kamin: 'kamin', luftluft: 'luftluftCur' };
+  /* V7 (A8): KMP tokens extended to EVERY complement-capable system id.
+   * franluft + fjarrvarme stay out (canComplement:false in data.js). */
+  var KMP_TOKEN = {
+    kamin: 'kamin', luftluft: 'luftluftCur', luftvatten: 'luftvattenCur',
+    bergvarme: 'bergvarmeCur', direktel: 'direktel', vattenburen: 'vattenburenEl',
+    olja: 'olja', vedpellets: 'vedpellets'
+  };
   var KMP_ID = {};
   Object.keys(KMP_TOKEN).forEach(function (t) { KMP_ID[KMP_TOKEN[t]] = t; });
 
   /* state shape (plain answers, app-agnostic):
-   * { sys, comps:[{system, stop}], m2:'b1'..'b4', era:'e1'..'e4'|'x', vb:true|false|'x',
-   *   kwh:N|null, kr:N|null, se:'SE1'..'SE4' } — all nullable. stop = 1..3 in the URL. */
+   * { sys, comps:[{system, stop}], m2:'b1'..'b4', era:'e1'..'e4'|'x',
+   *   kwh:N|null, se:'SE1'..'SE4', sol:null|{mode:'p'}|{mode:'f',kwh:N} }
+   * — all nullable. stop = 1..3 in the URL. V7: vb/kr are DECODE-ONLY legacy
+   * params (never emitted; the app drops them silently — inference + schablon
+   * take over). sol=p (planeras) | sol=f.<kwh> (finns + production). */
   function encodeState(s) {
     var p = [];
     if (s.sys && SYS_ID[s.sys]) p.push('sys=' + SYS_ID[s.sys]);
@@ -335,17 +471,15 @@
     }
     if (s.m2) p.push('m2=' + s.m2);
     if (s.era) p.push('era=' + s.era);
-    if (s.vb === true) p.push('vb=1');
-    else if (s.vb === false) p.push('vb=0');
-    else if (s.vb === 'x') p.push('vb=x');
     if (s.kwh != null) p.push('kwh=' + Math.round(s.kwh));
-    else if (s.kr != null) p.push('kr=' + Math.round(s.kr));
     if (s.se) p.push('se=' + s.se);
+    if (s.sol && s.sol.mode === 'p') p.push('sol=p');
+    else if (s.sol && s.sol.mode === 'f') p.push('sol=f.' + Math.round(s.sol.kwh != null ? s.sol.kwh : 0));
     return p.join('&');
   }
 
   function decodeState(search) {
-    var out = { sys: null, comps: [], m2: null, era: null, vb: null, kwh: null, kr: null, se: null };
+    var out = { sys: null, comps: [], m2: null, era: null, vb: null, kwh: null, kr: null, se: null, sol: null };
     var q = (search || '').replace(/^\?/, '');
     if (!q) return out;
     q.split('&').forEach(function (pair) {
@@ -367,13 +501,17 @@
       else if (k === 'kwh') { var n1 = parseInt(v, 10); if (n1 > 0) out.kwh = n1; }
       else if (k === 'kr')  { var n2 = parseInt(v, 10); if (n2 > 0) out.kr = n2; }
       else if (k === 'se' && /^SE[1-4]$/.test(v)) out.se = v;
+      else if (k === 'sol') {
+        if (v === 'p') out.sol = { mode: 'p' };
+        else if (/^f\.\d+$/.test(v)) out.sol = { mode: 'f', kwh: parseInt(v.slice(2), 10) };
+      }
     });
     return out;
   }
 
   /* expose (rankOptions rides on AmpyEngine per the delta; codec on its own handle) */
   if (global.AmpyEngine) global.AmpyEngine.rankOptions = rankOptions;
-  global.AmpyRank = { rankOptions: rankOptions, costSplit: costSplit, netInvestRange: netInvestRange };
+  global.AmpyRank = { rankOptions: rankOptions, recommend: recommend, costSplit: costSplit, netInvestRange: netInvestRange };
   global.AmpyCodec = { encode: encodeState, decode: decodeState };
 
 })(typeof window !== 'undefined' ? window : this);

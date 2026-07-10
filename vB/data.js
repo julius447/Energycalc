@@ -192,7 +192,7 @@ window.AMPY_DATA = {
     vattenburenEl:{ id: 'vattenburenEl',label: 'Vattenburen el',    isElectric: true,  efficiency: 0.95, canComplement: true }, // [GAP-R1-3] ~0,95–1,0
     olja:         { id: 'olja',         label: 'Oljepanna',         isElectric: false, efficiency: 0.85, canComplement: true }, // [GAP-R1-3] ~0,75–0,90; non-electric → fuelPrice path
     vedpellets:   { id: 'vedpellets',   label: 'Ved / pellets',     isElectric: false, efficiency: 0.75, canComplement: true }, // [GAP-R1-3] ~0,60–0,85; not electricity
-    franluft:     { id: 'franluft',     label: 'Äldre frånluftspump',isElectric: true, efficiency: 2.0,  canComplement: false },  // [GAP-R1-3] SPF ~1,5–2,5; treated as electric COP 2,0
+    franluft:     { id: 'franluft',     label: 'Äldre frånluftspump',isElectric: true, efficiency: 1.5,  canComplement: false },  // [GAP-E7-4] äldre F-pump verklig SPF (was 2,0; band ~1,5–2,5, conservative point); energiexpert signs
     fjarrvarme:   { id: 'fjarrvarme',   label: 'Fjärrvärme',        isElectric: false, efficiency: 1.00, isPrice: true, canComplement: false }, // [FACT] price comparison, NOT efficiency (R1 §3b)
 
     /* --- COMPLEMENT-CAPABLE CURRENT SYSTEMS (MASTER-SPEC-V3 §1.4) -------------
@@ -212,12 +212,64 @@ window.AMPY_DATA = {
    * [GAP-R1-3]/[GAP-R1-6] olja/ved/pellets/fjärrvärme price points need owner sign.
    * Placeholder bands (kr/kWh of delivered heat) so the non-electric path computes;
    * flagged so the renderer can footnote "depends on your fjärrvärmepris". */
+  /* V7 CHANGED (V7-economics §2 / V7-SPEC §1.1): corrected 2026 per-fuel prices,
+   * kr/kWh DELIVERED heat, inkl moms. Relative ordering the homeowner sees (SE3,
+   * effective on heating): olja ~2,40 > el ~2,05 eff > vattenburen el ~2,15 eff >
+   * köpt ved ~1,35 > fjärrvärme ~1,20 ≈ pellets ~1,15 > frånluft ~1,35 eff >
+   * luft-luft ~0,85 > bergvärme ~0,70 — matches folk intuition (the L1 fix). */
   fuelPrice: {
-    olja:       1.50, // [GAP-R1-3] kr/kWh delivered (oil price / boiler eff)
-    vedpellets: 0.80, // [GAP-R1-3] kr/kWh delivered (pellets cheaper, ved variable)
-    fjarrvarme: 1.10, // [GAP-R1-6] kr/kWh fjärrvärmepris — PRICE comparison, owner signs framing
-    kamin:      0.55  // [GAP-R1-3] kr/kWh delivered heat from a wood stove; conservative ved cost
+    olja:       2.40, // [GAP-E7-3] was 1.50 — villaolja ~20 900 kr/m³ ÷ (9 950 kWh/m³ × 0,85); energiexpert + Julius sign
+    vedpellets: 1.20, // [GAP-E7-3] was 0.80 — pellets ~1,15 / köpt ved ~1,35, blended
+    fjarrvarme: 1.20, // [GAP-E7-3] was 1.10 — Nils Holgersson 2025 riksgenomsnitt 1,23; PRICE comparison framing unchanged
+    kamin:      1.45  // [GAP-E7-3] was 0.55 — KÖPT ved ÷ stove eff; egen ved = copy, not math
   },
+
+  /* --- V7 SOLAR self-consumption model (V7-SPEC §1.1 / V7-economics §3) -------
+   * Feeds the L6 production slider + the engine's current-cost offset (engine §1.3).
+   * The offset applies to the ELECTRIC members of the current stack only, is capped
+   * per month at that month's electric cost, and NEVER folds in surplus/export
+   * (60-öre abolished 2026, [FACT] foretagsdata §6.4). */
+  solar: {
+    prodMin: 2000, prodMax: 12000, prodStep: 500, prodDefault: 8000, // [GAP-E7-5] slider band; 5–12 kWp × ~950 kWh/kWp; foretagsdata §3.3 anchor 10 kWp ≈ 9 000–11 000; energiexpert + Julius sign
+    selfUseShare: 0.30,          // [GAP-E7-6] no-battery self-consumption, conservative low end of 30–40 %; energiexpert signs
+    /* Otovo monthly production, Stockholm 15 kWp — the SHAPE source, transcribed
+     * VERBATIM from dossier R4 §1.1 (kWh per month, J..D); normalised in engine.
+     * ~90 % Mar–Nov, Dec ≈ 1,3 %. [FACT R4 §1.1 src: otovo.se] */
+    monthShape: [264, 580, 1337, 1845, 2100, 2131, 2110, 1785, 1360, 807, 334, 186]
+  },
+
+  /* --- V7 OWN-FIGURE kWh slider bounds (V7-left §2 / V7-SPEC §2.2) -----------
+   * Replaces the dead free-text override. Bounds [FACT]-anchored
+   * (energimarknadsbyran/klimatime via R3 §1b; top ≈350 m² pre-1940 direktel
+   * [DERIVED]); edges [GAP-L4 → energiexpert + Julius]. The kr path is DEAD. */
+  own: { min: 5000, max: 45000, step: 500, defaultKwh: 20000 },      // [GAP-L4]
+
+  /* --- V7 RECOMMENDATION CONSTITUTION (V7-rec-engine §2.1/§5) ----------------
+   * Policy constants, not physics — a signature is a one-file edit here. */
+  rec: {
+    pbLeadMax:          10,    // år — lead ceiling (H1)                    [GAP-V7-1] Julius
+    pbMentionMax:       15,    // år — "för den som vill" band (H2)         [GAP-V7-1] Julius
+    leadSavingFloor:    3000,  // kr/år — a lead needs a real saving (H4)   [GAP-V7-3] Julius
+    partialShareMin:    0.20,  // pump-complement coverage → delvisLost (H6) [GAP-V7-2] energiexpert
+    merLuftluftEnabled: false, // addOn gate — OFF until signed             [GAP-V7-8] energiexpert flips WITH the two below
+    merLuftluftMaxCov:  0.60,  //                                            [GAP-V7-8]
+    merLuftluftMinM2:   140    //                                            [GAP-V7-8]
+  },
+
+  /* --- V7 BATTERY catalogue anchors (rec-text slots only, never a sum) -------
+   * från-pris [FACT foretagsdata §3.2 via R4 §3.2]; grön teknik 50 % on battery
+   * is LOCKED 2026 canon (owner-confirmed). Display is gross → avdrag → net,
+   * never net-as-sticker. */
+  battery: {
+    grossFrom: 33000,   // [FACT foretagsdata §3.2] cheapest catalogue från-pris
+    greenTechRate: 0.50 // [FACT] grön teknik 50 % (battery), 2026 owner-confirmed canon
+  },
+
+  /* --- V7 waterborne retrofit adder (copy slot {vbLo}-{vbHi}) -----------------
+   * The +60 000-120 000 kr a direktel house adds for a waterborne system. Already
+   * baked into grossNoWaterborne above (mid ~90k); this RANGE feeds the rec-text
+   * sentence only (V7-COPY §0.2). [FACT R2 §1b] */
+  waterborneAdder: [60000, 120000],
 
   /* --- ROT mechanics ---------------------------------------------------------
    * [FACT] ROT = 30 % of the arbetskostnad-schablon only, cap 50 000 kr/person/yr.
@@ -339,7 +391,9 @@ window.AMPY_DATA = {
     /* Q1 primaries that IMPLY a waterborne system (Q3b skipped, hasWaterborne inferred true). */
     waterborneImplies: ['olja', 'fjarrvarme', 'vattenburenEl', 'luftvattenCur', 'bergvarmeCur'], // [MODEL] app-layer inference, engine untouched
     /* An existing luft-luft complement at/above this coverage removes S2 headroom (greyed, never hidden). */
-    complementHeadroomMax: 0.20   // [GAP-V4-9] expert signs; conservative (any real existing luft-luft ⇒ greyed at the 0.40 default stop)
+    complementHeadroomMax: 0.20,  // [GAP-V4-9] expert signs; conservative (any real existing luft-luft ⇒ greyed at the 0.40 default stop)
+    /* V7: row cap for the comparison visual (I dag + maxRows option rows + chip). */
+    maxRows: 6                    // [MODEL] V7-SPEC A7; more than 6 bars breaks 10-second legibility
   },
 
   /* --- 3.3 D.combi — future-stack combinations (S5 machinery) ---------------- */
