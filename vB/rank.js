@@ -32,15 +32,31 @@
     return pa.factor;
   }
 
-  /* ---------- exact space/VV cost split (E1 fields; §4.0) ---------- */
+  /* ---------- exact space/VV cost split + household DISPLAY post (§4.0) ----------
+   * heatingKr + vvKr === base.currentAnnual === the SAVINGS BASE (frozen, engine-owned).
+   * householdKr is DISPLAY-ONLY: it grows the anchor TOTAL, never any saving/payback.
+   * Read only by anchorVals + renderStorybar (grep proof: V9-SPEC §8.1).
+   * Regime branch keeps the anchor reconciling to a user's typed whole-house bill:
+   * when kWh is typed the engine stripped a flat D.household, so the DISPLAY must show
+   * that same flat 5000, or heatVv + household would not equal the typed total. */
   function costSplit(base, inputs, D) {
     var spaceCost = 0;
     for (var m = 0; m < 12; m++) {
       spaceCost += base.currentCost[m] * safeDiv(base.spaceHeatMonthly[m], base.monthHeat[m]);
     }
-    var vvCost = base.currentAnnual - spaceCost;
-    // [MODEL] story-bar grey segment only ("den rör vi inte"); NEVER in any saving.
-    var householdCost = D.household * D.marginalPriceSE3 * paFactor(inputs, D);
+    var vvCost = base.currentAnnual - spaceCost;                 // heat+VV — the SAVINGS BASE, untouched
+    // household = a REAL post in the anchor TOTAL, NEVER in any saving.
+    var pf = paFactor(inputs, D);
+    var typedKwh = !!(inputs.current && inputs.current.actual && inputs.current.actual.mode === 'kwh');
+    var householdKwh;
+    if (typedKwh) {
+      householdKwh = D.household;                                // flat 5000 — matches the engine strip
+    } else {
+      var hm  = D.householdModel || { baseKwh: D.household, perOccupantKwh: 0 };
+      var occ = (inputs.occupants != null) ? inputs.occupants : D.defaultOccupants;
+      householdKwh = hm.baseKwh + hm.perOccupantKwh * occ;       // dynamic occupant schablon (2 occ == 5000)
+    }
+    var householdCost = householdKwh * D.marginalPriceSE3 * pf;
     return { heatingKr: spaceCost, vvKr: vvCost, householdKr: householdCost };
   }
 

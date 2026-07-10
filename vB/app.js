@@ -1,15 +1,17 @@
 /* =============================================================================
- * app.js — Ampy energikalkylatorn — vB · v7 (V7-SPEC.md + V7-COPY.md)
+ * app.js — Ampy energikalkylatorn — vB · v9 "Sparstaplarna" (V9-SPEC.md)
  * Renderer + interactions. The two-pane single-canvas calculator, live recompute.
  *   LEFT:  ONE merged heat list (8 systems + Vet inte, multi-select) → boyta → byggår →
  *          boende → elområde → own-figure kWh SLIDER (all-electric stacks only)
  *          → solceller Nej/Finns/Planeras (+ production slider).
  *          7 controls, flat, zero keyboards, zero free-text numerics.
- *   RIGHT: DAGENS KOSTNAD anchor → story bar (+ member cost lines) →
- *          THE COMPARISON VISUAL (#compare, shared-scale bars + i dag line) →
- *          VÅRA REKOMMENDATIONER (#recs: plate always visible + rich expander)
- *          → CTA block (dominant primary + quiet share) → method (bullets +
- *          legal, NO curve).
+ *   RIGHT: energy-TOTAL anchor (uppvärmning + varmvatten + hushållsel) → story bar
+ *          (3-post legend) → SPARSTAPLARNA (#spark: horizontal SAVING bars, one per
+ *          option, shared scale, ★ ring on the lead, tap a bar → dropdown with the
+ *          verdict + investering/payback) → CTA block (dominant primary + quiet share)
+ *          → method (bullets + legal, NO curve).
+ *   Candour invariant: the anchor TOTAL is display-only; every bar reads o.saving[]
+ *   verbatim (heat+VV base, frozen), so household never touches a saving.
  * engine.js calculate() carries exactly the two spec'd v7 deltas. rank.js
  * (AmpyRank.rankOptions + recommend, AmpyCodec) is the pure additive layer.
  * data.js owns every number. Rounding + Swedish formatting HERE.
@@ -55,6 +57,11 @@
     var a = roundTo(lo, ROUND.payback), b = roundTo(hi, ROUND.payback);
     return (a === b) ? '~' + yrStr(a) + ' år' : '~' + yrStr(a) + '-' + yrStr(b) + ' år';
   }
+  /* Sparstaplarna saving value: '~lo-hi kr/år' (bulletproof unit), collapses to '~mid kr/år' */
+  function savRangeYr(lo, hi, step) {
+    var a = Math.max(0, roundTo(lo, step)), b = Math.max(0, roundTo(hi, step));
+    return (a === b) ? '~' + nf(a) + ' kr/år' : '~' + nf(a) + '-' + nf(b) + ' kr/år';
+  }
   var ROUND = (D.meta && D.meta.rounding) ? D.meta.rounding : { hero: 1000, stat: 500, payback: 0.5 };
 
   /* ---------- instrumentation (consent-gated, bucketed, experiment_id) ---------- */
@@ -62,7 +69,7 @@
   function track(ev, params) {
     if (!hasConsent()) return; /* no event fires without consent state */
     try {
-      var p = { event: 'ek_' + ev, experiment_id: 'energikalkylatorn-v7' };
+      var p = { event: 'ek_' + ev, experiment_id: 'energikalkylatorn-v9' };
       if (params) for (var k in params) if (Object.prototype.hasOwnProperty.call(params, k)) p[k] = params[k];
       (window.dataLayer = window.dataLayer || []).push(p);
     } catch (e) {}
@@ -91,7 +98,6 @@
   var S = {
     hintVetinte: 'Vi räknar försiktigt på direktverkande el tills du vet mer. Det går att ändra sen.',
     hintFjarr: 'Fjärrvärme jämförs på pris. Kamin och luft-luft går bra att lägga till.',
-    bandNote: 'Spannet är brett eftersom vi räknar försiktigt. Vet du din årssiffra? Fyll i den under Din el så smalnar det.',
     cardName: {
       behall: 'Behåll det du har',
       styrning: 'Smart styrning av värmen',
@@ -178,7 +184,28 @@
         styrning: 'Smart styrning styr värmen efter pris och behov. Vi sätter en siffra först när källan är granskad, därför visar vi den utan pris.',
         behall: 'Ingen åtgärd är också ett svar. Ditt system gör redan jobbet. Noll kronor i investering, och du kan räkna om här när något ändras.'
       },
-      announce: 'Vald väg: {namn}. Rekommendationen nedan är uppdaterad.'
+      announce: 'Vald väg: {namn}. Rekommendationen visas nedan.'
+    },
+    spark: {
+      recLabel: 'Vår rekommendation',
+      verdict: {
+        luftluft:        'En luft-luftvärmepump tar en stor del av värmen till en bråkdel av kostnaden. Det du värmer med idag sitter kvar som reserv i rummen den inte når.',
+        luftvattenWb:    'En luft-vatten värmepump kopplas på dina vattenburna element och hämtar större delen av värmen ur luften. Tappet i kyla är inräknat.',
+        luftvattenNoWb:  'En luft-vatten värmepump värmer hela huset via vattenburna element. Huset saknar det systemet idag, så {vbRange} kr för att lägga till det ingår i investeringen.',
+        bergvarme:       'Bergvärme hämtar värmen ur berget och ligger stabilt året om, även i sträng kyla. Den kräver borrhål på tomten, via partner.',
+        styrning:        'Styr värmen efter pris och behov, utan ingrepp i huset. Vi sätter en siffra först när källan är granskad.',
+        behall:          'Ingen åtgärd är också ett svar. Ditt system gör redan jobbet, och du kan räkna om här när något ändras.',
+        batteri:         'Ett solcellsbatteri ökar värdet av elen du redan producerar. Mer används i huset, och det kan köpa el när den är billig och använda den när den är dyr.',
+        discloseLuftvatten: 'Vi visar siffran som jämförelse, inte som råd. Med dina siffror är luft-vatten återbetald först på {pbRange} år, längre än vi är bekväma att rekommendera.',
+        discloseBergvarme:  'Vi visar siffran som jämförelse, inte som råd. Bergvärme är återbetald först på {pbRange} år, och kräver borrhål via partner.',
+        dyrare:          'Det här bytet ökar kostnaden i ditt hus. Vi visar det för ärlighetens skull.'
+      },
+      figInvest: 'Investering efter ROT', figPayback: 'Återbetald på',
+      figBattGross: 'Pris från', figBattNet: 'Efter grön teknik 50 %',
+      figBehall: 'Noll kronor i investering',
+      utanPris: 'utan pris', tagBehall: 'rimligast just nu', tagBatt: '(kräver solel)',
+      subRedan: ' Du har redan ett effektivt system. Staplarna visar vad ett byte skulle spara, som jämförelse.',
+      hint: 'Har du solceller? Ange det till vänster så räknar vi med din solel.'
     },
     sbMix: {
       line: '{label} ~{share} % av värmen · ca {kr} kr per år',
@@ -273,9 +300,8 @@
     ownKwh: (D.own && D.own.defaultKwh) || 20000,
     solarMode: 'nej',             // 'nej' | 'finns' | 'planeras'
     solarKwh: (D.solar && D.solar.prodDefault) || 8000,
-    selectedOption: null,         // the comparison visual's active scenario id
-    selectedByUser: false,        // a default selection re-defaults on recalc; a tap survives
-    recOpen: false                // the recs expander
+    selectedOption: null,         // the Sparstaplarna open/selected row id (null = all collapsed)
+    selectedByUser: false         // a default selection re-defaults on recalc; a tap survives
   };
   // seed the single default primary so the tool renders a real answer on first paint
   state.heat[D.defaultCurrentSystem] = { on: true, stop: DEFAULT_STOP, assumed: true };
@@ -755,9 +781,7 @@
   function render(R, rec) {
     renderAnchor(R);
     renderStorybar(R);
-    renderNotes(R);
-    renderCompare(R, rec);
-    renderRecs(R, rec);
+    renderSpark(R, rec);
     renderCtaBlock(rec);
     renderMsum(R);
     renderHpSummary(R);
@@ -791,12 +815,15 @@
   function anchorVals(R) {
     var measured = !!R.baseline.demandMeasured;
     var sp = measured ? 0 : D.demandSpread;
-    var base = R.baseline.spaceCost + R.baseline.vvCost;   // ≡ the heat+vv legend sum
+    // household-inclusive TOTAL: the ±15 % demand spread is heat-demand uncertainty,
+    // so it applies to heat+VV only; household is a flat schablon OUTSIDE the band.
+    var hv = R.baseline.spaceCost + R.baseline.vvCost;   // heat+VV (band applies here)
+    var hh = R.baseline.householdCost;                   // flat schablon — NO band on it
     return {
       single: sp === 0,
-      lo: Math.max(0, roundTo(base * (1 - sp), ROUND.hero)),
-      hi: Math.max(0, roundTo(base * (1 + sp), ROUND.hero)),
-      mid: Math.max(0, roundTo(base, ROUND.hero))
+      lo: Math.max(0, roundTo(hv * (1 - sp) + hh, ROUND.hero)),
+      hi: Math.max(0, roundTo(hv * (1 + sp) + hh, ROUND.hero)),
+      mid: Math.max(0, roundTo(hv + hh,           ROUND.hero))
     };
   }
   function anchorText(av) { return '~' + (av.single ? nf(av.mid) : nf(av.lo) + '-' + nf(av.hi)); }
@@ -860,31 +887,9 @@
     else { mix.textContent = ''; mix.hidden = true; }
   }
 
-  /* ---------- pre-touch primer / spann-note (mutually exclusive) ---------- */
-  function anyAssumed() {
-    if (state.vetinte || state.era === 'x' || !state.seTouched) return true;
-    var sel = heatSelection();
-    if (sel.multi) {
-      var ids = Object.keys(state.heat);
-      for (var i = 0; i < ids.length; i++) {
-        if (state.heat[ids[i]].on && state.heat[ids[i]].assumed) return true;
-      }
-    }
-    return false;
-  }
-
-  function renderNotes(R) {
-    var bn = $('#bandNote');
-    // the untouched state simply shows the result — no primer, no badge
-    if (userTouched && anyAssumed() && !R.baseline.demandMeasured) {
-      bn.textContent = S.bandNote; bn.hidden = false;
-    } else {
-      bn.hidden = true;
-    }
-  }
-
   /* ========================================================================
-   * D. THE COMPARISON VISUAL (#compare) — V7-visual adopted in full
+   * D+E. SPARSTAPLARNA (#spark) — savings bars + tap-to-expand rec
+   *      (replaces the old #compare cost visual and the #recs plate/wall)
    * ====================================================================== */
   function visibleOptions(R) { return R.options.slice(0, MAX_ROWS); }
 
@@ -903,70 +908,67 @@
     return { lo: lo, hi: hi, text: (lo === hi) ? '+' + nf(lo) + ' kr' : '+' + nf(lo) + '-' + nf(hi) + ' kr' };
   }
 
-  function rowProps(o, R, rec, today, scaleMax) {
+  function sparStar() {
+    return '<svg class="sp-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>';
+  }
+  function sparCaret() {
+    return '<svg class="sp-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg>';
+  }
+
+  /* per-row model on the SAVING scale (money coming back, never cost remaining) */
+  function sparRowProps(o, R, rec, scaleMax, wb) {
     var p = {
-      id: o.id, name: cardName(o), off: !o.eligible, qual: (o.numeric === false),
-      isBehall: o.id === 'behall', tag: null, tagSoft: null,
-      val: '', micro: '', aria: '', fillPct: 0, bandLeft: 0, bandW: 0, overLeft: 0, overW: 0,
-      weakPb: false
+      id: o.id, name: cardName(o), kind: 'numeric', off: false, isRec: false,
+      showFlag: false, batt: false, val: '', valClass: '', tag: null, reason: '',
+      hasBar: false, fillPct: 0, bandLeft: 0, bandW: 0, pay: null, payWeak: false, aria: ''
     };
-    if (p.isBehall) {
-      p.val = '~' + krStr(today, ROUND.stat);
-      p.micro = S.compare.behallMicro;
-      p.fillPct = clamp(100 * today / scaleMax, 0, 100);
-      if (rec.lead.type === 'composite') p.tag = S.compare.behallTag;
-      p.aria = p.name + '. Din kostnad idag, cirka ' + nf(roundTo(today, ROUND.stat)) + ' kronor per år.';
+    var weakPb = (o.paybackMid != null && o.paybackMid >= 15);
+
+    // behall (only reached on behållFirst branches — standard drops it upstream)
+    if (o.id === 'behall') {
+      p.kind = 'behall'; p.isRec = true; p.showFlag = true; p.tag = S.spark.tagBehall;
+      p.aria = p.name + '. ' + S.spark.tagBehall + '. ' + S.spark.verdict.behall + ' Visa rekommendationen.';
       return p;
     }
-    if (p.qual) {
-      p.val = S.compare.qualTag; p.valSoft = true;
-      p.micro = S.caveat.styrning;
-      p.aria = p.name + '. Utan pris. ' + S.caveat.styrning + ' Visa rekommendationen.';
+    // ineligible: greyed WITH reason, never hidden (rendered as a static note row)
+    if (!o.eligible) {
+      p.kind = 'off'; p.off = true;
+      p.reason = S.reason[o.ineligibleReason] || '';
+      p.aria = p.name + '. ' + p.reason;
       return p;
     }
-    var lo = Math.max(0, o.futureAnnualLow), hi = Math.max(0, o.futureAnnualHigh);
-    p.val = krRange(lo, hi, ROUND.stat);
-    p.fillPct = clamp(100 * lo / scaleMax, 2, 100);          // min visible fill 2 %
-    var bandEnd = clamp(100 * Math.min(hi, scaleMax) / scaleMax, 0, 100);
-    p.bandLeft = p.fillPct; p.bandW = Math.max(0, bandEnd - p.fillPct);
-    var linePct = clamp(100 * today / scaleMax, 0, 100);
-    if (hi > today) {                                        // amber overflow past the line
-      p.overLeft = Math.max(linePct, p.fillPct);
-      p.overW = Math.max(0, bandEnd - p.overLeft);
-      p.bandW = Math.max(0, Math.min(bandEnd, linePct) - p.fillPct);
-    }
-    if (p.off) {
-      p.micro = S.reason[o.ineligibleReason] || '';
-      p.aria = p.name + '. ' + p.micro + ' Vi visar siffran som jämförelse, inte som råd.';
+    // styrning (qualitative — utan pris, no bar, no figures)
+    if (o.numeric === false) {
+      p.kind = 'styrning'; p.val = S.spark.utanPris; p.valClass = 'soft';
+      p.aria = p.name + '. Utan pris. ' + S.spark.verdict.styrning + ' Visa rekommendationen.';
       return p;
     }
-    // micro-line: exactly 3 figures per row (efter-range on line 1, saving + payback here)
-    var savTxt;
+    // dyrare: eligible but the change costs more — no bar, amber value, never rec
     if (o.saving[1] <= 0) {
-      savTxt = fill(S.compare.microDyr, { sav: savRange(-o.saving[2], -o.saving[0], ROUND.stat) });
-    } else {
-      savTxt = fill(S.compare.microSaving, { sav: savRange(o.saving[0], o.saving[2], ROUND.stat) });
+      p.kind = 'dyrare';
+      p.val = '~' + savRange(-o.saving[2], -o.saving[0], ROUND.stat) + ' dyrare per år';
+      p.valClass = 'amber';
+      p.aria = p.name + '. Ungefär ' + savRange(-o.saving[2], -o.saving[0], ROUND.stat) + ' dyrare per år. ' + S.spark.verdict.dyrare + ' Visa mer.';
+      return p;
     }
-    var pbTxt;
-    if (o.paybackLow != null && o.paybackHigh != null) {
-      pbTxt = fill(S.compare.microPb, { pb: pbRange(o.paybackLow, o.paybackHigh) });
-    } else {
-      pbTxt = EMPTY;                                         /* the ONE sanctioned em-dash glyph */
-    }
-    p.weakPb = (o.paybackMid != null && o.paybackMid >= 15); // weak-case de-emphasis [GAP-V7-VIS-1]
-    p.savTxt = savTxt; p.pbTxt = pbTxt;
-    p.micro = savTxt + ' · ' + pbTxt;
-    if (o.flags && o.flags.priceComparison) p.tagSoft = S.compare.prisTag;
-    // the neon ring: the LEAD made visual — never on weak paybacks, never off-plate
-    p.best = (rec.lead.type === 'option' && rec.lead.id === o.id && !p.weakPb);
-    // composed Swedish aria-label (all four figures)
-    var iLo = o.netInvest ? roundTo(o.netInvest[0], ROUND.stat) : null;
-    var iHi = o.netInvest ? roundTo(o.netInvest[1], ROUND.stat) : null;
-    p.aria = p.name + '. Kostnad efter åtgärd cirka ' + nf(roundTo(lo, ROUND.stat)) + ' till ' + nf(roundTo(hi, ROUND.stat)) + ' kronor per år. ' +
-      (o.saving[1] > 0
-        ? nf(Math.max(0, roundTo(o.saving[0], ROUND.stat))) + ' till ' + nf(Math.max(0, roundTo(o.saving[2], ROUND.stat))) + ' kronor lägre per år. '
-        : '') +
-      (iLo != null && (iLo > 0 || iHi > 0) ? 'Investering cirka ' + nf(iLo) + ' till ' + nf(iHi) + ' kronor efter ROT. ' : '') +
+    // numeric option with a real saving: full bar + payback chip + dropdown
+    p.hasBar = true;
+    var lo = Math.max(0, o.saving[0]), hi = Math.max(0, o.saving[2]);
+    p.val = savRangeYr(o.saving[0], o.saving[2], ROUND.stat);
+    p.fillPct = clamp(100 * lo / scaleMax, 2, 100);
+    var bandEnd = clamp(100 * hi / scaleMax, 0, 100);
+    p.bandLeft = p.fillPct; p.bandW = Math.max(0, bandEnd - p.fillPct);
+    if (o.paybackLow != null && o.paybackHigh != null) p.pay = pbRange(o.paybackLow, o.paybackHigh);
+    p.payWeak = weakPb;
+    p.isRec = (rec.lead.type === 'option' && rec.lead.id === o.id && !weakPb);
+    p.showFlag = p.isRec;
+    var sLo = nf(Math.max(0, roundTo(o.saving[0], ROUND.stat)));
+    var sHi = nf(Math.max(0, roundTo(o.saving[2], ROUND.stat)));
+    var iLo = o.netInvest ? nf(roundTo(o.netInvest[0], ROUND.stat)) : null;
+    var iHi = o.netInvest ? nf(roundTo(o.netInvest[1], ROUND.stat)) : null;
+    p.aria = p.name + '. Kan spara cirka ' + sLo + ' till ' + sHi +
+      ' kronor per år på värme och varmvatten, räknat lågt ' + sLo + '. ' +
+      (iLo != null ? 'Investering efter ROT cirka ' + (iLo === iHi ? iLo : iLo + ' till ' + iHi) + ' kronor. ' : '') +
       (o.paybackLow != null && o.paybackHigh != null
         ? 'Återbetald på ungefär ' + yrStr(roundTo(o.paybackLow, ROUND.payback)) + ' till ' + yrStr(roundTo(o.paybackHigh, ROUND.payback)) + ' år. '
         : '') +
@@ -974,212 +976,231 @@
     return p;
   }
 
-  function crowHtml(p) {
-    var top = '<span class="crow-top"><span class="crow-name">' + esc(p.name) +
-      (p.tag ? '<span class="crow-tag">' + esc(p.tag) + '</span>' : '') +
-      '</span><span class="crow-val' + (p.valSoft ? ' crow-val--soft' : '') + '">' + esc(p.val) + '</span></span>';
-    var track = '';
-    if (!p.qual) {
-      track = '<span class="crow-track" aria-hidden="true">' +
-        '<span class="crow-fill" style="width:' + p.fillPct.toFixed(2) + '%"></span>' +
-        (p.bandW > 0 ? '<span class="crow-band" style="left:' + p.bandLeft.toFixed(2) + '%;width:' + p.bandW.toFixed(2) + '%"></span>' : '') +
-        (p.overW > 0 ? '<span class="crow-over" style="left:' + p.overLeft.toFixed(2) + '%;width:' + p.overW.toFixed(2) + '%"></span>' : '') +
-        '</span>';
-    }
-    var micro = '';
-    if (p.micro) {
-      if (p.savTxt && p.pbTxt) {
-        micro = '<span class="crow-micro" data-part="micro"><span data-part="sav">' + esc(p.savTxt) + ' · </span>' +
-          '<span' + (p.weakPb ? ' class="pb-weak"' : '') + '>' + esc(p.pbTxt) + '</span></span>';
-      } else {
-        micro = '<span class="crow-micro" data-part="micro">' + esc(p.micro) + '</span>';
-      }
-    }
-    if (p.tagSoft) micro += '<span class="crow-micro"><span class="crow-tag crow-tag--soft">' + esc(p.tagSoft) + '</span></span>';
-    return top + track + micro;
+  /* the battery pseudo-row (not a rank.js option) — mint bar on the saving scale */
+  function battRowProps(R, scaleMax) {
+    var br = battRange(R); if (!br) return null;
+    var p = {
+      id: 'batteri', name: 'Solcellsbatteri', kind: 'batt', batt: true, off: false,
+      isRec: false, showFlag: false, tag: S.spark.tagBatt, valClass: '',
+      hasBar: true, pay: null, payWeak: false
+    };
+    p.val = (br.lo === br.hi) ? '+' + nf(br.lo) + ' kr/år' : '+' + nf(br.lo) + '-' + nf(br.hi) + ' kr/år';
+    p.fillPct = clamp(100 * br.lo / scaleMax, 2, 100);
+    var bandEnd = clamp(100 * br.hi / scaleMax, 0, 100);
+    p.bandLeft = p.fillPct; p.bandW = Math.max(0, bandEnd - p.fillPct);
+    p.aria = 'Solcellsbatteri. Ungefär ' + (br.lo === br.hi ? nf(br.lo) : nf(br.lo) + ' till ' + nf(br.hi)) +
+      ' kronor mer per år i värde av din solel. Kräver solel. Visa rekommendationen.';
+    return p;
   }
 
-  var compareDrawn = false;
-  function renderCompare(R, rec) {
-    var list = $('#compareList'); if (!list) return;
-    var line = $('#cLine');
-    var today = R.baseline.currentAnnual;
-    var visible = visibleOptions(R);
+  function sparRowInner(p) {
+    var flag = '<span class="sp-flag"' + (p.showFlag ? '' : ' hidden') + '>' + sparStar() + esc(S.spark.recLabel) + '</span>';
+    var valClass = 'sp-val' + (p.valClass === 'soft' ? ' sp-val--soft' : (p.valClass === 'amber' ? ' sp-val--amber' : ''));
+    var head = '<span class="sp-head"><span class="sp-name">' + esc(p.name) + '</span>' +
+      (p.tag ? '<span class="sp-tag">' + esc(p.tag) + '</span>' : '') +
+      (p.val ? '<span class="' + valClass + '">' + esc(p.val) + '</span>' : '') +
+      sparCaret() + '</span>';
+    var barline = '';
+    if (p.hasBar) {
+      barline = '<span class="sp-barline"><span class="sp-track" aria-hidden="true">' +
+        '<span class="sp-fill" style="width:' + p.fillPct.toFixed(2) + '%"></span>' +
+        (p.bandW > 0 ? '<span class="sp-band" style="left:' + p.bandLeft.toFixed(2) + '%;width:' + p.bandW.toFixed(2) + '%"></span>' : '') +
+        '</span>' +
+        (p.pay ? '<span class="sp-pay' + (p.payWeak ? ' sp-pay--weak' : '') + '">' + esc(p.pay) + '</span>' : '') +
+        '</span>';
+    }
+    return flag + head + barline;
+  }
 
-    // behåll pinned first (after I dag) on behåll-first branches (rec is the truth)
+  function figRow(dt, dd) {
+    return '<div><dt>' + esc(dt) + '</dt><dd>' + esc(dd) + '</dd></div>';
+  }
+
+  /* dropdown body: tight verdict sentence + (numeric/battery) two figure lines.
+   * Reuses recNumbers/battSlots for every number; NEVER a fabricated styrning figure. */
+  function renderSparDrop(o, R, rec, wb) {
+    var verdict = '', figs = '';
+    var pbLeadMax = (D.rec && D.rec.pbLeadMax) || 10;
+    if (o.id === 'behall') {
+      verdict = S.spark.verdict.behall;
+      figs = '<p class="sp-fignote">' + esc(S.spark.figBehall) + '</p>';
+    } else if (!o.eligible) {
+      verdict = esc(S.reason[o.ineligibleReason] || '');
+    } else if (o.numeric === false) {
+      verdict = S.spark.verdict.styrning;
+    } else if (o.saving[1] <= 0) {
+      verdict = S.spark.verdict.dyrare;
+    } else {
+      var n = recNumbers(o);
+      var isLong = (o.paybackMid != null && o.paybackMid > pbLeadMax);
+      if (o.id === 'luftluft') {
+        verdict = S.spark.verdict.luftluft;
+      } else if (o.id === 'luftvatten') {
+        verdict = isLong ? fill(S.spark.verdict.discloseLuftvatten, { pbRange: n.pbRange })
+                         : fill(wb ? S.spark.verdict.luftvattenWb : S.spark.verdict.luftvattenNoWb, { vbRange: vbRangeStr() });
+      } else if (o.id === 'bergvarme') {
+        verdict = isLong ? fill(S.spark.verdict.discloseBergvarme, { pbRange: n.pbRange })
+                         : S.spark.verdict.bergvarme;
+      } else {
+        verdict = esc(o.label);
+      }
+      var invest = n.investRange ? '~' + n.investRange + ' kr' : EMPTY;
+      var pb = (n.pbRange && n.pbRange !== EMPTY) ? '~' + n.pbRange + ' år' : EMPTY;
+      figs = '<dl class="sp-figs">' + figRow(S.spark.figInvest, invest) + figRow(S.spark.figPayback, pb) + '</dl>';
+    }
+    return (verdict ? '<p class="sp-verdict">' + verdict + '</p>' : '') + figs;
+  }
+
+  function renderBattDrop(R) {
+    var bs = battSlots(R);
+    var figs = '<dl class="sp-figs">' +
+      figRow(S.spark.figBattGross, bs.battGross + ' kr') +
+      figRow(S.spark.figBattNet, '~' + bs.battNet + ' kr') + '</dl>';
+    return '<p class="sp-verdict">' + S.spark.verdict.batteri + '</p>' + figs;
+  }
+
+  var sparkDrawn = false;
+  function renderSpark(R, rec) {
+    var list = $('#sparkList'); if (!list) return;
+    var wb = inferWaterborne(heatSelection());
+
+    // sub gains the redan-effektiv sentence on that branch (rec is the truth)
+    var sub = $('#sparkSub');
+    if (sub) {
+      sub.textContent = 'Besparingen gäller värme och varmvatten. Hushållselen ligger kvar oavsett väg.' +
+        (rec.branch === 'redanEffektiv' ? S.spark.subRedan : '');
+    }
+
+    // row set: rank.js order EXACTLY; behall pinned first on behållFirst, dropped on standard
+    var visible = visibleOptions(R).slice();
     if (rec.lead.type === 'composite') {
       var bi = -1;
       for (var i = 0; i < visible.length; i++) if (visible[i].id === 'behall') { bi = i; break; }
-      if (bi > 0) { var b = visible.splice(bi, 1)[0]; visible.unshift(b); }
-    }
-
-    // scale: 2 % headroom so a dyrare option still renders inside the container
-    var maxHigh = today;
-    visible.forEach(function (o) {
-      if (o.numeric !== false && o.futureAnnualHigh != null) maxHigh = Math.max(maxHigh, o.futureAnnualHigh);
-    });
-    var scaleMax = 1.02 * maxHigh;
-    var linePct = clamp(100 * today / scaleMax, 0, 100);
-    if (line) { line.hidden = false; line.style.left = linePct + '%'; }
-
-    // sub gains the redan-effektiv line on that branch
-    var sub = $('#compareSub');
-    if (sub) {
-      sub.textContent = 'Dagens kostnad överst. Tryck på en rad så läser du vår rekommendation för just den vägen.' +
-        (rec.branch === 'redanEffektiv' ? ' ' + S.compare.subExtraRedan : '');
-    }
-
-    // build the row model: I dag row + option rows
-    var rows = [];
-    rows.push({
-      id: '__idag', idag: true,
-      html: '<span class="crow-top"><span class="crow-name">' + esc(S.compare.idag) + '</span>' +
-        '<span class="crow-val">~' + esc(krStr(today, ROUND.stat)) + '</span></span>' +
-        '<span class="crow-track" aria-hidden="true"><span class="crow-fill" style="width:' + linePct.toFixed(2) + '%"></span></span>',
-      aria: 'Idag. Cirka ' + nf(roundTo(today, ROUND.stat)) + ' kronor per år.'
-    });
-    visible.forEach(function (o) {
-      var p = rowProps(o, R, rec, today, scaleMax);
-      rows.push({ id: o.id, props: p, html: crowHtml(p), aria: p.aria });
-    });
-
-    // patch-in-place when the row set is unchanged (recalc keeps transitions + focus)
-    var existing = el('.crow', list);
-    var sameShape = existing.length === rows.length &&
-      existing.every(function (n, idx) { return n.dataset.id === rows[idx].id; });
-
-    if (!sameShape) {
-      el('.crow', list).forEach(function (n) { n.remove(); });
-      rows.forEach(function (r, idx) {
-        var n;
-        if (r.idag) {
-          n = document.createElement('div');
-          n.className = 'crow crow--idag';
-          n.setAttribute('role', 'listitem');
-        } else {
-          n = document.createElement('button');
-          n.type = 'button';
-          n.className = 'crow' + (r.id === 'behall' ? ' crow--behall' : '');
-          n.setAttribute('role', 'listitem');
-          n.addEventListener('click', function () { onCompareSelect(r.id, true); });
-        }
-        n.dataset.id = r.id;
-        n.innerHTML = r.html;
-        if (!r.idag) n.setAttribute('aria-label', r.aria);
-        list.appendChild(n);
-      });
-      // entrance stagger (first structural paint only, reduced-motion safe)
-      if (!REDUCED && !compareDrawn) {
-        list.classList.add('is-drawing');
-        var fills = el('.crow-fill', list);
-        fills.forEach(function (f, idx) { f.style.transitionDelay = (idx * 45) + 'ms'; });
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            list.classList.remove('is-drawing');
-            list.classList.add('is-drawn');
-            setTimeout(function () {
-              list.classList.remove('is-drawn');
-              fills.forEach(function (f) { f.style.transitionDelay = ''; });
-            }, 700);
-          });
-        });
-      }
-      compareDrawn = true;
+      if (bi > 0) { var bmoved = visible.splice(bi, 1)[0]; visible.unshift(bmoved); }
     } else {
-      rows.forEach(function (r, idx) {
-        var n = existing[idx];
-        n.innerHTML = r.html;
-        if (!r.idag) n.setAttribute('aria-label', r.aria);
+      visible = visible.filter(function (o) { return o.id !== 'behall'; }); // a zero prize is not a bar
+    }
+
+    /* ADVICE ORDER (owner: the ★ recommendation must lead, not sit under styrning).
+     * Float the lead row to the top, keep the eligible pumps in rank order, sink the
+     * qualitative "utan pris" styrning row toward the bottom, greyed/ineligible last.
+     * The battery row is appended after this loop, so it stays truly last. */
+    var leadId = rec.lead.type === 'option' ? rec.lead.id
+               : (rec.lead.type === 'composite' ? 'behall' : null);
+    function sparPri(o) {
+      if (leadId && o.id === leadId) return 0;             // the recommendation leads
+      if (!o.eligible) return 3;                            // greyed-with-reason sinks
+      if (o.id === 'styrning' || o.numeric === false) return 2; // "utan pris" footnote row
+      return 1;                                             // eligible pumps, rank order kept
+    }
+    visible = visible.map(function (o, i2) { return { o: o, i: i2 }; })
+      .sort(function (a, b) { var d = sparPri(a.o) - sparPri(b.o); return d !== 0 ? d : a.i - b.i; })
+      .map(function (x) { return x.o; });
+
+    // scaleMax over shown numeric rows incl the battery hi
+    var hasSolar = state.solarMode === 'finns';
+    var br = hasSolar ? battRange(R) : null;
+    var maxSav = 0;
+    visible.forEach(function (o) {
+      if (o.numeric !== false && o.eligible && o.saving && o.saving[2] > 0) maxSav = Math.max(maxSav, o.saving[2]);
+    });
+    if (br) maxSav = Math.max(maxSav, br.hi);
+    var scaleMax = maxSav > 0 ? 1.02 * maxSav : 1;
+
+    // build (full rebuild — <=7 rows, cheap; inline widths render final, no re-anim on recalc)
+    list.innerHTML = '';
+    function appendRow(id, o, p, dropHtml) {
+      var item = document.createElement('div');
+      item.className = 'sp-item' + (p.isRec ? ' is-rec' : '') + (p.off ? ' is-off' : '') + (p.batt ? ' sp-item--batt' : '');
+      item.dataset.id = id;
+      if (p.kind === 'off') {
+        // ineligible: informational, not a button; reason wraps inline (never hidden)
+        item.innerHTML = '<div class="sp-row sp-row--static">' +
+          '<span class="sp-head"><span class="sp-name">' + esc(p.name) + '</span></span>' +
+          '<span class="sp-note">' + esc(p.reason) + '</span></div>';
+        list.appendChild(item);
+        return;
+      }
+      var open = (state.selectedOption === id);
+      var dropId = 'drop-' + id;
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'sp-row';
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-controls', dropId);
+      btn.setAttribute('aria-label', p.aria);
+      btn.innerHTML = sparRowInner(p);
+      btn.addEventListener('click', function () { onSparkSelect(id, true); });
+      var drop = document.createElement('div');
+      drop.className = 'sp-drop gear-collapsed' + (open ? ' open' : '');
+      drop.id = dropId;
+      drop.innerHTML = '<div class="gear-inner"><div class="sp-drop-body">' + dropHtml + '</div></div>';
+      item.appendChild(btn); item.appendChild(drop);
+      list.appendChild(item);
+    }
+    visible.forEach(function (o) {
+      var p = sparRowProps(o, R, rec, scaleMax, wb);
+      appendRow(o.id, o, p, renderSparDrop(o, R, rec, wb));
+    });
+    if (br) {
+      var pbatt = battRowProps(R, scaleMax);
+      if (pbatt) appendRow('batteri', null, pbatt, renderBattDrop(R));
+    }
+
+    // entrance stagger (first structural paint only, reduced-motion safe)
+    if (!REDUCED && !sparkDrawn) {
+      list.classList.add('is-drawing');
+      var fills = el('.sp-fill', list);
+      fills.forEach(function (f, i2) { f.style.transitionDelay = (i2 * 45) + 'ms'; });
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          list.classList.remove('is-drawing');
+          list.classList.add('is-drawn');
+          setTimeout(function () {
+            list.classList.remove('is-drawn');
+            fills.forEach(function (f) { f.style.transitionDelay = ''; });
+          }, 700);
+        });
       });
     }
-    updateCompareSelection(R, rec);
-    updateGapDeltas(list, linePct);
+    sparkDrawn = true;
 
-    // the battery chip (solar finns) / the no-solar hint
-    var chip = $('#compareChip');
-    if (chip) {
-      var hasSolar = state.solarMode === 'finns';
-      var br = hasSolar ? battRange(R) : null;
-      if (hasSolar && br) {
-        chip.hidden = false;
-        chip.innerHTML = '<button type="button" id="chipBtn">' + ICONS.sun +
-          '<span>' + fill(esc(S.compare.chip), { battRange: '{battRange}' }).replace('{battRange}', '<b>' + esc(br.text) + '</b>') + '</span></button>';
-        var cb = $('#chipBtn', chip);
-        if (cb) cb.addEventListener('click', function () { onCompareSelect('batteri', true); });
-      } else if (state.solarMode === 'nej') {
-        chip.hidden = false;
-        chip.innerHTML = '<span class="c-chip-hint">' + ICONS.sun + '<span>' + esc(S.compare.chipHint) + '</span></span>';
-      } else {
-        chip.hidden = true;   // m5: "planeras" just answered the question — never show the "har du solceller?" hint back at them
-      }
+    // the no-solar hint (planeras/finns → hidden)
+    var hint = $('#sparkHint');
+    if (hint) {
+      if (state.solarMode === 'nej') { hint.textContent = S.spark.hint; hint.hidden = false; }
+      else { hint.textContent = ''; hint.hidden = true; }
     }
   }
 
-  function updateCompareSelection(R, rec) {
-    var list = $('#compareList'); if (!list) return;
-    el('.crow', list).forEach(function (n) {
-      var id = n.dataset.id;
-      if (id === '__idag') return;
-      var o = optById(R, id);
-      var p = o ? rowPropsLite(o, rec) : {};
-      n.classList.toggle('is-selected', state.selectedOption === id);
-      n.classList.toggle('is-best', !!p.best);
-      n.classList.toggle('is-off', !!(o && !o.eligible));
-      if (n.tagName === 'BUTTON') n.setAttribute('aria-pressed', state.selectedOption === id ? 'true' : 'false');
-    });
-  }
-  function rowPropsLite(o, rec) {
-    var weak = (o.paybackMid != null && o.paybackMid >= 15);
-    return { best: rec.lead.type === 'option' && rec.lead.id === o.id && !weak };
-  }
-
-  /* desktop richness: print the delta inside the bar-to-line gap when ≥90 px */
-  function updateGapDeltas(list, linePct) {
-    el('.crow-gap', list).forEach(function (n) { n.remove(); });
-    el('.crow-micro [data-part="sav"]', list).forEach(function (n) { n.style.display = ''; });
-    if (!window.matchMedia('(min-width:993px)').matches) return;
-    var w = list.clientWidth; if (!w) return;
-    el('.crow', list).forEach(function (n) {
-      if (n.dataset.id === '__idag') return;
-      var track = $('.crow-track', n); if (!track) return;
-      var fillN = $('.crow-fill', n), bandN = $('.crow-band', n);
-      if (!fillN) return;
-      var endPct = parseFloat((bandN && bandN.style.width) ? (parseFloat(bandN.style.left) + parseFloat(bandN.style.width)) : parseFloat(fillN.style.width));
-      if (!isFinite(endPct)) return;
-      var gapPx = (linePct - endPct) / 100 * w;
-      var savSpan = $('.crow-micro [data-part="sav"]', n);
-      if (gapPx >= 90 && savSpan) {
-        var g = document.createElement('span');
-        g.className = 'crow-gap';
-        g.textContent = savSpan.textContent.replace(' · ', '');
-        g.style.left = linePct + '%';
-        track.appendChild(g);
-        savSpan.style.display = 'none';   // no duplicate delta; micro keeps payback only
-      }
+  /* accordion: one dropdown open at a time; tap the open row to collapse it */
+  function updateSparkOpen() {
+    var list = $('#sparkList'); if (!list) return;
+    el('.sp-item', list).forEach(function (item) {
+      var id = item.dataset.id;
+      var open = (state.selectedOption === id);
+      var btn = $('.sp-row', item), drop = $('.sp-drop', item);
+      if (btn && btn.tagName === 'BUTTON') btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (drop) drop.classList.toggle('open', open);
     });
   }
 
-  function onCompareSelect(id, userInitiated) {
-    state.selectedOption = id;
+  function onSparkSelect(id, userInitiated) {
+    state.selectedOption = (state.selectedOption === id) ? null : id;  // toggle (one open at a time)
     if (userInitiated) state.selectedByUser = true;
-    if (lastRank && lastRec) updateCompareSelection(lastRank, lastRec);
-    renderRecText(lastRank, lastRec);
+    updateSparkOpen();
     if (userInitiated) {
-      setRecOpen(true, true);
       track('compare_select', { id: id });
-      try {
-        document.dispatchEvent(new CustomEvent('ampy:optionSelect', { detail: { id: id } }));
-      } catch (e) {}
-      var name = id === 'batteri' ? 'solcellsbatteri'
-        : (optById(lastRank, id) ? cardName(optById(lastRank, id)).toLowerCase() : id);
-      var live = $('#resultLive');
-      if (live) live.textContent = fill(S.rec.announce, { namn: name });
+      try { document.dispatchEvent(new CustomEvent('ampy:optionSelect', { detail: { id: id } })); } catch (e) {}
+      if (state.selectedOption === id) {
+        var name = id === 'batteri' ? 'solcellsbatteri'
+          : (optById(lastRank, id) ? cardName(optById(lastRank, id)).toLowerCase() : id);
+        var live = $('#resultLive');
+        if (live) live.textContent = fill(S.rec.announce, { namn: name });
+      }
     }
   }
 
-  /* ========================================================================
-   * E. VÅRA REKOMMENDATIONER — plate (always visible) + rich expander
-   * ====================================================================== */
+  /* ---------- E. rec numbers (reused by the Sparstaplarna dropdowns) ---------- */
   function recNumbers(o) {
     if (!o || !o.saving) return {};
     var m = {
@@ -1214,150 +1235,6 @@
       battGross: nf(gross),
       battNet: nf(roundTo(gross * (1 - rate), 500))
     };
-  }
-
-  function renderRecs(R, rec) {
-    var plateEl = $('#recPlate'); if (!plateEl) return;
-    var html = '';
-    // vetinteHedge prefaces the plate
-    if (rec.addOns.indexOf('vetinteHedge') !== -1) html += esc(S.rec.addOn.vetinteHedge) + ' ';
-
-    if (rec.branch === 'standard' && rec.lead.type === 'option') {
-      var o = optById(R, rec.lead.id);
-      var n = recNumbers(o);
-      html += fill(S.rec.plate.standard, {
-        leadName: leadDisplayName(rec.lead.id),
-        savingRange: n.savingRange,
-        pbRange: n.pbRange
-      });
-    } else if (rec.branch === 'delvisLost' && rec.residual) {
-      html += fill(S.rec.plate.delvisLost, {
-        residualLabel: rec.residual.label.toLowerCase(),
-        residualShare: Math.round(rec.residual.share * 100),
-        residualKr: nf(roundTo(rec.residual.annualKr, ROUND.stat))
-      });
-    } else {
-      html += fill(S.rec.plate[rec.branch] || '', {});
-    }
-    plateEl.innerHTML = html;
-    renderRecText(R, rec);
-  }
-
-  /* the expander body: the scenario free text for the CURRENT selection */
-  function renderRecText(R, rec) {
-    var box = $('#recText'); if (!box || !R || !rec) return;
-    var sel = state.selectedOption;
-    var paras = [];
-    var leadId = rec.lead.type === 'option' ? rec.lead.id : 'behall';
-    var wb = inferWaterborne(heatSelection());
-    var isLeadScenario = (sel === leadId);
-    var behallBranches = ['redanEffektiv', 'halvvags', 'langsiktig'];
-    var battFeatured = rec.addOns.indexOf('batteri') !== -1 && behallBranches.indexOf(rec.branch) !== -1;
-
-    if (sel === 'batteri') {
-      paras.push(fill(S.rec.batteriFeatured, battSlots(R)));
-    } else if (isLeadScenario) {
-      // -- the branch scenario body
-      if (rec.branch === 'standard') {
-        var o = optById(R, leadId);
-        var n = recNumbers(o);
-        var slots = { savingRange: n.savingRange, investRange: n.investRange, pbRange: n.pbRange, vbRange: vbRangeStr() };
-        if (leadId === 'luftluft') paras.push(fill(S.rec.body.luftluft, slots));
-        else if (leadId === 'luftvatten') paras.push(fill(wb ? S.rec.body.luftvattenWb : S.rec.body.luftvattenNoWb, slots));
-        else if (leadId === 'bergvarme') paras.push(fill(S.rec.body.bergvarme, slots));
-      } else if (rec.branch === 'delvisLost' && rec.residual) {
-        paras.push(fill(S.rec.body.delvisLost, {
-          residualLabel: rec.residual.label.toLowerCase(),
-          residualShare: Math.round(rec.residual.share * 100),
-          residualKr: nf(roundTo(rec.residual.annualKr, ROUND.stat))
-        }));
-      } else if (rec.branch === 'redanEffektiv') {
-        paras.push(S.rec.body.redanEffektivA);
-        if (battFeatured) paras.push(fill(S.rec.batteriFeatured, battSlots(R)));
-        else paras.push(S.rec.body.redanEffektivB);
-      } else {
-        paras.push(fill(S.rec.body[rec.branch] || '', {}));
-        if (battFeatured) paras.push(fill(S.rec.batteriFeatured, battSlots(R)));
-      }
-
-      // -- addOn riders (order: styrning · golvvärme · kaminSpets · merLuftluft ·
-      //    endOfLife · vattenburetAdder · batteri/batteriPlaneras)
-      var riders = [];
-      var leadOpt = rec.lead.type === 'option' ? optById(R, leadId) : null;
-      if (rec.addOns.indexOf('styrning') !== -1) riders.push(S.rec.addOn.styrning);
-      if (rec.addOns.indexOf('kaminSpets') !== -1) riders.push(S.rec.addOn.kaminSpets);
-      if (rec.addOns.indexOf('merLuftluft') !== -1) riders.push(S.rec.addOn.merLuftluft);
-      if (rec.addOns.indexOf('endOfLife') !== -1) {
-        var primId = R.baseline.results.ctx.primaryId;
-        riders.push(primId === 'olja' ? S.rec.addOn.endOfLifeOlja : S.rec.addOn.endOfLifeFranluft);
-      }
-      if (leadOpt && leadOpt.flags && leadOpt.flags.waterborneAdder && leadId !== 'luftvatten') {
-        riders.push(fill(S.rec.addOn.vattenburetAdder, { vbRange: vbRangeStr() })); // LV body carries it already
-      }
-      if (rec.addOns.indexOf('batteri') !== -1 && !battFeatured) {
-        riders.push(fill(S.rec.addOn.batteri, battSlots(R)));
-      }
-      if (rec.addOns.indexOf('batteriPlaneras') !== -1) riders.push(S.rec.addOn.batteriPlaneras); // A10: no numbers
-      riders.forEach(function (r) { paras.push(r); });
-    } else {
-      // -- a non-lead row tapped: honest per-option disclosure, never a sell
-      var od = optById(R, sel);
-      if (od) {
-        var nd = recNumbers(od);
-        var adder = (od.flags && od.flags.waterborneAdder)
-          ? fill(S.rec.addOn.vattenburetAdder, { vbRange: vbRangeStr() }) + ' ' : '';
-        if (!od.eligible) {
-          paras.push(S.reason[od.ineligibleReason] || '');
-        } else if (sel === 'behall') {
-          paras.push(S.rec.disclose.behall);
-        } else if (od.numeric === false) {
-          paras.push(S.rec.disclose.styrning);
-        } else if (rec.excluded.indexOf(sel) !== -1 || rec.secondary.indexOf(sel) !== -1 ||
-                   (od.paybackMid != null && od.paybackMid > ((D.rec && D.rec.pbLeadMax) || 10))) {
-          // mention band or neverAdvice: the disclosure cell, payback stated
-          if (sel === 'luftvatten') paras.push(fill(S.rec.disclose.luftvatten, { pbRange: nd.pbRange, adder: adder }));
-          else if (sel === 'bergvarme') paras.push(fill(S.rec.disclose.bergvarme, { pbRange: nd.pbRange, adder: adder }));
-          else paras.push(fill(S.rec.sec.luftluft, { pbRange: nd.pbRange }));
-        } else {
-          // clears the gate but is not the lead: the sanctioned one-liner cell
-          if (sel === 'luftvatten') paras.push(fill(wb ? S.rec.sec.luftvattenWb : S.rec.sec.luftvattenNoWb, { pbRange: nd.pbRange, vbRange: vbRangeStr() }));
-          else if (sel === 'bergvarme') paras.push(fill(wb ? S.rec.sec.bergvarmeWb : S.rec.sec.bergvarmeNoWb, { pbRange: nd.pbRange, vbRange: vbRangeStr() }));
-          else if (sel === 'luftluft') paras.push(fill(S.rec.sec.luftluft, { pbRange: nd.pbRange }));
-        }
-      }
-    }
-
-    // -- secondary "för den som vill se längre" lines (lead scenario only, max 2, payback printed)
-    var secHtml = '';
-    if (isLeadScenario && rec.secondary.length) {
-      var secs = [];
-      rec.secondary.forEach(function (id) {
-        var so = optById(R, id); if (!so) return;
-        var ns = recNumbers(so);
-        var slots2 = { pbRange: ns.pbRange, vbRange: vbRangeStr() };
-        if (id === 'luftvatten') secs.push(fill(wb ? S.rec.sec.luftvattenWb : S.rec.sec.luftvattenNoWb, slots2));
-        else if (id === 'bergvarme') secs.push(fill(wb ? S.rec.sec.bergvarmeWb : S.rec.sec.bergvarmeNoWb, slots2));
-        else if (id === 'luftluft') secs.push(fill(S.rec.sec.luftluft, slots2));
-      });
-      if (secs.length) {
-        secHtml = '<p class="rec-sec-h">' + esc(S.rec.secHead) + '</p>' +
-          secs.map(function (s) { return '<p class="rec-sec">' + s + '</p>'; }).join('');
-      }
-    }
-
-    box.innerHTML = '<div class="rec-text">' +
-      paras.filter(Boolean).map(function (p2) { return '<p>' + p2 + '</p>'; }).join('') +
-      '</div>' + secHtml;
-  }
-
-  function setRecOpen(open, userInitiated) {
-    var body = $('#recBody'), btn = $('#recToggle');
-    if (!body || !btn) return;
-    body.removeAttribute('hidden');
-    state.recOpen = open;
-    toggleEl(body, open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open && userInitiated) track('rec_open');
   }
 
   /* ---------- F. the CTA block ---------- */
@@ -1451,13 +1328,13 @@
       var live = $('#resultLive'); if (!live) return;
       var av = anchorVals(R);
       var txt = av.single
-        ? 'Idag kostar värmen cirka ' + nf(av.mid) + ' kronor per år.'
-        : 'Idag kostar värmen cirka ' + nf(av.lo) + ' till ' + nf(av.hi) + ' kronor per år.';
+        ? 'Idag kostar husets energi cirka ' + nf(av.mid) + ' kronor per år.'
+        : 'Idag kostar husets energi cirka ' + nf(av.lo) + ' till ' + nf(av.hi) + ' kronor per år.';
       if (rec.branch === 'standard' && rec.lead.type === 'option') {
         var o = optById(R, rec.lead.id);
         if (o && o.saving) {
           var slo = Math.max(0, roundTo(o.saving[0], ROUND.hero)), shi = Math.max(0, roundTo(o.saving[2], ROUND.hero));
-          txt += ' Rimligaste vägen ser ut att vara ' + leadDisplayName(rec.lead.id) + ', ungefär ' + nf(slo) + ' till ' + nf(shi) + ' kronor lägre per år.';
+          txt += ' Rimligaste vägen ser ut att vara ' + leadDisplayName(rec.lead.id) + ', ungefär ' + nf(slo) + ' till ' + nf(shi) + ' kronor lägre per år på värme och varmvatten.';
         }
       }
       live.textContent = txt;
@@ -1469,6 +1346,7 @@
     var b = R.baseline.results.ctx;
     var items = [];
     items.push('Husets värmebehov uppskattar vi från byggår, boyta och antal boende, normalårskorrigerat.');
+    items.push('Hushållsel, alltså belysning, vitvaror och elektronik, räknar vi som en försiktig schablon som växer med antalet boende. Den ligger utanför det värme och styrning påverkar, så den står lika i alla vägar.');
     items.push('Vi räknar på 21 °C inomhus och på radiatorer. Golvvärme ger värmepumpen något bättre verkningsgrad.');
     if (b.isMultiSystem) {
       items.push('Värmer flera system delar vi kostnaden efter dina andelar. Komplementen täcker tillsammans högst 70 procent.');
@@ -1557,13 +1435,7 @@
       });
     });
 
-    // the recs expander
-    var recBtn = $('#recToggle');
-    if (recBtn) {
-      recBtn.addEventListener('click', function () {
-        setRecOpen(!state.recOpen, !state.recOpen);
-      });
-    }
+    // (Sparstaplarna rows wire their own tap-to-expand in renderSpark; no separate toggle)
 
     // share (AmpyCodec: house state only, NO identity, ever)
     var shareBtn = $('#shareBtn');
@@ -1817,22 +1689,10 @@
     }
   }
 
-  /* ---------- resize: re-place the sliding pills + re-measure the gap deltas ---------- */
-  var rT;
+  /* ---------- resize: re-place the sliding pills (bars are % width, no re-measure) ---------- */
   window.addEventListener('resize', function () {
     replaceAllPills();
     checkStickyIntegrity();
-    clearTimeout(rT); rT = setTimeout(function () {
-      if (lastRank && lastRec) {
-        var list = $('#compareList');
-        var today = lastRank.baseline.currentAnnual;
-        var maxHigh = today;
-        visibleOptions(lastRank).forEach(function (o) {
-          if (o.numeric !== false && o.futureAnnualHigh != null) maxHigh = Math.max(maxHigh, o.futureAnnualHigh);
-        });
-        if (list) updateGapDeltas(list, clamp(100 * today / (1.02 * maxHigh), 0, 100));
-      }
-    }, 160);
   });
 
   /* ---------- boot ---------- */

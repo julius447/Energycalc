@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Energikalkylatorn: vad kostar det att värma ditt hus?</title>
 <meta name="description" content="Se vad värmen kostar i ditt hus och vad som är värt att göra. Försiktiga spann, fält-SPF, ROT 30 % på arbetet. Gratis, utan mejl.">
-<link rel="stylesheet" href="tool.css?v=10">
+<link rel="stylesheet" href="tool.css?v=12">
 </head>
 <body>
 <div class="page">
@@ -114,9 +114,9 @@
           <span class="eyebrow" id="eyebrow">Så använder ditt hus energi idag</span>
         </div>
 
-        <!-- B. anchor (KEEP — R2) -->
+        <!-- B. anchor (now the household-inclusive total, display only) -->
         <p class="anchor-num" id="anchorNum">&#8212;</p>
-        <p class="anchor-sub">uppvärmning och varmvatten</p>
+        <p class="anchor-sub">uppvärmning, varmvatten &amp; hushållsel</p>
 
         <!-- C. story bar (KEEP + member-line upgrade — R2) -->
         <div class="storybar" id="storyBar" aria-hidden="true">
@@ -125,36 +125,21 @@
         <ul class="sb-legend">
           <li><i class="sb-dot sb-dot-heat" aria-hidden="true"></i>Uppvärmning <b id="sbHeatKr">&#8212;</b></li>
           <li><i class="sb-dot sb-dot-vv" aria-hidden="true"></i>Varmvatten <b id="sbVvKr">&#8212;</b></li>
-          <li class="sb-house-row"><i class="sb-dot sb-dot-house" aria-hidden="true"></i>Hushållsel <b id="sbHouseKr">&#8212;</b> <span>den rör vi inte</span></li>
+          <li class="sb-house-row"><i class="sb-dot sb-dot-house" aria-hidden="true"></i>Hushållsel <b id="sbHouseKr">&#8212;</b></li>
         </ul>
         <p class="sb-mix" id="sbMix" hidden></p>
-        <p class="anchor-note" id="bandNote" hidden></p>
 
-        <!-- D. THE COMPARISON VISUAL (NEW — R4/R5) -->
-        <section class="compare" id="compare" aria-labelledby="compareH">
-          <h2 class="compare-h" id="compareH">Årlig kostnad, väg för väg</h2>
-          <p class="compare-sub" id="compareSub">Dagens kostnad överst. Tryck på en rad så läser du vår rekommendation för just den vägen.</p>
-          <ul class="compare-legend" aria-hidden="true">
-            <li><i class="cl-swatch cl-after"></i>efter åtgärd</li>
-            <li><i class="cl-swatch cl-band"></i>spann</li>
-            <li><i class="cl-swatch cl-idag"></i>idag</li>
-          </ul>
-          <div class="compare-list" id="compareList" role="list">
-            <span class="c-line" id="cLine" aria-hidden="true" hidden></span>
-            <!-- rows built by app.js -->
+        <!-- D+E. SPARSTAPLARNA — savings bars + tap-to-expand rec (replaces #compare + #recs) -->
+        <section class="spark" id="spark" aria-labelledby="sparkH">
+          <h2 class="spark-h" id="sparkH">Så mycket kan du spara per år</h2>
+          <p class="spark-sub" id="sparkSub">Besparingen gäller värme och varmvatten. Hushållselen ligger kvar oavsett väg.</p>
+          <div class="spark-legend" aria-hidden="true">
+            <span class="sp-lg"><i class="sp-sw sp-sw-low"></i>räknat lågt</span>
+            <span class="sp-lg"><i class="sp-sw sp-sw-band"></i>upp till</span>
+            <span class="sp-colhead">Du sparar per år</span>
           </div>
-          <div class="c-chip" id="compareChip" hidden></div>
-        </section>
-
-        <!-- E. VÅRA REKOMMENDATIONER (NEW — R3/R6): plate always visible + expander -->
-        <section class="recs" id="recs" aria-labelledby="recsH">
-          <h2 class="recs-h" id="recsH">Våra rekommendationer</h2>
-          <p class="verdict" id="recPlate"></p>
-          <button type="button" class="reveal recs-toggle" id="recToggle" aria-expanded="false" aria-controls="recBody">
-            <span>Läs hela rekommendationen</span>
-            <svg class="reveal-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg>
-          </button>
-          <div class="gear gear-collapsed" id="recBody" hidden><div class="gear-inner" id="recText"></div></div>
+          <div class="spark-list" id="sparkList" role="list"><!-- .sp-item rows built by app.js --></div>
+          <p class="spark-hint" id="sparkHint" role="status" aria-live="polite" hidden></p>
         </section>
 
         <!-- sr-only live region (the ONE result announcer) -->
@@ -172,7 +157,6 @@
           <div class="gear-inner">
             <div class="lead-inline-body">
               <button type="button" class="leadclose" id="leadClose" aria-label="Stäng formuläret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
-              <div class="lead-eyebrow">Få en plan</div>
               <h3 class="lead-title">En elektriker räknar på ditt hus</h3>
               <p class="lead-sub">Vi utgår från kalkylen du just gjort. En behörig elektriker hör av sig med ett förslag, oftast inom en arbetsdag.</p>
               <form id="leadForm" novalidate>
@@ -233,9 +217,9 @@
 </div>
 
 <!-- 5-layer chassis: data -> engine -> rank -> app -->
-<script src="data.js?v=10"></script>
-<script src="engine.js?v=10"></script>
-<script src="rank.js?v=10"></script>
-<script src="app.js?v=10"></script>
+<script src="data.js?v=12"></script>
+<script src="engine.js?v=12"></script>
+<script src="rank.js?v=12"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>

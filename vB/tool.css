@@ -1,8 +1,8 @@
 /* =============================================================================
  * tool.css — Ampy energikalkylatorn — vB · v7 (V7-SPEC.md)
  * Two-pane single-canvas calculator. LEFT white input card (7 flat controls) /
- * RIGHT midnight result card: DAGENS KOSTNAD anchor → story bar → the comparison
- * visual (#compare) → Våra rekommendationer (#recs) → CTA block → method
+ * RIGHT midnight result card: energy-TOTAL anchor → story bar → SPARSTAPLARNA
+ * (#spark: savings bars + tap-to-expand rec) → CTA block → method
  * (bullets + legal, NO curve). Sticky mobile result bar #msum.
  * Single font (Outfit) canonical; hierarchy by weight (300/500/900).
  * All spacing on --sp-* (4px grid, rem on 10px base); all type on --ty-*.
@@ -180,7 +180,7 @@ button{font-family:inherit}
 .hp-legend{padding:0;font-size:var(--ty-body);font-weight:500;color:var(--ink);line-height:var(--lh-snug);
   display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--sp-2)}
 .hp-legend-soft{font-size:var(--ty-label);font-weight:300;color:var(--slate)}
-.hp-grid{display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:1fr;gap:var(--sp-2h);margin-top:var(--sp-3)}
+.hp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-2h);margin-top:var(--sp-3)}
 .hp-subhead{grid-column:1/-1;font-size:var(--ty-eyebrow);letter-spacing:var(--tr-eyebrow);text-transform:uppercase;
   color:var(--slate);font-weight:500;margin-top:var(--sp-2)}
 .hp-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:var(--sp-2);
@@ -203,13 +203,19 @@ button{font-family:inherit}
   opacity:0;transform:scale(.6);transition:opacity var(--t-fast) var(--ease-out),transform var(--t-fast) var(--ease-out)}
 .hp-check svg{width:1.2rem;height:1.2rem}
 .hp-card[aria-pressed="true"] .hp-check{opacity:1;transform:scale(1)}
-/* the quiet "Vet inte" card — a normal grid cell: same height/format as the
- * other cards, dashed border, label centered both axes */
-.hp-card--quiet{align-items:center;justify-content:center;text-align:center;
-  border-style:dashed;color:var(--muted);
-  grid-column:1 / -1}   /* 8 systems + Vet inte = odd count: span the full last row so no orphan cell */
-.hp-card--quiet .hp-lbl{color:inherit;font-weight:300}
-.hp-card--quiet[aria-pressed="true"] .hp-lbl{color:var(--ink);font-weight:500}
+/* the quiet "Vet inte" card — a COMPACT single-line control, clearly smaller than
+ * the system cards. Spans the full last row (odd count) but sizes to its content
+ * (no grid-auto-rows:1fr stretch, no floaty gap). >=44px touch, dashed, centered.
+ * Specificity .hp-grid .hp-card--quiet (0,2,0) BEATS the media-query .hp-card
+ * min-height (0,1,0), so no per-breakpoint override is needed. */
+.hp-grid .hp-card--quiet{
+  grid-column:1 / -1; min-height:4.4rem; align-self:start;
+  flex-direction:row; align-items:center; justify-content:center; gap:var(--sp-2);
+  padding:var(--sp-2) var(--sp-3); border-style:dashed; color:var(--muted); text-align:center;
+}
+.hp-grid .hp-card--quiet .hp-lbl{color:inherit;font-weight:300;font-size:var(--ty-label)}
+.hp-grid .hp-card--quiet[aria-pressed="true"]{border-color:var(--teal);background:#f2fbf8}
+.hp-grid .hp-card--quiet[aria-pressed="true"] .hp-lbl{color:var(--ink);font-weight:500}
 /* primary marker = a teal ring on the icon tile (NO word — avoids superlative) */
 .hp-card.is-primary .hp-ic{box-shadow:0 0 0 2px var(--teal)}
 .hp-hint{font-size:var(--ty-label);color:var(--muted);margin:var(--sp-2) 0 0;line-height:var(--lh-body)}
@@ -300,105 +306,97 @@ button{font-family:inherit}
 .sb-legend b{font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
 .sb-dot{flex:0 0 auto;width:1rem;height:1rem;border-radius:3px;align-self:center}
 .sb-dot-heat{background:var(--teal-on-dark)} .sb-dot-vv{background:var(--mint)} .sb-dot-house{background:var(--bar-house)}
-.sb-house-row span{font-size:var(--ty-micro);color:var(--footnote)}
 .sb-mix{font-size:var(--ty-micro);color:var(--footnote);margin:var(--sp-2) 0 0}
 .sb-mix[hidden],.anchor-note[hidden],.sb-mix:empty{display:none}
 .anchor-note{font-size:var(--ty-micro);font-weight:300;color:var(--footnote);margin:var(--sp-3) 0 0;line-height:var(--lh-body)}
 
-/* the verdict plate — KEPT verbatim (the owner-loved artefact, now #recPlate) */
-.verdict{display:block;font-size:clamp(1.7rem, 1.5rem + 0.6vw, 2.1rem);font-weight:300;line-height:var(--lh-snug);
-  color:#fff;margin:var(--sp-6) 0 0;padding:var(--sp-4);background:rgba(0,196,167,.10);
-  border:var(--bd-teal-dark);border-radius:var(--r-md)}
-.verdict b{font-weight:500;color:#dffbe9;font-variant-numeric:tabular-nums}
-.verdict:empty{display:none}
+/* ============================ SPARSTAPLARNA (#spark) ============================
+ * Horizontal SAVING bars (money coming back). Solid teal fill = "räknat lågt" (LOW),
+ * mint band = "upp till" (HIGH). ★ ring on the lead. Tap a row → dropdown (verdict +
+ * two figure lines). Replaces the old #compare cost visual AND the #recs plate/wall. */
+.spark{display:block;margin-top:var(--sp-6);border:0;padding:0}
+.spark-h{font-size:var(--ty-h);font-weight:500;color:#fff;margin:0;line-height:var(--lh-tight)}
+.spark-sub{font-size:var(--ty-label);font-weight:300;color:var(--subtext);margin:var(--sp-1) 0 0;line-height:var(--lh-body)}
 
-/* ============================ D. THE COMPARISON VISUAL (#compare, V7-visual) ============================ */
-.compare{display:block;margin-top:var(--sp-6);border:0;padding:0}
-.compare-h{font-size:var(--ty-h);font-weight:500;color:#fff;margin:0;line-height:var(--lh-tight)}
-.compare-sub{font-size:var(--ty-label);font-weight:300;color:var(--subtext);margin:var(--sp-1) 0 0;line-height:var(--lh-body)}
-.compare-legend{list-style:none;display:flex;gap:var(--sp-4);flex-wrap:wrap;margin:var(--sp-2) 0 0;padding:0;
+.spark-legend{display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap;margin-top:var(--sp-3);
   font-size:var(--ty-micro);color:var(--footnote)}
-.compare-legend li{display:flex;align-items:center;gap:var(--sp-1h)}
-.cl-swatch{display:inline-block;width:1.4rem;height:.8rem;border-radius:var(--r-pill)}
-.cl-after{background:var(--teal-on-dark)}
-.cl-band{background:rgba(159,225,203,.34)}
-.cl-idag{width:0;height:1.2rem;border-radius:0;border-left:1px dashed rgba(255,255,255,.45)}
-/* the list + the ONE container-positioned dashed i dag line */
-.compare-list{position:relative;margin-top:var(--sp-4);min-height:24rem}
-.c-line{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed rgba(255,255,255,.35);pointer-events:none;z-index:0}
-.c-line[hidden]{display:none}
-/* row = one whole-row button (≥44px), labels above bars — one DOM both breakpoints */
-/* NOTE: zero horizontal padding — the track's x-axis must equal the list's so the
- * ONE container-positioned i dag line lines up with every bar. */
-.crow{position:relative;z-index:1;display:block;width:100%;text-align:left;border:0;background:none;color:inherit;
-  font-family:inherit;cursor:pointer;padding:var(--sp-2) 0;margin:0;min-height:4.4rem;
-  border-radius:var(--r-xs);transition:background var(--t-fast) var(--ease)}
-.crow+.crow, .crow+div>.crow{margin-top:var(--sp-2h)}
-@media (hover:hover) and (pointer:fine){ .crow:hover{background:rgba(255,255,255,.04)} .crow:hover .crow-name{color:#fff} }
-.crow:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
-.crow--idag{cursor:default;pointer-events:none}
-.crow-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3)}
-.crow-name{font-size:var(--ty-body);font-weight:300;color:var(--subtext);line-height:var(--lh-snug);min-width:0;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color var(--t-fast) var(--ease)}
-/* the lead rec's name must never truncate on a phone — let it wrap to two lines */
-@media (max-width:480px){ .crow-name{white-space:normal} }
-.crow-val{font-size:var(--ty-body);font-weight:500;color:#fff;white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto}
-.crow-val--soft{color:var(--footnote);font-weight:300;font-size:var(--ty-label)}
-.crow.is-best .crow-name,.crow.is-selected .crow-name{color:#fff;font-weight:500}
-/* bar: inset track full-width to scaleMax; solid fill to low; mint band low→high */
-.crow-track{position:relative;display:block;height:1.2rem;margin-top:var(--sp-2);border-radius:var(--r-pill);
-  background:var(--inset);overflow:visible}
-.crow-fill{position:absolute;left:0;top:.1rem;bottom:.1rem;border-radius:var(--r-pill);background:var(--teal-on-dark);
-  transform-origin:left center;transition:width var(--t-mid) var(--ease-out)}
-.crow-band{position:absolute;top:.1rem;bottom:.1rem;background:rgba(159,225,203,.34);border-radius:0 var(--r-pill) var(--r-pill) 0;
-  opacity:1;transition:opacity var(--t-fast) var(--ease),left var(--t-mid) var(--ease-out),width var(--t-mid) var(--ease-out)}
-.crow-over{position:absolute;top:.1rem;bottom:.1rem;background:rgba(240,180,41,.55);border-radius:0 var(--r-pill) var(--r-pill) 0}
-.crow--idag .crow-fill,.crow--behall .crow-fill{background:rgba(139,149,189,.55)}
-/* the neon best-ring (NEVER when paybackMid >= 15 — the weak-case rule made visual) */
-.crow.is-best .crow-fill{box-shadow:0 0 0 1px var(--neon)}
-/* selected = teal rail just OUTSIDE the bar zone (the DV2 .is-chosen pattern;
- * kept off the track so the shared x-scale stays exact) */
-.crow.is-selected{box-shadow:-0.8rem 0 0 -0.6rem var(--teal-on-dark);background:rgba(255,255,255,.03)}
-/* greyed-with-reason: whole row .4, fill desaturated, reason replaces the micro-line */
-.crow.is-off{opacity:.4}
-.crow.is-off .crow-fill{background:rgba(139,149,189,.45)}
-.crow-micro{display:block;font-size:var(--ty-label);font-weight:300;color:var(--footnote);
-  margin-top:var(--sp-1h);line-height:var(--lh-body)}
-.crow-micro .pb-weak{opacity:.75}
-.crow-micro b{font-weight:500;color:var(--subtext)}
-/* behåll pin tag + fjärrvärme price tag */
-.crow-tag{display:inline-block;font-size:var(--ty-micro);font-weight:500;color:var(--midnight);background:var(--mint);
-  border-radius:var(--r-pill);padding:.15rem var(--sp-2);margin-left:var(--sp-2);vertical-align:.1rem;white-space:nowrap}
-.crow-tag--soft{background:rgba(124,134,176,.22);color:#c4ccdf}
-/* desktop in-gap delta (≥90 px only; JS-gated): sits INSIDE the empty track gap,
- * vertically centered on the bar, right-aligned to the i dag line */
-.crow-gap{position:absolute;top:50%;font-size:var(--ty-micro);font-weight:500;color:var(--mint);
-  white-space:nowrap;transform:translate(-100%,-50%);padding-right:var(--sp-2);line-height:1}
-/* the battery chip — text only, hairline above, no bar (income never gets a bar on a cost scale) */
-.c-chip{margin-top:var(--sp-3);border-top:var(--bd-dark);padding-top:var(--sp-3);
-  font-size:var(--ty-label);font-weight:300;color:var(--subtext);line-height:var(--lh-body)}
-.c-chip[hidden]{display:none}
-.c-chip button{display:flex;align-items:flex-start;gap:var(--sp-2);width:100%;min-height:4.4rem;text-align:left;
-  border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:var(--sp-1) 0;border-radius:var(--r-xs)}
-.c-chip button:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
-.c-chip svg{width:1.6rem;height:1.6rem;color:var(--mint);flex:0 0 auto;margin-top:.2rem}
-.c-chip b{font-weight:500;color:var(--mint);font-variant-numeric:tabular-nums}
-.c-chip .c-chip-hint{display:flex;align-items:flex-start;gap:var(--sp-2);color:var(--footnote)}
+.sp-lg{display:inline-flex;align-items:center;gap:var(--sp-1h)}
+.sp-sw{display:inline-block;width:1.4rem;height:.8rem;border-radius:var(--r-pill)}
+.sp-sw-low{background:var(--teal-on-dark)} .sp-sw-band{background:rgba(159,225,203,.34)}
+.sp-colhead{margin-left:auto;font-size:var(--ty-micro);color:var(--footnote);white-space:nowrap}
 
-/* ============================ E. VÅRA REKOMMENDATIONER (#recs) ============================ */
-.recs{display:block;margin-top:var(--sp-6);border:0;padding:0}
-.recs-h{font-size:var(--ty-h);font-weight:500;color:#fff;margin:0;line-height:var(--lh-tight)}
-.recs .verdict{margin-top:var(--sp-3)}
-.recs-toggle{border-top:0;margin-top:var(--sp-1);color:var(--subtext)}
-.recs-toggle:hover{color:#fff}
-#recBody .gear-inner{padding-top:var(--sp-2)}
-.rec-text{font-size:var(--ty-sub);font-weight:300;color:var(--subtext);line-height:var(--lh-body)}
-.rec-text p{margin:0 0 var(--sp-3)}
-.rec-text p:last-child{margin-bottom:0}
-.rec-text b{font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
-.rec-sec-h{font-size:var(--ty-eyebrow);font-weight:500;letter-spacing:var(--tr-eyebrow);text-transform:uppercase;
-  color:var(--footnote);margin:var(--sp-4) 0 var(--sp-1)}
-.rec-sec{font-size:var(--ty-label);font-weight:300;color:var(--footnote);line-height:var(--lh-body);margin:0 0 var(--sp-1)}
+.spark-list{margin-top:var(--sp-4);min-height:20rem}   /* reserve height → no CLS on first paint */
+
+.sp-item{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:var(--r-md);
+  overflow:hidden;transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease)}
+.sp-item + .sp-item{margin-top:var(--sp-2h)}
+.sp-item.is-rec{border-color:rgba(85,255,154,.55);background:rgba(0,196,167,.06);
+  box-shadow:0 0 0 3px rgba(85,255,154,.10)}
+.sp-item.is-off{opacity:.4}
+.sp-item--batt .sp-fill{background:var(--mint)} .sp-item--batt .sp-band{background:rgba(159,225,203,.20)}
+.sp-item--batt .sp-val{color:var(--mint)}
+
+.sp-row{display:block;width:100%;text-align:left;border:0;background:none;color:inherit;font-family:inherit;
+  cursor:pointer;padding:var(--sp-3);margin:0;min-height:4.4rem;transition:background var(--t-fast) var(--ease)}
+.sp-row--static{cursor:default}
+@media (hover:hover) and (pointer:fine){ .sp-row:not(.sp-row--static):hover{background:rgba(255,255,255,.03)} }
+.sp-row:focus-visible{outline:2px solid var(--neon);outline-offset:2px;border-radius:var(--r-md)}
+
+.sp-flag{display:inline-flex;align-items:center;gap:var(--sp-1);margin-bottom:var(--sp-2);
+  padding:.2rem var(--sp-2);border-radius:var(--r-pill);background:var(--mint);color:var(--midnight);
+  font-size:var(--ty-micro);font-weight:500;line-height:1.2}
+.sp-flag[hidden]{display:none}
+.sp-star{width:1.2rem;height:1.2rem;fill:var(--midnight);flex:0 0 auto;margin-right:.2rem}
+
+.sp-head{display:flex;align-items:baseline;gap:var(--sp-2)}
+.sp-name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:var(--ty-body);font-weight:300;color:var(--subtext);line-height:var(--lh-snug);
+  transition:color var(--t-fast) var(--ease)}
+.sp-item.is-rec .sp-name{color:#fff;font-weight:500}
+.sp-val{font-size:var(--ty-body);font-weight:500;color:var(--teal-on-dark);white-space:nowrap;
+  font-variant-numeric:tabular-nums;flex:0 0 auto}
+.sp-val--soft{color:var(--footnote);font-weight:300;font-size:var(--ty-label)}   /* utan pris */
+.sp-val--amber{color:var(--amber);white-space:normal}                            /* dyrare */
+.sp-tag{display:inline-block;font-size:var(--ty-micro);font-weight:500;color:var(--midnight);background:var(--mint);
+  border-radius:var(--r-pill);padding:.15rem var(--sp-2);vertical-align:.1rem;white-space:nowrap;flex:0 0 auto}
+.sp-note{display:block;font-size:var(--ty-label);font-weight:300;color:var(--footnote);
+  margin-top:var(--sp-1h);line-height:var(--lh-body)}
+.sp-caret{flex:0 0 auto;align-self:center;width:1.6rem;height:1.6rem;color:var(--slate);
+  transition:transform var(--t-fast) var(--ease)}
+.sp-row[aria-expanded="true"] .sp-caret{transform:rotate(180deg)}
+
+.sp-barline{display:flex;align-items:center;gap:var(--sp-2);margin-top:var(--sp-2)}
+.sp-track{position:relative;display:block;flex:1 1 auto;height:1.2rem;border-radius:var(--r-pill);
+  background:var(--inset);overflow:hidden}
+.sp-fill{position:absolute;left:0;top:.1rem;bottom:.1rem;border-radius:var(--r-pill);background:var(--teal-on-dark);
+  transform-origin:left center;transition:width var(--t-mid) var(--ease-out)}
+.sp-band{position:absolute;top:.1rem;bottom:.1rem;background:rgba(159,225,203,.34);
+  border-radius:0 var(--r-pill) var(--r-pill) 0;transition:width var(--t-mid) var(--ease-out),left var(--t-mid) var(--ease-out)}
+.sp-pay{flex:0 0 auto;font-size:var(--ty-micro);font-weight:500;color:var(--subtext);background:var(--chip);
+  border-radius:var(--r-pill);padding:.2rem var(--sp-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.sp-pay--weak{opacity:.75;font-weight:300;color:var(--footnote)}
+
+/* dropdown — reuses the existing .gear-collapsed grid mechanic (0fr→1fr) */
+.sp-drop-body{padding:var(--sp-3) var(--sp-3) var(--sp-4);border-top:var(--bd-dark);margin-top:var(--sp-3)}
+.sp-verdict{font-size:var(--ty-sub);font-weight:300;color:var(--subtext);line-height:var(--lh-body);margin:0 0 var(--sp-3)}
+.sp-verdict b{font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
+.sp-figs{display:grid;gap:var(--sp-2);margin:0}
+.sp-figs > div{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3)}
+.sp-figs dt{font-size:var(--ty-label);font-weight:300;color:var(--footnote);margin:0}
+.sp-figs dd{font-size:var(--ty-label);font-weight:500;color:#fff;margin:0;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sp-fignote{font-size:var(--ty-label);font-weight:500;color:#fff;margin:0;font-variant-numeric:tabular-nums}
+
+.spark-hint{font-size:var(--ty-label);font-weight:300;color:var(--footnote);margin:var(--sp-3) 0 0;
+  line-height:var(--lh-body)}
+.spark-hint[hidden]{display:none}
+
+/* entrance: bars scaleX, band fades, chip pops last (JS toggles is-drawing/is-drawn) */
+.spark-list.is-drawing .sp-fill{transform:scaleX(0)}
+.spark-list.is-drawing .sp-band{opacity:0}
+.spark-list.is-drawing .sp-pay{opacity:0}
+.spark-list.is-drawn  .sp-fill{transform:scaleX(1);transition:transform var(--t-mid) var(--ease-out)}
+.spark-list.is-drawn  .sp-band{opacity:1;transition:opacity var(--t-fast) var(--ease) 140ms}
+.spark-list.is-drawn  .sp-pay{opacity:1;transition:opacity var(--t-fast) var(--ease) 200ms}
 
 /* ============================ F. THE CTA BLOCK ============================ */
 .ctablock{margin-top:var(--sp-7)}
@@ -453,8 +451,9 @@ button{font-family:inherit}
 .lead-inline[hidden]{display:none}
 .lead-inline-body{position:relative;background:var(--chip);border:1px solid rgba(255,255,255,.06);
   border-radius:var(--r-lg);padding:var(--sp-5);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
-.lead-eyebrow{font-size:var(--ty-eyebrow);letter-spacing:var(--tr-eyebrow);text-transform:uppercase;color:var(--eyebrow);font-weight:500}
-.lead-title{font-size:var(--ty-h);font-weight:500;line-height:var(--lh-tight);color:#fff;margin:.3rem 0 .4rem}
+/* .lead-eyebrow removed (the form now opens on the heading); title is the first child,
+ * so margin-top:0 and padding-right clears the absolute close button (3rem + 1.1rem inset) */
+.lead-title{font-size:var(--ty-h);font-weight:500;line-height:var(--lh-tight);color:#fff;margin:0 0 .4rem;padding-right:3.6rem}
 .lead-sub{font-size:var(--ty-sub);font-weight:300;color:var(--subtext);margin:0 0 var(--sp-3);line-height:var(--lh-body)}
 .lead-lbl{display:block;font-size:var(--ty-eyebrow);color:var(--subtext);margin:var(--sp-2) 0 .4rem}
 .lead-field{width:100%;padding:1.0rem 1.1rem;border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);
@@ -515,16 +514,10 @@ button{font-family:inherit}
 .result.enter > .anchor-num{animation-delay:calc(var(--t-stagger)*1)}
 .result.enter > .storybar{animation-delay:calc(var(--t-stagger)*2)}
 .result.enter > .sb-legend{animation-delay:calc(var(--t-stagger)*3)}
-.result.enter > .compare{animation-delay:calc(var(--t-stagger)*4)}
-.result.enter > .recs{animation-delay:calc(var(--t-stagger)*5)}
+.result.enter > .spark{animation-delay:calc(var(--t-stagger)*4)}
 .result.enter > .ctablock{animation-delay:calc(var(--t-stagger)*6)}
 .input{animation:ampyRise var(--t-mid) var(--ease-out) both}
-
-/* comparison-bar entrance: scaleX per row, staggered by app.js inline delay */
-.compare-list.is-drawing .crow-fill{transform:scaleX(0)}
-.compare-list.is-drawing .crow-band{opacity:0}
-.compare-list.is-drawn .crow-fill{transform:scaleX(1);transition:transform var(--t-mid) var(--ease-out)}
-.compare-list.is-drawn .crow-band{opacity:1;transition:opacity var(--t-fast) var(--ease) 140ms}
+/* (Sparstaplarna per-bar entrance lives in the #spark block: .spark-list.is-drawing/.is-drawn) */
 
 /* ============================ RESPONSIVE ============================ */
 @media (max-width:992px){
@@ -544,8 +537,8 @@ button{font-family:inherit}
   .stepbtn{width:44px;height:44px}
   .reveal{padding:1.4rem 0}
   .leadclose{width:44px;height:44px}
-  /* comparison bars: 12px on mobile, names may ellipsize, values never truncate */
-  .crow-track{height:1.2rem}
+  /* Sparstaplarna: 12px track on mobile; name ellipsizes, value never truncates */
+  .sp-track{height:1.2rem}
   /* zero CLS: reserve the hint slot so a fjärrvärme/vet-inte notice never shifts the picker */
   .hp-hint{display:block;min-height:3.6rem;margin:var(--sp-2) 0 0}
   .hp-hint[hidden]{display:block;visibility:hidden}
@@ -560,12 +553,20 @@ button{font-family:inherit}
   .hp-ic{width:3.4rem;height:3.4rem}
   .hp-ic svg{width:1.9rem;height:1.9rem}
   .storybar{height:3.2rem}
-  .crow-micro{white-space:normal}
+  /* mobile 375: name may wrap, value never truncates; figures tighten */
+  .sp-name{white-space:normal}
+  .sp-figs > div{gap:var(--sp-2)}
+}
+/* iPad 769-991 (two-pane, tighter result column): one deliberate tune */
+@media (min-width:769px) and (max-width:991px){
+  .sp-track{height:1.1rem}
+  .sp-name{font-size:var(--ty-label)}
+  .sp-row{padding:var(--sp-3)}
 }
 @media (min-width:993px){
-  /* desktop: 10px bars, rows tighten, in-gap delta may print (JS-gated ≥90px) */
-  .crow-track{height:1rem}
-  .crow+.crow, .crow+div>.crow{margin-top:var(--sp-2)}
+  /* desktop: calmer 10px track, rows tighten */
+  .sp-track{height:1rem}
+  .sp-item + .sp-item{margin-top:var(--sp-2)}
 }
 
 /* reduced motion — belt and braces on top of the zeroed tokens */

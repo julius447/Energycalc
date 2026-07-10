@@ -174,7 +174,11 @@ window.AMPY_DATA = {
   /* --- 6. HOUSEHOLD ELECTRICITY (excluded from the heating comparison) -------
    * [FACT] R3: when the user types a whole-house annual kWh for an ELECTRIC system,
    * subtract a household-electricity baseline so we compare heating, not appliances. */
-  household: 5000, // [MODEL] schablon hushållsel kWh/yr; [GAP-R3] owner may refine
+  household: 5000, // STRIP CONSTANT — engine.js kWh-strip; do NOT change (re-signs savings) [GAP-R3]
+  householdModel: {           // DISPLAY-ONLY — read by rank.js costSplit for the anchor decomposition;
+    baseKwh:        3000,     //   NEVER by any saving/payback. [GAP-HH-1] signer: energiexpert + Julius.
+    perOccupantKwh: 1000      //   2 occ -> 5000 (== strip constant, continuity); 4 occ -> 7000
+  }, // Derivation: Energimyndigheten 2018 villa ~5 747 kWh excl värme+VV [FACT src: energimarknadsbyran.se / hemsol.se 2026-07-10]; ~2 000 kWh/person reconciled to fixed base + conservative-low 1 000 kWh/boende (2 occ == 5 000 schablon). Area-scaling deliberately EXCLUDED (no second unsigned coefficient).
 
   /* --- HOT-WATER per occupant -----------------------------------------------
    * [FACT] occupant-driven hot water ~1 000 kWh/person (R3 §1c). Conservative-high.
