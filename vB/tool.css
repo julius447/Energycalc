@@ -515,6 +515,11 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   transition:grid-template-rows var(--t-mid) var(--ease-out),opacity var(--t-mid) var(--ease-out)}
 .gear-collapsed.open{grid-template-rows:1fr;opacity:1}
 .gear-collapsed > .gear-inner{overflow:hidden;min-height:0}
+/* a COLLAPSED disclosure panel must occupy zero vertical space — no phantom margin/padding
+   leaking into the group rhythm (the own/sol panels sat 10px proud when shut).
+   The #ownRow id-scoped margin needs an id-scoped override to actually win. */
+.gear-collapsed:not(.open){margin-top:0;padding-top:0}
+#ownRow > .gear-collapsed:not(.open){margin-top:0}
 
 /* entrance choreography (first paint, staggered, once) */
 @keyframes ampyRise{from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none}}
@@ -569,8 +574,7 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   .sp-track{height:1rem}
   .sp-item + .sp-item{margin-top:var(--sp-2)}
   .spark-list{min-height:12rem}   /* d-p5: the v2 list is shorter — less reserved void */
-  /* DM1a: three-up system cards shorten the left card ~90-130px → CTA nearer the fold */
-  .hp-grid{grid-template-columns:repeat(3,1fr)}
+  /* owner: keep the heat cards 2-up on desktop (the 3-col grid read cramped) */
   /* d-m5 (partial): the lead form breathes at desktop — capped fields,
    * Namn + Telefon side by side (pure CSS placement, zero DOM changes) */
   .lead-field{max-width:48rem}
