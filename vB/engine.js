@@ -475,9 +475,22 @@
       }
       return tot;
     }
-    // Low band: low SPF + low demand → smallest saving; High band: high SPF + high demand.
-    var heroLow  = annualCurrentCostFor(1 - sp) - annualPumpCostFor(pump.spfRange[0], 1 - sp);
-    var heroHigh = annualCurrentCostFor(1 + sp) - annualPumpCostFor(pump.spfRange[1], 1 + sp);
+    /* V8 (E-V8-1, V8-payback-research §3): the ± band combines the two INDEPENDENT
+     * uncertainties (demand ±sp, SPF range) in quadrature (RSS) around the mid,
+     * instead of stacking both worst cases. Corner-stacking quoted a ~2-4 % joint
+     * tail as the band edge and produced the 9,5-14/4,1-6,0 over-wide bands.
+     * Each component spread is computed NUMERICALLY (solar offset caps break pure
+     * linearity), one factor at a time, at the other factor's point value.
+     * demandMeasured ⇒ sp=0 ⇒ the band is SPF-only. [GAP-V8-1 expert countersign] */
+    var savingSpfLo = annualCurrentCostFor(1) - annualPumpCostFor(pump.spfRange[0], 1);
+    var savingSpfHi = annualCurrentCostFor(1) - annualPumpCostFor(pump.spfRange[1], 1);
+    var savingDemLo = annualCurrentCostFor(1 - sp) - annualPumpCostFor(pump.spf, 1 - sp);
+    var savingDemHi = annualCurrentCostFor(1 + sp) - annualPumpCostFor(pump.spf, 1 + sp);
+    var relSpf = heroSaving > 0 ? Math.abs(savingSpfHi - savingSpfLo) / (2 * heroSaving) : 0;
+    var relDem = heroSaving > 0 ? Math.abs(savingDemHi - savingDemLo) / (2 * heroSaving) : 0;
+    var relTot = Math.sqrt(relSpf * relSpf + relDem * relDem);
+    var heroLow  = heroSaving * (1 - relTot);
+    var heroHigh = heroSaving * (1 + relTot);
     if (heroLow > heroHigh) { var tmp = heroLow; heroLow = heroHigh; heroHigh = tmp; } // guarantee order
     var paybackLow  = payback(heroHigh); // shortest payback at the largest saving
     var paybackHigh = payback(heroLow);  // longest payback at the smallest saving

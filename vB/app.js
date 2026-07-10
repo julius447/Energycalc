@@ -1,7 +1,7 @@
 /* =============================================================================
  * app.js — Ampy energikalkylatorn — vB · v7 (V7-SPEC.md + V7-COPY.md)
  * Renderer + interactions. The two-pane single-canvas calculator, live recompute.
- *   LEFT:  ONE merged heat list (11 cards, multi-select) → boyta → byggår →
+ *   LEFT:  ONE merged heat list (8 systems + Vet inte, multi-select) → boyta → byggår →
  *          boende → elområde → own-figure kWh SLIDER (all-electric stacks only)
  *          → solceller Nej/Finns/Planeras (+ production slider).
  *          7 controls, flat, zero keyboards, zero free-text numerics.
@@ -91,7 +91,6 @@
   var S = {
     hintVetinte: 'Vi räknar försiktigt på direktverkande el tills du vet mer. Det går att ändra sen.',
     hintFjarr: 'Fjärrvärme jämförs på pris. Kamin och luft-luft går bra att lägga till.',
-    primer: 'Räknat på ett typhus: direktel, 150 m², SE3. Ändra uppgifterna så blir siffran din.',
     bandNote: 'Spannet är brett eftersom vi räknar försiktigt. Vet du din årssiffra? Fyll i den under Din el så smalnar det.',
     cardName: {
       behall: 'Behåll det du har',
@@ -114,8 +113,8 @@
     },
     compare: {
       subExtraRedan: 'Du har redan ett effektivt system. Staplarna visar vad ett byte skulle göra, som jämförelse.',
-      idag: 'I dag',
-      behallMicro: 'din kostnad i dag',
+      idag: 'Idag',
+      behallMicro: 'din kostnad idag',
       behallTag: 'rimligast just nu',
       qualTag: 'utan pris',
       prisTag: 'Prisjämförelse: du köper färdig värme, inte el.',
@@ -138,9 +137,9 @@
         langsiktig: 'Det finns pengar att spara i huset, men ingen åtgärd betalar sig inom tio år med dina siffror. Rimligast nu: behåll det du har och styr värmen smartare.'
       },
       body: {
-        luftluft: 'En luft-luftvärmepump ersätter inte hela uppvärmningen, men den tar en stor del av den till en bråkdel av kostnaden. Den värmer där luften når, och det du har i dag sitter kvar som reserv i övriga rum. Investeringen landar runt {investRange} kr efter ROT 30 procent på arbetet. Med dina siffror sänker den kostnaden med ungefär {savingRange} kr per år och är återbetald på {pbRange} år. Sedan är besparingen din, år efter år. Nästa steg är enkelt: en elektriker tittar på planlösningen, hittar rätt placering för innedelen och ger dig ett fast pris.',
+        luftluft: 'En luft-luftvärmepump ersätter inte hela uppvärmningen, men den tar en stor del av den till en bråkdel av kostnaden. Den värmer där luften når, och det du har idag sitter kvar som reserv i övriga rum. Investeringen landar runt {investRange} kr efter ROT 30 procent på arbetet. Med dina siffror sänker den kostnaden med ungefär {savingRange} kr per år och är återbetald på {pbRange} år. Sedan är besparingen din, år efter år. Nästa steg är enkelt: en elektriker tittar på planlösningen, hittar rätt placering för innedelen och ger dig ett fast pris.',
         luftvattenWb: 'Huset har redan vattenburna element, och det är halva jobbet gjort. En luft-vatten värmepump kopplas på systemet du har och hämtar större delen av värmen ur luften. Investeringen landar runt {investRange} kr efter ROT 30 procent på arbetet. Med dina siffror sänker den kostnaden med ungefär {savingRange} kr per år och är återbetald på {pbRange} år. Pumpen tappar i kyla, det är med i siffran. Nästa steg: en elektriker går igenom huset, kontrollerar att elcentralen klarar pumpen och ger dig ett fast pris.',
-        luftvattenNoWb: 'En luft-vatten värmepump värmer hela huset via vattenburna element. Huset har inte det systemet i dag, så vi har räknat med {vbRange} kr extra för att lägga till det, det ingår i investeringen på {investRange} kr efter ROT. Även med den posten sänker den kostnaden med ungefär {savingRange} kr per år, återbetald på {pbRange} år. Pumpen tappar i kyla, det är med i siffran. Nästa steg: en elektriker går igenom huset och ger dig ett fast pris där ingenting hänger på slumpen.',
+        luftvattenNoWb: 'En luft-vatten värmepump värmer hela huset via vattenburna element. Huset har inte det systemet idag, så vi har räknat med {vbRange} kr extra för att lägga till det, det ingår i investeringen på {investRange} kr efter ROT. Även med den posten sänker den kostnaden med ungefär {savingRange} kr per år, återbetald på {pbRange} år. Pumpen tappar i kyla, det är med i siffran. Nästa steg: en elektriker går igenom huset och ger dig ett fast pris där ingenting hänger på slumpen.',
         bergvarme: 'Bergvärme hämtar värmen ur berget och ligger stabilt året om, även i sträng kyla. I ett hus med din förbrukning är det ett starkt alternativ. Investeringen är den stora: runt {investRange} kr efter ROT 30 procent på arbetet, och den kräver borrhål på tomten. Med dina siffror sänker den kostnaden med ungefär {savingRange} kr per år och är återbetald på {pbRange} år. Borrningen sker via partner, vi berättar om tomten räcker. Nästa steg: en elektriker går igenom huset och ger dig ett fast pris.',
         delvisLost: 'När en värmepump redan tar en stor del av värmen finns det mindre kvar för en ny investering att spara på. En stor pump skulle till stor del ersätta värme som redan är billig, och då växer återbetalningstiden snabbt. Därför leder vi inte med den. Det ärliga draget är att rikta in sig på det som är kvar: {residualLabel} står för ungefär {residualShare} procent av värmen, cirka {residualKr} kr per år. Smart styrning flyttar den förbrukningen till timmar när elen är billig, utan ingrepp i huset. Vill du ändå se de stora alternativen finns de i jämförelsen ovan, med sina verkliga återbetalningstider.',
         /* redanEffektiv splits in two: bodyB is REPLACED by batteri.featured on solar-finns (V7-COPY §1.3) */
@@ -159,7 +158,7 @@
         merLuftluft: 'I ett hus i din storlek kan ytterligare en luft-luft ta en större del av värmen. En elektriker ser var den gör nytta.',
         endOfLifeOlja: 'När pannan ändå närmar sig sitt slut ändras kalkylen: då jämför du nypriser, inte mot en fungerande panna. Boverkets nya stöd för vattenburen värme kan vara värt att bevaka, vi räknar inte med det.',
         endOfLifeFranluft: 'Närmar sig pumpen bytesålder ändras kalkylen: då jämför du nypriser, inte mot en fungerande pump. Det är rätt läge att räkna om här.',
-        vattenburetAdder: 'Kräver vattenburet system. Det finns inte i huset i dag, så vi har räknat med {vbRange} kr extra för att lägga till det. Det ingår i investeringssiffran.',
+        vattenburetAdder: 'Kräver vattenburet system. Det finns inte i huset idag, så vi har räknat med {vbRange} kr extra för att lägga till det. Det ingår i investeringssiffran.',
         batteri: 'Med solceller på taket är ett solcellsbatteri ett rimligt nästa steg: ungefär {battRange} per år i ökat värde av din egen el. Pris från {battGross} kr, efter grön teknik 50 procent cirka {battNet} kr.',
         batteriPlaneras: 'När solcellerna är på plats blir ett batteri nästa fråga. Vi räknar på det när anläggningen finns.',
         vetinteHedge: 'Vi räknar försiktigt på direktverkande el tills du vet mer.'
@@ -187,9 +186,7 @@
       solar: 'Solel drar av ca {kr} kr av elkostnaden.'
     },
     cta: {
-      plan: 'Få en plan för ditt hus', soft: 'Få en kostnadsfri bedömning',
-      ledeStandard: 'En elektriker räknar på just ditt hus och ger dig ett riktigt pris.',
-      ledeSoft: 'Vill du ha en second opinion på din uppvärmning? Vi tittar gärna.'
+      plan: 'Få en plan för ditt hus', soft: 'Få en kostnadsfri bedömning'
     },
     share: 'Dela din kalkyl',
     shareCopied: 'Länk kopierad',
@@ -200,11 +197,9 @@
       name: 'Skriv ditt namn.',
       phone: 'Skriv ett nummer vi kan nå dig på.',
       zip: 'Postnumret ska vara fem siffror.',
-      email: 'Kolla e-postadressen, den ser inte komplett ut.',
-      gdpr: 'Bocka i rutan så får vi höra av oss.'
+      email: 'Kolla e-postadressen, den ser inte komplett ut.'
     },
-    methodLegal: 'Det här är en uppskattning byggd på schabloner och försiktiga antaganden. Den är inte ett erbjudande, inte ett bindande pris och inte ekonomisk rådgivning. Verklig kostnad och besparing beror på huset, avtalet och vädret, och kan bli både högre och lägre. En offert från oss räknas alltid på ditt hus och gäller före kalkylatorn.',
-    foot: 'Försiktiga schabloner, inte ett erbjudande. Vi jobbar i Stockholmsområdet i dag.'
+    methodLegal: 'Det här är en uppskattning byggd på schabloner och försiktiga antaganden. Den är inte ett erbjudande, inte ett bindande pris och inte ekonomisk rådgivning. Verklig kostnad och besparing beror på huset, avtalet och vädret, och kan bli både högre och lägre. En offert från oss räknas alltid på ditt hus och gäller före kalkylatorn. Vi jobbar i Stockholmsområdet idag.'
   };
 
   /* ---------- labels for the data-driven inputs ---------- */
@@ -241,8 +236,10 @@
     chevUp:   icsvg('<path d="M6 15l6-6l6 6"/>')
   };
 
-  /* the ONE merged heat list (L2): eleven cards, prevalence grid order
-   * (2-col reading order = rows). Labels DISPLAY-ONLY; engine ids untouched.
+  /* the ONE merged heat list (L2): nine cards (8 common systems + Vet inte),
+   * prevalence grid order (2-col reading order = rows). Labels DISPLAY-ONLY;
+   * engine ids untouched. olja/vedpellets stay in data.js/engine (back-compat)
+   * but are UI-HIDDEN: no card, and share-link decode maps them to Vet inte.
    * [MODEL prevalence order — owner may reorder at zero code risk] */
   var HEAT_CARDS = [
     { id: 'direktel',      icon: 'bolt',     label: 'Direktel' },
@@ -253,10 +250,10 @@
     { id: 'luftvattenCur', icon: 'droplet',  label: 'Luft-vatten' },
     { id: 'vattenburenEl', icon: 'dropbolt', label: 'Vattenburen el' },
     { id: 'franluft',      icon: 'wind',     label: 'Frånluftspump' },
-    { id: 'olja',          icon: 'flame',    label: 'Oljepanna' },
-    { id: 'vedpellets',    icon: 'pellets',  label: 'Ved / pellets' },
     { id: 'vetinte',       icon: null,       label: 'Vet inte', quiet: true }
   ];
+  /* systems kept in the engine but hidden from the UI card set */
+  var UI_HIDDEN_SYSTEMS = { olja: true, vedpellets: true };
   function shortLabel(id) {
     for (var i = 0; i < HEAT_CARDS.length; i++) if (HEAT_CARDS[i].id === id) return HEAT_CARDS[i].label;
     return (D.currentSystems[id] && D.currentSystems[id].label) || id;
@@ -675,7 +672,6 @@
       gear.removeAttribute('hidden');
       toggleEl(gear, state.solarMode === 'finns');
     }
-    var note = $('#solarPlanNote'); if (note) note.hidden = state.solarMode !== 'planeras';
   }
 
   /* ---------- read the live inputs → the multi-system model (§1.5 contract) ---------- */
@@ -712,12 +708,27 @@
     document.body.classList.add('has-msum');
     var m = $('#msum'); if (m) m.classList.add('on');
     msumSync();
-    var tb = $('#typBadge');
-    if (tb) {
-      if (REDUCED || silent) { tb.hidden = true; }
-      else { tb.classList.add('out'); setTimeout(function () { tb.hidden = true; }, 200); }
-    }
     if (!silent) track('calc_first_touch');
+  }
+
+  /* rAF-throttled recompute for slider drags: the slider's own output label
+   * updates immediately in its input handler; the heavy recompute runs at most
+   * once per frame, and any input landing while a frame is pending is absorbed
+   * (recompute reads live state at execution, so the trailing value always
+   * renders). No layout-affecting work in the drag path itself. */
+  var recomputeRaf = 0;
+  function scheduleRecompute() {
+    if (recomputeRaf) return;
+    recomputeRaf = requestAnimationFrame(function () {
+      recomputeRaf = 0;
+      recompute();
+    });
+  }
+  /* drag end ('change'): settle immediately — cancels any pending frame so the
+   * final value always renders, even if the tab was backgrounded mid-drag */
+  function settleRecompute() {
+    if (recomputeRaf) { cancelAnimationFrame(recomputeRaf); recomputeRaf = 0; }
+    recompute();
   }
 
   function recompute() {
@@ -755,10 +766,8 @@
     var capNote = $('#complementCapNote');
     if (capNote) capNote.hidden = !R.baseline.results.ctx.complementClamped;
 
-    // methodology + foot + placeholder
+    // methodology
     $('#methodBody').innerHTML = methodHtml(R, rec);
-    $('#placeholderNote').textContent = D.meta.placeholderNote;
-    $('#foot').textContent = S.foot;
 
     announceResult(R, rec);
     checkStickyIntegrity();
@@ -866,13 +875,8 @@
 
   function renderNotes(R) {
     var bn = $('#bandNote');
-    if (!userTouched) {
-      $('#typBadge').hidden = false;
-      bn.textContent = S.primer; bn.hidden = false;
-      return;
-    }
-    $('#typBadge').hidden = true;
-    if (anyAssumed() && !R.baseline.demandMeasured) {
+    // the untouched state simply shows the result — no primer, no badge
+    if (userTouched && anyAssumed() && !R.baseline.demandMeasured) {
       bn.textContent = S.bandNote; bn.hidden = false;
     } else {
       bn.hidden = true;
@@ -911,7 +915,7 @@
       p.micro = S.compare.behallMicro;
       p.fillPct = clamp(100 * today / scaleMax, 0, 100);
       if (rec.lead.type === 'composite') p.tag = S.compare.behallTag;
-      p.aria = p.name + '. Din kostnad i dag, cirka ' + nf(roundTo(today, ROUND.stat)) + ' kronor per år.';
+      p.aria = p.name + '. Din kostnad idag, cirka ' + nf(roundTo(today, ROUND.stat)) + ' kronor per år.';
       return p;
     }
     if (p.qual) {
@@ -1032,7 +1036,7 @@
       html: '<span class="crow-top"><span class="crow-name">' + esc(S.compare.idag) + '</span>' +
         '<span class="crow-val">~' + esc(krStr(today, ROUND.stat)) + '</span></span>' +
         '<span class="crow-track" aria-hidden="true"><span class="crow-fill" style="width:' + linePct.toFixed(2) + '%"></span></span>',
-      aria: 'I dag. Cirka ' + nf(roundTo(today, ROUND.stat)) + ' kronor per år.'
+      aria: 'Idag. Cirka ' + nf(roundTo(today, ROUND.stat)) + ' kronor per år.'
     });
     visible.forEach(function (o) {
       var p = rowProps(o, R, rec, today, scaleMax);
@@ -1356,11 +1360,9 @@
     if (open && userInitiated) track('rec_open');
   }
 
-  /* ---------- F. the CTA block (R9) ---------- */
+  /* ---------- F. the CTA block ---------- */
   function renderCtaBlock(rec) {
     var soft = rec.branch !== 'standard';
-    var lede = $('#ctaLede');
-    if (lede) lede.textContent = soft ? S.cta.ledeSoft : S.cta.ledeStandard;
     var cta = $('#ctaBtn');
     if (!cta.classList.contains('is-close')) {
       cta.textContent = soft ? S.cta.soft : S.cta.plan;
@@ -1449,8 +1451,8 @@
       var live = $('#resultLive'); if (!live) return;
       var av = anchorVals(R);
       var txt = av.single
-        ? 'I dag kostar värmen cirka ' + nf(av.mid) + ' kronor per år.'
-        : 'I dag kostar värmen cirka ' + nf(av.lo) + ' till ' + nf(av.hi) + ' kronor per år.';
+        ? 'Idag kostar värmen cirka ' + nf(av.mid) + ' kronor per år.'
+        : 'Idag kostar värmen cirka ' + nf(av.lo) + ' till ' + nf(av.hi) + ' kronor per år.';
       if (rec.branch === 'standard' && rec.lead.type === 'option') {
         var o = optById(R, rec.lead.id);
         if (o && o.saving) {
@@ -1496,7 +1498,7 @@
     // m7: the borrhål bullet only when bergvärme is actually shown in the comparison
     var showsBerg = (R.options || []).some(function (o) { return o.id === 'bergvarme'; });
     if (showsBerg) items.push('Bergvärme kräver borrhål och sker via partner.');
-    items.push('Spannen är breda med flit. Vi räknar hellre försiktigt än lovar för mycket.');
+    items.push('Spannet kombinerar två osäkerheter, husets verkliga värmebehov och pumpens verkliga årsvärmefaktor, som oberoende osäkerheter i stället för staplade värstafall.');
 
     return '<ul class="method-list">' +
       items.map(function (it) { return '<li>' + esc(it) + '</li>'; }).join('') +
@@ -1508,9 +1510,13 @@
    * INTERACTIONS — sliders, stepper, expander, share, lead form
    * ====================================================================== */
   function wireControls() {
+    // sliders: label-first, recompute rides the rAF throttle (iOS drag perf)
     el('[data-input]').forEach(function (n) {
-      var ev = (n.type === 'range') ? 'input' : 'change';
-      n.addEventListener(ev, function () { recompute(); });
+      var isRange = (n.type === 'range');
+      n.addEventListener(isRange ? 'input' : 'change', function () {
+        if (isRange) scheduleRecompute(); else recompute();
+      });
+      if (isRange) n.addEventListener('change', settleRecompute);
     });
     var area = $('#areaSlider'); area.addEventListener('input', function () { $('#areaOut').textContent = area.value + ' m²'; });
 
@@ -1520,9 +1526,10 @@
       own.addEventListener('input', function () {
         state.ownKwh = +own.value;
         $('#ownOut').textContent = nf(state.ownKwh) + ' kWh per år';
-        recompute();
+        scheduleRecompute();
       });
       own.addEventListener('change', function () {
+        settleRecompute();
         track('own_slider_set', { kwh_bucket: bucketKwh(state.ownKwh) });
       });
     }
@@ -1533,8 +1540,9 @@
       sol.addEventListener('input', function () {
         state.solarKwh = +sol.value;
         $('#solarOut').textContent = nf(state.solarKwh) + ' kWh per år';
-        recompute();
+        scheduleRecompute();
       });
+      sol.addEventListener('change', settleRecompute);
     }
 
     // stepper (occupants)
@@ -1636,11 +1644,23 @@
     var dec = CODEC.decode(location.search);
     var any = false;
     if (dec.sys && D.currentSystems[dec.sys]) {
-      state.heat = {};
-      state.heat[dec.sys] = { on: true, stop: DEFAULT_STOP, assumed: true };
-      any = true;
+      if (UI_HIDDEN_SYSTEMS[dec.sys]) {
+        // UI-hidden system (olja/vedpellets) in an old share link: map to the
+        // Vet inte state so no card-less selection can ever render
+        state.heat = {};
+        state.heat[D.defaultCurrentSystem] = { on: true, stop: DEFAULT_STOP, assumed: true };
+        state.vetinte = true;
+        setHint(S.hintVetinte);
+        any = true;
+      } else {
+        state.heat = {};
+        state.heat[dec.sys] = { on: true, stop: DEFAULT_STOP, assumed: true };
+        any = true;
+      }
     }
     dec.comps.forEach(function (c) {
+      // hidden systems are skipped; the Vet inte state stays pure (no complements)
+      if (state.vetinte || UI_HIDDEN_SYSTEMS[c.system]) return;
       if (D.currentSystems[c.system] && c.system !== dec.sys) {
         state.heat[c.system] = { on: true, stop: c.stop, assumed: false };
         any = true;
@@ -1688,7 +1708,7 @@
     var s = $('#seAsm'); if (s) s.hidden = state.seTouched;
   }
 
-  /* ---------- lead validation (min = namn + telefon + postnr + GDPR; e-post optional) ---------- */
+  /* ---------- lead validation (min = namn + telefon + postnr; consent via submit; e-post optional) ---------- */
   function setErr(fieldSel, errSel, msg) {
     var f = $(fieldSel), e = $(errSel);
     if (msg) { f.setAttribute('aria-invalid', 'true'); e.textContent = msg; e.hidden = false; return false; }
@@ -1757,9 +1777,7 @@
     e.preventDefault();
     if ($('#leadCompany').value) { return; } // honeypot tripped: silently drop
     var okName = validateName(true), okPhone = validatePhone(true), okZip = validateZip(true), okEmail = validateEmail(true);
-    var gdpr = $('#leadGdpr').checked;
-    var okGdpr = setErr('#leadGdpr', '#errGdpr', gdpr ? null : S.err.gdpr);
-    if (!(okName && okPhone && okZip && okEmail && okGdpr)) {
+    if (!(okName && okPhone && okZip && okEmail)) {
       var firstBad = $('[aria-invalid="true"]'); if (firstBad) firstBad.focus();
       return;
     }
@@ -1769,7 +1787,9 @@
       var sel = heatSelection();
       var ownActive = state.ownMode === 'ja' && ownRowAllowed();
       // webhook stays the console-logged owner-gated stub; payload = bucketed/enum only
+      // pressing the submit button IS the consent (text under the button) — timestamp it
       console.log('[ampy lead]', {
+        consentTs: new Date().toISOString(),
         zip: $('#leadZip').value.trim(),
         primary: sel.primary,
         complements: sel.complements.map(function (c) { return c.system; }),
@@ -1822,7 +1842,7 @@
     syncAsmTags();
     wireControls();
     wireMsum();
-    if (decodedAny) firstTouch(true);   // a shared link never shows the typhus primer over someone else's house
+    if (decodedAny) firstTouch(true);   // a shared link counts as touched (msum on, no assumed-state notes)
     recompute();
     booted = true;
 

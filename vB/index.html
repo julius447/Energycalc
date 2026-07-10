@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Energikalkylatorn: vad kostar det att värma ditt hus?</title>
 <meta name="description" content="Se vad värmen kostar i ditt hus och vad som är värt att göra. Försiktiga spann, fält-SPF, ROT 30 % på arbetet. Gratis, utan mejl.">
-<link rel="stylesheet" href="tool.css?v=8">
+<link rel="stylesheet" href="tool.css?v=10">
 </head>
 <body>
 <div class="page">
@@ -28,7 +28,7 @@
 
           <!-- 1. the ONE merged heat list (L2): all eleven cards, multi-select -->
           <fieldset class="heatpicker" id="heatPicker">
-            <legend class="hp-legend">Vad värmer huset i dag?<span class="hp-legend-soft">Välj en eller flera</span></legend>
+            <legend class="hp-legend">Vad värmer huset idag?<span class="hp-legend-soft">Välj en eller flera</span></legend>
             <div class="hp-grid" id="hpGrid" role="group" aria-describedby="hpHint"><!-- cards built by app.js --></div>
             <p class="hp-hint" id="hpHint" role="status" aria-live="polite" hidden></p>
             <div class="hp-shares" id="hpShares" hidden>
@@ -65,7 +65,6 @@
           <!-- 5. elområde (PROMOTED, relabelled) -->
           <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/></svg>Var ligger huset? <span class="lbl-soft">elområdet styr elpriset</span> <span class="antag" id="seAsm">(antagande)</span></div>
           <div class="seg" id="priceAreaSeg" role="radiogroup" aria-label="Elområde"></div>
-          <p class="gearcopy">SE1 är längst norrut, SE4 längst söderut. Stockholm ligger i SE3.</p>
         </div>
 
         <div class="gear" data-gear="n2">
@@ -83,9 +82,8 @@
                 </div>
                 <input type="range" id="ownSlider" class="range"
                        min="5000" max="45000" step="500" value="20000"
-                       aria-label="Husets elförbrukning i kilowattimmar per år" aria-describedby="ownNote">
+                       aria-label="Husets elförbrukning i kilowattimmar per år">
                 <p class="gearcopy">Ett normalstort elvärmt hus drar 15 000-25 000 kWh om året. Siffran står på elnätsfakturan.</p>
-                <p class="gearcopy own-note" id="ownNote" role="status" aria-live="polite">Din siffra används i stället för boyta och byggår. Spannet smalnar.</p>
               </div>
             </div>
           </div>
@@ -105,7 +103,6 @@
               <p class="gearcopy">En vanlig villaanläggning på 10 kW ger runt 9 000-11 000 kWh om året.</p>
             </div>
           </div>
-          <p class="gearcopy" id="solarPlanNote" role="status" aria-live="polite" hidden>Solel som inte finns än räknar vi inte med. Vi tar med den i planen.</p>
         </div>
       </form>
 
@@ -114,8 +111,7 @@
 
         <!-- A. head (#ownBadge deleted — R1) -->
         <div class="eyebrow-row">
-          <span class="eyebrow" id="eyebrow">Så använder ditt hus energi i dag</span>
-          <span class="typbadge" id="typBadge">Räknat på startvärden</span>
+          <span class="eyebrow" id="eyebrow">Så använder ditt hus energi idag</span>
         </div>
 
         <!-- B. anchor (KEEP — R2) -->
@@ -141,7 +137,7 @@
           <ul class="compare-legend" aria-hidden="true">
             <li><i class="cl-swatch cl-after"></i>efter åtgärd</li>
             <li><i class="cl-swatch cl-band"></i>spann</li>
-            <li><i class="cl-swatch cl-idag"></i>i dag</li>
+            <li><i class="cl-swatch cl-idag"></i>idag</li>
           </ul>
           <div class="compare-list" id="compareList" role="list">
             <span class="c-line" id="cLine" aria-hidden="true" hidden></span>
@@ -164,11 +160,9 @@
         <!-- sr-only live region (the ONE result announcer) -->
         <div class="sr-only" id="resultLive" aria-live="polite" aria-atomic="true"></div>
 
-        <!-- F. CTA BLOCK (REDESIGNED — R9): dominant primary + quiet share -->
+        <!-- F. CTA BLOCK: dominant primary + quiet share -->
         <div class="ctablock">
-          <p class="cta-lede" id="ctaLede"></p>
           <button type="button" class="cta cta--primary" id="ctaBtn">Få en plan för ditt hus</button>
-          <p class="cta-trust">Kostnadsfritt · utan förbindelse · svar oftast inom en arbetsdag</p>
           <button type="button" class="share-btn share-btn--quiet" id="shareBtn">Dela din kalkyl</button>
         </div>
         <p class="sr-only" id="shareLive" role="status"></p>
@@ -180,7 +174,7 @@
               <button type="button" class="leadclose" id="leadClose" aria-label="Stäng formuläret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
               <div class="lead-eyebrow">Få en plan</div>
               <h3 class="lead-title">En elektriker räknar på ditt hus</h3>
-              <p class="lead-sub">Vi utgår från kalkylen du just gjort. En behörig elektriker hör av sig med ett förslag, oftast inom en arbetsdag. Kostnadsfritt och utan förbindelse.</p>
+              <p class="lead-sub">Vi utgår från kalkylen du just gjort. En behörig elektriker hör av sig med ett förslag, oftast inom en arbetsdag.</p>
               <form id="leadForm" novalidate>
                 <label class="lead-lbl" for="leadName">Namn</label>
                 <input class="lead-field" type="text" id="leadName" name="name" autocomplete="name" required aria-describedby="errName">
@@ -204,13 +198,8 @@
                   <input type="text" id="leadCompany" name="company" tabindex="-1" autocomplete="off">
                 </div>
 
-                <label class="lead-gdpr">
-                  <input type="checkbox" id="leadGdpr" name="gdpr" required aria-describedby="errGdpr">
-                  <span>Jag godkänner att Ampy hör av sig om min förfrågan.</span>
-                </label>
-                <p class="field-err" id="errGdpr" hidden></p>
-
-                <button type="submit" class="cta lead-submit">Skicka, så hör vi av oss</button>
+                <button type="submit" class="cta lead-submit">Få ditt förslag</button>
+                <p class="lead-consent">Genom att trycka på "Få ditt förslag" samtycker jag till att Ampy behandlar mina personuppgifter enligt vår <a href="https://ampy.se/integritetspolicy/" target="_blank" rel="noopener">integritetspolicy</a>.</p>
                 <p class="lead-err" id="leadErr" role="alert" hidden></p>
               </form>
               <div class="lead-success" id="leadSuccess" role="status" tabindex="-1" hidden>
@@ -229,27 +218,24 @@
           </div>
         </details>
 
-        <p class="placeholder-note" id="placeholderNote"></p>
       </div>
     </div>
-
-    <div class="foot" id="foot"></div>
   </div>
 </div>
 
 <!-- sticky mobile result bar (outside .page) -->
 <div class="msum" id="msum" role="region" aria-label="Ditt resultat">
   <div class="msum-txt">
-    <span class="msum-k">I dag</span>
+    <span class="msum-k">Idag</span>
     <b class="msum-v" id="msumVal">&#8212;</b>
   </div>
   <button type="button" class="msum-go" id="msumGo">Se resultatet</button>
 </div>
 
 <!-- 5-layer chassis: data -> engine -> rank -> app -->
-<script src="data.js?v=8"></script>
-<script src="engine.js?v=8"></script>
-<script src="rank.js?v=8"></script>
-<script src="app.js?v=8"></script>
+<script src="data.js?v=10"></script>
+<script src="engine.js?v=10"></script>
+<script src="rank.js?v=10"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>

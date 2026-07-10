@@ -18,11 +18,8 @@
 
 window.AMPY_DATA = {
 
-  /* --- meta / honesty -------------------------------------------------------
-   * Surfaced verbatim in the UI so every figure reads as a careful placeholder. */
+  /* --- meta ------------------------------------------------------------- */
   meta: {
-    // [FACT] candour invariant 7: research-grade placeholders pending sign-off.
-    placeholderNote: 'Siffrorna är försiktiga schabloner som väntar på slutlig signering.',
     rounding: { hero: 1000, stat: 500, payback: 0.5 } // round only in the renderer
   },
 
@@ -43,7 +40,8 @@ window.AMPY_DATA = {
 
   /* --- 2. FIELD SPF per pump system (verklig årsvärmefaktor) -----------------
    * [FACT] Conservative shippable FIELD SPF (NOT energimärkning SCOP):
-   *   luft-luft ~2,5–3,0 · luft-vatten ~2,7–3,2 · bergvärme ~3,0–3,5.
+   *   luft-luft ~2,5–3,0 · luft-vatten ~2,5–3,0 (V8: Energimyndighetens test,
+   *   årsvärmefaktor "2,5 upp mot 3") · bergvärme fältgenomsnitt 2,7, spann ~2,7–3,2.
    *   Bergvärme field test anchored 2,7 at the low end (R1 §2); spec §6 lists the
    *   3,0–3,5 band — we ship the conservative POINT and build the ± from the range.
    * src: energimyndigheten.se, polarpumpen.se test pages (R1 §1–§2).
@@ -51,33 +49,39 @@ window.AMPY_DATA = {
   pumps: {
     luftluft: {
       id: 'luftluft', label: 'Luft-luft',
-      spf: 2.5, spfRange: [2.5, 3.0],       // conservative point + ± band
+      spf: 2.5, spfRange: [2.5, 3.0],       // point AT band floor = deliberately max-conservative for the komplement device; [GAP-R1-1] expert may symmetrise (e.g. point 2.6 or floor 2.3) — no field source found in the V8 pass
       isGround: false,
       isComplement: true,                    // candour invariant 6: komplement, not whole-house
       servedShare: 0.7,                      // [MODEL] caps modelled saving to served area; [GAP] expert signs
-      gross: 30000,                          // [FACT] R2 §1a luft-luft total installerat ~25 000–55 000; conservative ~30 000. [GAP-R2-1]
+      gross: 30000,                          // [FACT] R2 §1a luft-luft total installerat ~25 000–55 000; conservative ~30 000. V8 corroborated: varmekalkyl.se 2026 ~25 000–55 000 brutto. [GAP-R2-1]
       laborShare: 0.30,                      // [FACT] R2 §2 schablon arbetskostnad luftpump 30 %
       requiresWaterborne: false
     },
     luftvatten: {
       id: 'luftvatten', label: 'Luft-vatten',
-      spf: 2.7, spfRange: [2.7, 3.2],
+      /* V8 CHANGED (V8-payback-research §3): was [2,7, 3,2] — the point sat AT the
+       * band floor (worst case carried zero SPF downside) and the 3,2 top has no
+       * field support. [FACT] Energimyndighetens luft-vatten-test: årsvärmefaktor
+       * 2,5 upp mot 3,0; varmekalkyl.se 2026 räknar konservativt på SCOP 2,5.
+       * Point 2,7 now sits mid-band. src: energimyndigheten.se via web 2026-07-10.
+       * [GAP-E7-8 → energiexpert signs the symmetrised band] */
+      spf: 2.7, spfRange: [2.5, 3.0],
       isGround: false,
       isComplement: false,
       servedShare: 1.0,
-      gross: 130000,                         // [FACT] R2 §1b ~90 000–180 000 (befintligt vattenburet); conservative ~130 000. [GAP-R2-1]
-      grossNoWaterborne: 220000,             // [FACT] R2 §1b direktel must add 60 000–120 000 → 150 000–300 000; mid ~220 000. [GAP-R2-1]
+      gross: 130000,                         // [FACT] R2 §1b ~90 000–180 000 (befintligt vattenburet); conservative ~130 000. V8 corroborated: varmekalkyl.se 2026 90 000–180 000 installerat. [GAP-R2-1]
+      grossNoWaterborne: 220000,             // [FACT] R2 §1b direktel must add 60 000–120 000 → 150 000–300 000; mid ~220 000. V8 corroborated: varmekalkyl.se 2026 vattenburet tillägg 60 000–120 000. [GAP-R2-1]
       laborShare: 0.30,                      // [FACT] R2 §2 schablon 30 %
       requiresWaterborne: true
     },
     bergvarme: {
       id: 'bergvarme', label: 'Bergvärme',
-      spf: 2.9, spfRange: [2.7, 3.2],        // [GAP-R1-1] field anchor 2,7 (Energimyndigheten/SP real-home avg) sets the low end; conservative point 2,9
+      spf: 2.9, spfRange: [2.7, 3.2],        // [GAP-R1-1] field anchor 2,7 (Energimyndigheten/SP real-home avg) sets the low end; conservative point 2,9. V8 verified KEEP: Energimyndighetens fältmätning genomsnitt 2,7; marknadens "5-10 år" räknar på SPEC-COP 3,5 (ej fält) — vi ligger rätt.
       isGround: true,                        // SPF flat across the year (ground temp stable, R1 §1c/§2)
       isComplement: false,
       servedShare: 1.0,
-      gross: 200000,                         // [FACT] R2 §1c ~150 000–280 000 (befintligt vattenburet); conservative ~200 000. [GAP-R2-1]
-      grossNoWaterborne: 290000,             // [FACT] R2 §1c direktel adds ~60 000–120 000. [GAP-R2-1]
+      gross: 200000,                         // [FACT] R2 §1c ~150 000–280 000 (befintligt vattenburet); conservative ~200 000. V8 corroborated: varmekalkyl.se 2026 150 000–250 000 brutto. [GAP-R2-1]
+      grossNoWaterborne: 290000,             // [FACT] R2 §1c direktel adds ~60 000–120 000. V8 corroborated (adder): varmekalkyl.se 2026. [GAP-R2-1]
       laborShare: 0.35,                      // [FACT] R2 §2 schablon vätska/vatten 35 % (bergvärme ROT-favourable)
       requiresWaterborne: true,
       // [GAP-R2-4] does Ampy install/quote bergvärme in the live footprint? Owner confirm.
@@ -102,6 +106,9 @@ window.AMPY_DATA = {
    * [FACT] All-in conservative MARGINAL price SE3 ≈ 1,80 kr/kWh (annual), built from
    * spot ~79,6 öre medel + nät överföring, × moms + energiskatt 45,0 öre incl moms.
    * src: elbruk.se, elen.nu, energimarknadsbyran.se (R4 §4 / B2 §4).
+   * V8 corroborated: varmekalkyl.se 2026 uses exactly 1,80 kr/kWh in its bergvärme,
+   * luft-vatten AND luft-luft payback examples ("rimligt antagande 2026 inkl nät,
+   * energiskatt, moms"). KEEP. src: varmekalkyl.se via web 2026-07-10.
    * [GAP-R-price] owner signs the all-in marginal figure + whether to vary by month. */
   marginalPriceSE3: 1.80, // kr/kWh, all-in marginal, annual baseline
 
@@ -357,7 +364,7 @@ window.AMPY_DATA = {
   /* ==========================================================================
    * V4 DELTA (V4-engine-delta.md §3) — the neutral ranked-options registry.
    * Read ONLY by rankOptions (rank.js). Every new coefficient [GAP]-tagged with
-   * its signer; unsigned ⇒ conservative end + meta.placeholderNote, or qualitative.
+   * its signer; unsigned ⇒ conservative end, or qualitative.
    * ======================================================================== */
 
   /* --- 3.1 D.measures — the option registry ---------------------------------- */

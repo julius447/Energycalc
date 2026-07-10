@@ -98,7 +98,7 @@ button{font-family:inherit}
 
 /* ---- tabular numerals: SINGLE owner ---- */
 .result,.input{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1}
-.anchor-sub,.lead-sub,.gearcopy,.method-body p,.foot{font-variant-numeric:normal}
+.anchor-sub,.lead-sub,.gearcopy,.method-body p{font-variant-numeric:normal}
 
 /* ============================ LAYOUT — the wide, de-boxed shell ============================ */
 .page{max-width:var(--shell-max);margin:0 auto;padding:var(--sp-8) var(--shell-gutter) var(--sp-9)}
@@ -124,34 +124,45 @@ button{font-family:inherit}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
 .result>*{position:relative;z-index:1}
 
-/* ============================ INPUT: gears + labels ============================ */
+/* ============================ INPUT: gears + labels ============================
+ * The left-card rhythm (one scale, no drift):
+ *   label → its control        --sp-2  (0.8rem)
+ *   gearhead → its content     --sp-4  (1.6rem)
+ *   control → next group       --sp-6  (2.4rem)
+ *   hairline section (n2)      --sp-6 above AND below the line               */
 .gear{padding-top:.2rem}
 .gear > * + *{margin-top:var(--sp-5)}
 .gear .range{margin-top:var(--sp-2)}
 .gear .seg{margin-top:var(--sp-2)}
+/* every new question group opens with --sp-6 of air */
+.gear > .lbl,.gear > #ownRow{margin-top:var(--sp-6)}
+/* the collapsed sub-gears couple to their seg like a control (phantom-gap safe) */
+.gear > .gear-collapsed{margin-top:var(--sp-2)}
+/* the group head owns its gap (its --sp-4 margin-bottom, nothing stacked on top) */
+.gear > .gearhead + *,.gear > .gearhead + .lbl,.gear > .gearhead + #ownRow{margin-top:0}
 /* the two v7 gear groups (Ditt hus / Din el) separate with a quiet hairline */
-.gear[data-gear="n2"]{margin-top:var(--sp-6);border-top:1px solid #eef2f9;padding-top:var(--sp-5)}
+.gear[data-gear="n2"]{margin-top:var(--sp-6);border-top:1px solid #eef2f9;padding-top:var(--sp-6)}
 #ownRow > * + *{margin-top:var(--sp-2)}
 .gear-inner > .gearcopy{margin-top:var(--sp-2)}
 .gearhead{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--ty-eyebrow);letter-spacing:var(--tr-eyebrow);
-  text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:var(--sp-3)}
+  text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:var(--sp-4)}
 .gearcopy{font-size:var(--ty-label);font-weight:300;line-height:var(--lh-body);color:var(--muted);margin:0}
 .lbl{font-size:var(--ty-label);font-weight:300;line-height:var(--lh-body);color:var(--muted);margin-bottom:var(--sp-1h);
   display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .lbl > svg,.lbl span > svg{width:1.5rem;height:1.5rem;color:var(--slate);flex:0 0 auto}
 .lbl-row{display:flex;align-items:center;justify-content:space-between}
 .lbl-row > span:first-child{display:inline-flex;align-items:center;gap:.5rem;flex-wrap:wrap}
-.lbl-val{font-size:1.7rem;color:var(--ink);font-weight:500;transition:transform var(--t-fast) var(--ease-out)}
+.lbl-val{font-size:var(--ty-body);color:var(--ink);font-weight:500;transition:transform var(--t-fast) var(--ease-out)}
 .lbl-soft{color:var(--slate);font-weight:300}
 /* the reusable assumption tag — real text, never colour-only */
-.antag{font-size:1.05rem;color:var(--footnote);font-weight:300}
+.antag{font-size:var(--ty-micro);color:var(--footnote);font-weight:300}
 .antag[hidden]{display:none}
-/* the own-slider status note */
-.own-note{margin-top:var(--sp-2)}
 .gearcopy[hidden]{display:none}
 
-/* native range — 44px touch body, visible track drawn inside it */
-.range{-webkit-appearance:none;appearance:none;width:100%;height:4.4rem;background:transparent;cursor:pointer}
+/* native range — 44px touch body, visible track drawn inside it.
+ * touch-action:pan-y — horizontal drags go straight to the slider (no iOS
+ * gesture arbitration lag); vertical swipes still scroll the page. */
+.range{-webkit-appearance:none;appearance:none;display:block;width:100%;height:4.4rem;background:transparent;cursor:pointer;touch-action:pan-y}
 .range::-webkit-slider-runnable-track{height:.8rem;border-radius:.4rem;background:#e3e9f5}
 .range::-webkit-slider-thumb{-webkit-appearance:none;width:2.8rem;height:2.8rem;margin-top:-1rem;border-radius:50%;
   background:#fff;border:2px solid var(--teal);cursor:pointer;box-shadow:0 1px 3px rgba(9,11,50,.18);
@@ -169,7 +180,7 @@ button{font-family:inherit}
 .hp-legend{padding:0;font-size:var(--ty-body);font-weight:500;color:var(--ink);line-height:var(--lh-snug);
   display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--sp-2)}
 .hp-legend-soft{font-size:var(--ty-label);font-weight:300;color:var(--slate)}
-.hp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-2h);margin-top:var(--sp-3)}
+.hp-grid{display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:1fr;gap:var(--sp-2h);margin-top:var(--sp-3)}
 .hp-subhead{grid-column:1/-1;font-size:var(--ty-eyebrow);letter-spacing:var(--tr-eyebrow);text-transform:uppercase;
   color:var(--slate);font-weight:500;margin-top:var(--sp-2)}
 .hp-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:var(--sp-2);
@@ -192,9 +203,11 @@ button{font-family:inherit}
   opacity:0;transform:scale(.6);transition:opacity var(--t-fast) var(--ease-out),transform var(--t-fast) var(--ease-out)}
 .hp-check svg{width:1.2rem;height:1.2rem}
 .hp-card[aria-pressed="true"] .hp-check{opacity:1;transform:scale(1)}
-/* the quiet "Vet inte" card — full row, dashed, muted */
-.hp-card--quiet{grid-column:1/-1;flex-direction:row;justify-content:center;min-height:4.8rem;
-  border-style:dashed;color:var(--muted)}
+/* the quiet "Vet inte" card — a normal grid cell: same height/format as the
+ * other cards, dashed border, label centered both axes */
+.hp-card--quiet{align-items:center;justify-content:center;text-align:center;
+  border-style:dashed;color:var(--muted);
+  grid-column:1 / -1}   /* 8 systems + Vet inte = odd count: span the full last row so no orphan cell */
 .hp-card--quiet .hp-lbl{color:inherit;font-weight:300}
 .hp-card--quiet[aria-pressed="true"] .hp-lbl{color:var(--ink);font-weight:500}
 /* primary marker = a teal ring on the icon tile (NO word — avoids superlative) */
@@ -214,7 +227,7 @@ button{font-family:inherit}
 .hp-share-name{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-2);
   font-size:var(--ty-label);color:var(--muted);margin-bottom:var(--sp-2)}
 .hp-share-name svg{width:1.5rem;height:1.5rem;color:var(--slate);margin-right:.4rem;vertical-align:-.3rem}
-.hp-share-name .antag{font-size:1.05rem;color:var(--footnote)}
+.hp-share-name .antag{font-size:var(--ty-micro);color:var(--footnote)}
 .capnote{font-size:var(--ty-label);color:var(--muted);margin:var(--sp-2) 0 0;line-height:var(--lh-body)}
 .capnote[hidden]{display:none}
 
@@ -262,12 +275,6 @@ button{font-family:inherit}
 .eyebrow{font-size:var(--ty-eyebrow);letter-spacing:var(--tr-eyebrow);color:var(--eyebrow);text-transform:uppercase;font-weight:500;line-height:1.2}
 .eyebrow::before{content:'';display:inline-block;width:2.4rem;height:2px;background:var(--teal-bright);
   vertical-align:middle;margin-right:var(--sp-2)}
-.typbadge{font-size:var(--ty-eyebrow);letter-spacing:.04em;padding:.2rem .8rem;border-radius:var(--r-pill);
-  background:rgba(255,255,255,.08);color:var(--subtext);white-space:nowrap;
-  transition:opacity var(--t-mid) var(--ease)}
-.typbadge.out{opacity:0}
-.typbadge[hidden]{display:none}
-
 /* B. anchor — DAGENS kostnad */
 .anchor-num{font-size:var(--ty-display);font-weight:900;line-height:var(--lh-display);
   letter-spacing:var(--tr-display);color:#fff;margin:var(--sp-3) 0 0;font-variant-numeric:tabular-nums;
@@ -393,11 +400,8 @@ button{font-family:inherit}
   color:var(--footnote);margin:var(--sp-4) 0 var(--sp-1)}
 .rec-sec{font-size:var(--ty-label);font-weight:300;color:var(--footnote);line-height:var(--lh-body);margin:0 0 var(--sp-1)}
 
-/* ============================ F. THE CTA BLOCK (R9) ============================ */
+/* ============================ F. THE CTA BLOCK ============================ */
 .ctablock{margin-top:var(--sp-7)}
-.cta-lede{font-size:var(--ty-sub);font-weight:300;color:var(--subtext);margin:0 0 var(--sp-3);line-height:var(--lh-body)}
-.cta-lede:empty{display:none}
-.cta-trust{font-size:var(--ty-micro);font-weight:300;color:var(--footnote);text-align:center;margin:var(--sp-2) 0 0;line-height:var(--lh-body)}
 
 /* cta — the ONE loud element on the card */
 .cta{display:block;width:100%;background:var(--teal);color:#fff;text-align:center;font-weight:500;
@@ -438,10 +442,14 @@ button{font-family:inherit}
 .method-list li{margin:0 0 var(--sp-2)}
 .method-legal{margin:var(--sp-4) 0 0;padding-top:var(--sp-3);border-top:1px solid rgba(255,255,255,.08);
   font-size:var(--ty-micro);color:var(--footnote);line-height:var(--lh-body)}
-.placeholder-note{font-size:var(--ty-micro);color:var(--footnote);margin-top:var(--sp-3);font-style:normal}
 
 /* ============================ INLINE LEAD FORM (inside the midnight card) ============================ */
-.lead-inline{margin-top:var(--sp-5)}
+/* the gap belongs to the OPEN state: a closed form leaves no orphan margin
+ * between the share button and the method hairline */
+.lead-inline{margin-top:0;
+  transition:grid-template-rows var(--t-mid) var(--ease-out),opacity var(--t-mid) var(--ease-out),
+             margin-top var(--t-mid) var(--ease-out)}
+.lead-inline.open{margin-top:var(--sp-5)}
 .lead-inline[hidden]{display:none}
 .lead-inline-body{position:relative;background:var(--chip);border:1px solid rgba(255,255,255,.06);
   border-radius:var(--r-lg);padding:var(--sp-5);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
@@ -463,17 +471,18 @@ button{font-family:inherit}
 .leadclose:hover{background:rgba(255,255,255,.06)}
 .leadclose:focus-visible{outline:2px solid var(--neon);outline-offset:1px}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-.lead-gdpr{display:flex;align-items:flex-start;gap:var(--sp-2);font-size:var(--ty-label);color:var(--subtext);
-  margin:var(--sp-3) 0 .4rem;cursor:pointer;line-height:1.4}
-.lead-gdpr input{margin-top:.2rem;accent-color:var(--teal)}
-.lead-submit{margin-top:var(--sp-3)}
+.lead-submit{margin-top:var(--sp-4)}
+/* the consent line under the submit button — pressing the button IS the consent */
+.lead-consent{font-size:var(--ty-micro);font-weight:300;color:var(--footnote);margin:var(--sp-2) 0 0;line-height:var(--lh-body)}
+.lead-consent a{color:var(--subtext);text-decoration:underline;text-underline-offset:.2em;
+  transition:color var(--t-fast) var(--ease)}
+.lead-consent a:hover{color:#fff}
+.lead-consent a:focus-visible{outline:2px solid var(--neon);outline-offset:2px;border-radius:2px}
 .lead-success{text-align:center;padding:var(--sp-4) var(--sp-1);color:var(--subtext)}
 .lead-success[hidden]{display:none}
 .lead-success svg{width:3rem;height:3rem;color:var(--teal)}
 .lead-success p{font-size:var(--ty-sub);margin:var(--sp-2) 0 0;color:#fff}
 .lead-success:focus-visible{outline:2px solid var(--neon);outline-offset:2px;border-radius:var(--r-sm)}
-
-.foot{font-size:var(--ty-micro);color:#8893a8;margin-top:var(--sp-4);text-align:center;line-height:var(--lh-body)}
 
 /* ============================ STICKY MOBILE RESULT BAR ============================ */
 .msum{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;
@@ -532,18 +541,16 @@ button{font-family:inherit}
   /* touch-target floor (>=44px) on every tappable control */
   .seg button{min-height:44px}
   .hp-card{min-height:8.4rem}
-  .hp-card--quiet{min-height:4.8rem}
   .stepbtn{width:44px;height:44px}
   .reveal{padding:1.4rem 0}
   .leadclose{width:44px;height:44px}
-  .lead-gdpr input{width:20px;height:20px}
   /* comparison bars: 12px on mobile, names may ellipsize, values never truncate */
   .crow-track{height:1.2rem}
   /* zero CLS: reserve the hint slot so a fjärrvärme/vet-inte notice never shifts the picker */
   .hp-hint{display:block;min-height:3.6rem;margin:var(--sp-2) 0 0}
   .hp-hint[hidden]{display:block;visibility:hidden}
-  /* room for the fixed bar */
-  body.has-msum .foot{padding-bottom:calc(6.4rem + env(safe-area-inset-bottom,0px))}
+  /* room for the fixed bar (#foot is gone — the page shell carries the clearance) */
+  body.has-msum .page{padding-bottom:calc(6.4rem + env(safe-area-inset-bottom,0px))}
 }
 @media (max-width:480px){
   .page{padding:var(--sp-4) var(--sp-3) var(--sp-8)}
