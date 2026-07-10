@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Energikalkylatorn: vad kostar det att värma ditt hus?</title>
 <meta name="description" content="Se vad värmen kostar i ditt hus och vad som är värt att göra. Försiktiga spann, fält-SPF, ROT 30 % på arbetet. Gratis, utan mejl.">
-<link rel="stylesheet" href="tool.css?v=13">
+<link rel="stylesheet" href="tool.css?v=15">
 </head>
 <body>
 <div class="page">
@@ -65,6 +65,8 @@
           <!-- 5. elområde (PROMOTED, relabelled) -->
           <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/></svg>Var ligger huset? <span class="lbl-soft">elområdet styr elpriset</span> <span class="antag" id="seAsm">(antagande)</span></div>
           <div class="seg" id="priceAreaSeg" role="radiogroup" aria-label="Elområde"></div>
+          <!-- MM6: the bare SE1-SE4 labels decoded in one quiet line -->
+          <p class="gearcopy">SE1 norr (Luleå) · SE2 mitt (Sundsvall) · SE3 Stockholm och Mellansverige · SE4 söder (Malmö)</p>
         </div>
 
         <div class="gear" data-gear="n2">
@@ -81,7 +83,7 @@
                   <output id="ownOut" for="ownSlider" class="lbl-val">20 000 kWh per år</output>
                 </div>
                 <input type="range" id="ownSlider" class="range"
-                       min="5000" max="45000" step="500" value="20000"
+                       min="5000" max="60000" step="500" value="20000"
                        aria-label="Husets elförbrukning i kilowattimmar per år">
                 <p class="gearcopy">Ett normalstort elvärmt hus drar 15 000-25 000 kWh om året. Siffran står på elnätsfakturan.</p>
               </div>
@@ -155,7 +157,7 @@
             <div class="lead-inline-body">
               <button type="button" class="leadclose" id="leadClose" aria-label="Stäng formuläret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
               <h3 class="lead-title">En elektriker räknar på ditt hus</h3>
-              <p class="lead-sub">Vi utgår från kalkylen du just gjort. En behörig elektriker hör av sig med ett förslag, oftast inom en arbetsdag.</p>
+              <p class="lead-sub">Vi utgår från kalkylen du just gjort. En behörig elektriker hör av sig, oftast inom en arbetsdag, och går igenom vad som är värt att göra i ditt hus. Det kostar ingenting.</p>
               <form id="leadForm" novalidate>
                 <label class="lead-lbl" for="leadName">Namn</label>
                 <input class="lead-field" type="text" id="leadName" name="name" autocomplete="name" required aria-describedby="errName">
@@ -179,13 +181,16 @@
                   <input type="text" id="leadCompany" name="company" tabindex="-1" autocomplete="off">
                 </div>
 
-                <button type="submit" class="cta lead-submit">Få ditt förslag</button>
-                <p class="lead-consent">Genom att trycka på "Få ditt förslag" samtycker jag till att Ampy behandlar mina personuppgifter enligt vår <a href="https://ampy.se/integritetspolicy/" target="_blank" rel="noopener">integritetspolicy</a>.</p>
+                <!-- Submit label A/B: shipped = "Boka kostnadsfri rådgivning".
+                     Documented alternative for a future A/B (message-match with the heading):
+                     "Ja, räkna på mitt hus" — if swapped, the consent line MUST quote the new label verbatim. -->
+                <button type="submit" class="cta lead-submit">Boka kostnadsfri rådgivning</button>
+                <p class="lead-consent">Genom att trycka på "Boka kostnadsfri rådgivning" samtycker jag till att Ampy behandlar mina personuppgifter enligt vår <a href="https://ampy.se/integritetspolicy/" target="_blank" rel="noopener">integritetspolicy</a>.</p>
                 <p class="lead-err" id="leadErr" role="alert" hidden></p>
               </form>
               <div class="lead-success" id="leadSuccess" role="status" tabindex="-1" hidden>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/></svg>
-                <p>Tack. Vi hör av oss med ett förslag för ditt hus, oftast inom en arbetsdag. Under tiden kan du dela kalkylen med någon som borde se den.</p>
+                <p>Tack. En elektriker hör av sig med ett förslag för ditt hus, oftast inom en arbetsdag. Under tiden kan du dela kalkylen med någon som borde se den.</p>
               </div>
             </div>
           </div>
@@ -205,9 +210,9 @@
 </div>
 
 <!-- 5-layer chassis: data -> engine -> rank -> app -->
-<script src="data.js?v=13"></script>
-<script src="engine.js?v=13"></script>
-<script src="rank.js?v=13"></script>
-<script src="app.js?v=13"></script>
+<script src="data.js?v=15"></script>
+<script src="engine.js?v=15"></script>
+<script src="rank.js?v=15"></script>
+<script src="app.js?v=15"></script>
 </body>
 </html>

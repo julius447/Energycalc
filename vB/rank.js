@@ -212,7 +212,12 @@
       };
 
       // --- eligibility gates (V4-systems §3.1) — grey WITH reason, never hide ---
-      if (primaryIsPump) { opt.eligible = false; opt.ineligibleReason = 'redanVarmepump'; }
+      // OWNER POLICY V10: 'redanVarmepump' applies ONLY to true whole-house pump
+      // primaries. franluft (eff ~1,5) and luftluftCur (partial coverage) are UPGRADE
+      // cases — their options stay eligible; the numbers tell the story. [owner P3]
+      if (base.ctx.primaryId === 'bergvarmeCur' || base.ctx.primaryId === 'luftvattenCur') {
+        opt.eligible = false; opt.ineligibleReason = 'redanVarmepump';
+      }
       if (pu.isComplement && hasExistingLuftluft) { opt.eligible = false; opt.ineligibleReason = 'luftluftFinnsRedan'; }
       if (pu.isComplement) opt.caveats.push('servedShare');            // "värmer där luften når"
       if (!pu.isGround && !pu.isComplement) opt.caveats.push('vinterSagMedISiffran'); // air-source sentence
@@ -223,7 +228,9 @@
       candidates.push(opt);
 
       // --- combo variant: replacement pump + kept spets complement (D.combi) ---
-      if (!pu.isComplement && keptComps.length && !primaryIsPump) {
+      // V10: same two-id test as the gate above — combos unlock for franluft/luftluftCur [owner P3]
+      if (!pu.isComplement && keptComps.length &&
+          base.ctx.primaryId !== 'bergvarmeCur' && base.ctx.primaryId !== 'luftvattenCur') {
         if (D.combi.enabled) {
           candidates.push(comboOption(opt, r, base, keptComps, currentAnnual, D));
         } else {
@@ -242,7 +249,9 @@
                : bestSavingMid <= 0 ? 'ingenBesparing'
                : bestSavingMid <= smallThreshold ? 'litenBesparing'
                : 'standard';
-    var behallFirst = (branch !== 'standard');
+    // OWNER POLICY V10 (P1): behåll never pins first. behallFirst is emitted as a
+    // CONSTANT false — the field stays for payload back-compat only.
+    var behallFirst = false;
     // Reuses the engine's efficientFlag semantics but against the BEST option;
     // the per-run r.efficientFlag stays untouched for back-compat.
 
@@ -275,19 +284,15 @@
       return a.rangeWidth - b.rangeWidth;                                 // narrower honest range wins
     });
 
-    // behåll placement: pinned first on the honest branches; else end of rung r0 (a real card).
+    // behåll placement: ALWAYS end of rung r0 (a context card, never the lead) [owner P1]
     var behallIdx = -1;
     for (var ci = 0; ci < candidates.length; ci++) if (candidates[ci].id === 'behall') { behallIdx = ci; break; }
     var behall = candidates.splice(behallIdx, 1)[0];
-    if (behallFirst) {
-      candidates.unshift(behall);
-    } else {
-      var insertAt = candidates.length;
-      for (var cj = 0; cj < candidates.length; cj++) {
-        if (candidates[cj].rungIndex > 0) { insertAt = cj; break; }
-      }
-      candidates.splice(insertAt, 0, behall);
+    var insertAt = candidates.length;
+    for (var cj = 0; cj < candidates.length; cj++) {
+      if (candidates[cj].rungIndex > 0) { insertAt = cj; break; }
     }
+    candidates.splice(insertAt, 0, behall);
 
     // best option id: eligible full option with the shortest mid payback
     var bestOptionId = null, bestPb = Infinity;
@@ -319,88 +324,66 @@
   }
 
   /* =========================================================================
-   * recommend(R, inputs, D) — V7 the additive ADVICE layer (V7-rec-engine §5,
-   * lifted as the implementation contract; V7-SPEC §1.4).
+   * recommend(R, inputs, D) — V10 the additive ADVICE layer (V10-SPEC §1.3).
    *
    * rankOptions stays the TRUTH TABLE (every option, deterministic sort — feeds
-   * the comparison visual). recommend() decides WHAT IS ADVICE:
-   *   - leadPool gate (H1+H4): paybackMid ≤ D.rec.pbLeadMax AND saving[1] ≥
-   *     D.rec.leadSavingFloor. A lead outside the pool cannot exist, ever.
-   *   - mention band (H2): paybackMid ∈ (lead, 15] år, max 2, payback printed.
-   *   - neverAdvice (H3): >15 år → comparison visual only, never in rec text.
-   *   - the branch ladder (order IS the logic; first hit wins).
+   * the comparison visual). recommend() decides WHAT IS ADVICE.
    * Pure + deterministic: no DOM, no Date, no rounding, does NOT mutate R.
+   *
+   * OWNER POLICY V10 (P1-P5, 2026-07-10): the ★ lead is ALWAYS a real, purchasable
+   * action. 'Behåll det du har' may exist as a context row but NEVER carries the ★
+   * and never leads the list. Payback never suppresses advice; it is DISCLOSED
+   * plainly in the verdict. The old pbLeadMax-as-suppressor + behåll-first branch
+   * design is retired on owner instruction. Honesty lives in the visible numbers.
    * ========================================================================= */
   function recommend(R, inputs, D) {
-    var base = R.baseline.results;
-    var primaryId = base.ctx.primaryId;
+    var base = R.baseline.results, primaryId = base.ctx.primaryId;
+    var TRUE_OPTIMAL = ['bergvarmeCur', 'luftvattenCur'];       // whole-house pumps ONLY [owner P3]
+    var trueOptimal = TRUE_OPTIMAL.indexOf(primaryId) !== -1;
     var hp = D.heatPumpCurrentIds || [];
+    var smallThreshold = (D.multi && D.multi.smallSavingThreshold != null) ? D.multi.smallSavingThreshold : 1500;
 
-    /* -- classify the house */
-    var pumpShare = 0, kaminShare = 0, luftluftCov = 0;
+    var pumpShare = 0, kaminShare = 0;
     base.currentBreakdown.forEach(function (b) {
       if (b.isPrimary) return;
       if (hp.indexOf(b.id) !== -1) pumpShare += b.share;
       if (b.id === 'kamin') kaminShare += b.share;
-      if (b.id === 'luftluftCur') luftluftCov += b.share;
     });
-    // heatPumpCurrentIds is UNCHANGED as data; franluft is carved out of the
-    // BRANCH test only (it gets its own honest 'halvvags' branch below).
-    var primaryIsPump = hp.indexOf(primaryId) !== -1 && primaryId !== 'franluft';
 
-    /* -- the lead pool (H1 + H4) */
+    /* candidate pool: eligible numeric full options with a real kr story and an
+     * honest ceiling. pbActionMax does NOT hide numbers — only reroutes the ★. */
     var full = R.options.filter(function (o) {
       return o.eligible && o.numeric !== false &&
              (o.kind === 'replace' || o.kind === 'complement' || o.kind === 'combo');
     });
-    var leadPool = full.filter(function (o) {
-      return o.paybackMid != null && o.paybackMid <= D.rec.pbLeadMax &&
-             o.saving[1] >= D.rec.leadSavingFloor;
+    var candidates = full.filter(function (o) {
+      return o.saving[1] > smallThreshold &&
+             o.paybackMid != null && o.paybackMid <= D.rec.pbActionMax;
     });
 
-    /* -- mention band (H2) + advice exclusion (H3) */
+    /* mention band (unchanged semantics) + excluded */
     var mention = [], excluded = [];
     full.forEach(function (o) {
-      if (leadPool.indexOf(o) !== -1) return;
       if (o.paybackMid != null && o.paybackMid <= D.rec.pbMentionMax) mention.push(o);
-      else excluded.push(o);                       // comparison visual only
+      else excluded.push(o);
     });
-    mention.sort(function (a, b) { return a.paybackMid - b.paybackMid; });
-    mention = mention.slice(0, 2);
 
-    /* -- the branch ladder (V7-SPEC §1.4 order; first hit wins) */
-    var branch =
-        primaryIsPump                             ? 'redanEffektiv'
-      : primaryId === 'franluft'                  ? 'halvvags'
-      : primaryId === 'fjarrvarme'                ? 'fjarrvarmePris'
-      : pumpShare >= D.rec.partialShareMin        ? 'delvisLost'
-      : R.verdict.bestSavingMid <= 0              ? 'ingenBesparing'
-      : R.verdict.bestSavingMid <=
-          ((D.multi && D.multi.smallSavingThreshold != null)
-            ? D.multi.smallSavingThreshold : 1500) ? 'litenBesparing'
-      /* H8 + neverSay ledger: ved/pellets primary is ALWAYS the arbete/komfort
-       * frame — a kr-saving lead on a ved house is banned copy (the ladder's
-       * original leadPool-empty clause assumed the old 0,80 price; the blocking
-       * QA gate T3 and the unconditional neverSay row outrank it). The pump
-       * numbers stay fully visible in the comparison visual. */
-      : (primaryId === 'vedpellets' ||
-         primaryId === 'kamin')                   ? 'komfortFraga'  /* M2: kamin primary = wood-heated house, same arbete/komfort frame */
-      : leadPool.length > 0                       ? 'standard'
-      :                                             'langsiktig';
-
-    /* -- the lead (H5: composite behåll+styrning wherever no option clears the bar) */
     var ctrl = (D.rank.controllablePrimaries || []).indexOf(primaryId) !== -1;
-    var lead;
-    if (branch === 'standard') {
-      var pool = leadPool.slice();
-      /* Matrix rule (V7-rec-engine §3.1 rows 2-3, QA gate T7): on a house WITH
-       * waterborne distribution the honest full solution rides the system that
-       * already exists — a whole-house pump outranks a complement for the LEAD
-       * when it clears the gate. The complement keeps its numbers in the
-       * mention band / comparison visual. Direktel houses (wb false) keep the
-       * luft-luft complement lead (T8). */
-      if (inputs.hasWaterborne === true) {
-        var whole = pool.filter(function (o) { return o.kind !== 'complement'; });
+    var branch, lead, longPb = false;
+
+    if (trueOptimal || candidates.length === 0) {
+      /* -- ACTION LANE [owner P4]: a real, purchasable next step. NEVER behåll. -- */
+      if (inputs.hasSolar)          { branch = 'optimeraBatteri';  lead = { type: 'action', id: 'batteri'  }; }
+      else if (inputs.solarPlanned) { branch = 'optimeraSolplan';  lead = { type: 'action', id: 'solplan'  }; }
+      else if (ctrl)                { branch = 'optimeraStyrning'; lead = { type: 'action', id: 'styrning' }; }
+      else                          { branch = 'optimeraService';  lead = { type: 'action', id: 'service'  }; }
+    } else {
+      /* -- PUMP LANE: honest best tradeoff -- */
+      var pool = candidates.slice();
+      if (inputs.hasWaterborne === true) {          // T7 kept, comfort-gated: a whole-house
+        var whole = pool.filter(function (o) {      // pump outranks a complement ONLY when
+          return o.kind !== 'complement' && o.paybackMid <= D.rec.pbComfort;   // it clears
+        });                                         // the comfort bar
         if (whole.length) pool = whole;
       }
       pool.sort(function (a, b) {
@@ -408,40 +391,46 @@
         if (a.saving[1] !== b.saving[1])   return b.saving[1] - a.saving[1];
         return a.rangeWidth - b.rangeWidth;
       });
-      lead = { type: 'option', id: pool[0].id };
-    } else {
-      lead = { type: 'composite', id: 'behall',
-               withStyrning: ctrl && primaryId !== 'vedpellets' }; // styrning qualitative until [GAP-V4-2] signs
+      var L = pool[0];
+      lead = { type: 'option', id: L.id };
+      longPb = L.paybackMid > D.rec.pbComfort;      // ⇒ verdict states the payback PLAINLY, ★ stays
+
+      branch =
+          primaryId === 'franluft'                ? 'uppgradering'   // frånluft = prime upgrade case
+        : primaryId === 'luftluftCur'             ? 'heltackning'    // partial coverage → whole house
+        : primaryId === 'fjarrvarme'              ? 'fjarrvarmePris' // numbers-carried PRICE framing
+        : (primaryId === 'vedpellets' ||
+           primaryId === 'kamin')                 ? 'komfortKrona'   // komfort frame + honest kr
+        : pumpShare >= D.rec.partialShareMin      ? 'delvisLost'     // residual honesty kept, real lead
+        : L.saving[1] < D.rec.leadSavingFloor     ? 'litenBesparing' // wording boundary, not a gate
+        : longPb                                  ? 'standardLang'
+        :                                           'standard';
     }
 
-    /* -- orthogonal add-ons (V7-rec-engine §2.3) */
+    /* add-ons (unchanged logic; no duplicate when the add-on IS the lead) */
     var addOns = [];
-    var isWholeHousePump = lead.type === 'option' &&
-        D.pumps[lead.id] && !D.pumps[lead.id].isComplement;
-    if (inputs.hasSolar) addOns.push('batteri');           // H9; featured on behåll-type branches (renderer)
-    else if (inputs.solarPlanned) addOns.push('batteriPlaneras'); // A10: qualitative only, no numbers
+    var isWholeHousePump = lead.type === 'option' && D.pumps[lead.id] && !D.pumps[lead.id].isComplement;
+    if (inputs.hasSolar && lead.id !== 'batteri') addOns.push('batteri');
+    else if (inputs.solarPlanned && lead.id !== 'solplan') addOns.push('batteriPlaneras');
     if (kaminShare > 0 && isWholeHousePump) addOns.push('kaminSpets');
-    if (D.rec.merLuftluftEnabled && branch === 'delvisLost' &&
-        luftluftCov > 0 && luftluftCov < D.rec.merLuftluftMaxCov &&
-        (inputs.area || 0) >= D.rec.merLuftluftMinM2) addOns.push('merLuftluft'); // OFF until [GAP-V7-8]
+    if (D.rec.merLuftluftEnabled && branch === 'delvisLost') { /* gate unchanged, still OFF [GAP-V7-8] */ }
     if (primaryId === 'olja' || primaryId === 'franluft') addOns.push('endOfLife');
     if (inputs.vetinte) addOns.push('vetinteHedge');
     if (lead.type === 'option' && ctrl) addOns.push('styrning');
 
-    /* -- marginal-honesty payload for delvisLost (the copy names the residual target) */
     var residual = null;
     if (branch === 'delvisLost') {
       var prim = base.currentBreakdown.filter(function (b) { return b.isPrimary; })[0];
       if (prim) residual = { share: prim.share, annualKr: prim.annual, label: prim.label, id: prim.id };
     }
 
+    mention.sort(function (a, b) { return a.paybackMid - b.paybackMid; });
     return {
-      branch: branch,
-      lead: lead,
-      secondary: mention.map(function (o) { return o.id; }),
-      excluded: excluded.map(function (o) { return o.id; }),   // neverAdvice ids (H3)
-      addOns: addOns,
-      residual: residual
+      branch: branch, lead: lead, longPb: longPb,
+      secondary: mention.filter(function (o) { return o.id !== lead.id; }).slice(0, 2)
+                        .map(function (o) { return o.id; }),
+      excluded: excluded.map(function (o) { return o.id; }),
+      addOns: addOns, residual: residual
     };
   }
 

@@ -7,7 +7,8 @@
  * Single font (Outfit) canonical; hierarchy by weight (300/500/900).
  * All spacing on --sp-* (4px grid, rem on 10px base); all type on --ty-*.
  * Motion is opacity / transform / grid-fraction, <=300ms, reduced-motion safe.
- * Breakpoints 992 / 768 / 480. No em-dashes in copy. Fonts at ../fonts/.
+ * Breakpoints (V10 DB1): <=991 stacked / >=992 two-pane / 480 mobile tune.
+ * No em-dashes in copy. Fonts at ../fonts/.
  * v7 components reuse the EXISTING token set — zero new colors, zero new type sizes.
  * ========================================================================== */
 
@@ -117,14 +118,15 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   text-transform:uppercase;color:#04342c;background:var(--mint);border-radius:var(--r-pill);padding:var(--sp-1) var(--sp-3);line-height:1.2}
 .toolhead{display:flex;flex-direction:column;align-items:flex-start;gap:var(--sp-2);margin-bottom:var(--sp-6)}
 .toolhead .th-title{font-size:clamp(2.0rem, 1.7rem + 0.8vw, 2.6rem);font-weight:500;line-height:var(--lh-tight);
-  letter-spacing:-.01em;color:var(--ink);max-width:44rem;margin:0}
+  letter-spacing:-.01em;color:var(--ink);max-width:42rem;margin:0}   /* d-p4 */
 .toolhead .th-sub{font-size:var(--ty-label);font-weight:300;color:var(--muted);margin:0;line-height:var(--lh-body)}
 
 .panes{display:flex;gap:var(--sp-7);align-items:flex-start}
 @media (min-width:1200px){ .panes{gap:var(--sp-8)} }
 .input{flex:0 0 42rem;max-width:42rem;background:#fff;border:var(--bd-light);border-radius:var(--r-xl);
   padding:var(--sp-7);margin:0;position:sticky;top:var(--sp-6);align-self:flex-start;box-shadow:var(--shadow-2)}
-.input.static{position:static;top:auto}   /* dropped sticky when the composer makes the card too tall */
+/* DM1b: the .static kill-switch is retired — a too-tall card gets a sticky-BOTTOM
+ * fallback via an inline negative top set by checkStickyIntegrity() */
 .result{flex:1;min-width:0;background:var(--midnight);border-radius:var(--r-xl);padding:var(--sp-7);
   color:#fff;position:relative;overflow:hidden;box-shadow:var(--shadow-3);scroll-margin-top:var(--sp-4)}
 @media (min-width:1200px){ .result{padding:var(--sp-8)} }
@@ -183,6 +185,10 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   transition:transform var(--t-fast) var(--ease)}
 .range:active::-moz-range-thumb{transform:scale(1.12)}
 .range:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+@media (hover:hover) and (pointer:fine){   /* d-p2: quiet affordance, gated to real pointers */
+  .range:hover::-webkit-slider-thumb{transform:scale(1.06)}
+  .range:hover::-moz-range-thumb{transform:scale(1.06)}
+}
 
 /* ============================ HEAT PICKER — icon multi-select card set ============================ */
 .heatpicker{border:0;margin:0;padding:0;min-width:0}
@@ -197,7 +203,10 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   border-radius:var(--r-md);background:#fff;color:var(--ink);font-family:inherit;
   transition:border-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),
              background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
-.hp-card:hover{border-color:var(--teal);transform:translateY(-1px);box-shadow:var(--shadow-1)}
+/* DM4: decorative hovers gated to real pointers (no sticky-hover on touch iPads) */
+@media (hover:hover) and (pointer:fine){
+  .hp-card:hover{border-color:var(--teal);transform:translateY(-1px);box-shadow:var(--shadow-1)}
+}
 .hp-card:active{transform:translateY(0) scale(.995)}
 .hp-card:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .hp-ic{display:inline-flex;align-items:center;justify-content:center;width:4rem;height:4rem;border-radius:var(--r-sm);
@@ -249,28 +258,21 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 /* ============================ segmented — sliding selection pill ============================ */
 .seg{position:relative;display:flex;gap:var(--sp-1h)}
 .seg-wrap{flex-wrap:wrap}
-.seg-pill{position:absolute;top:0;left:0;z-index:0;border-radius:var(--r-xs);background:var(--teal);
+/* MM5: pill surface = a11y-DERIVED shade of brand teal (white text 4.6:1); NOT a new
+ * token — borders/CTA keep #00a991. Owned by the designsystem-konsolidering program. */
+.seg-pill{position:absolute;top:0;left:0;z-index:0;border-radius:var(--r-xs);background:#00806e;
   transform:translate(0,0);
   transition:transform var(--t-fast) var(--ease),width var(--t-fast) var(--ease),height var(--t-fast) var(--ease)}
 .seg button{position:relative;z-index:1;flex:1 1 auto;min-width:0;text-align:center;font-size:var(--ty-label);
   padding:.8rem .6rem;border:var(--bd-light-2);border-radius:var(--r-xs);color:var(--muted);background:transparent;cursor:pointer;
   white-space:nowrap;min-height:4.4rem;
   transition:color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
-.seg button:not(.on):hover{border-color:var(--teal)}
+@media (hover:hover) and (pointer:fine){ .seg button:not(.on):hover{border-color:var(--teal)} }   /* DM4 */
 .seg button.on{background:transparent;color:#fff;border-color:var(--teal)}
 .seg button:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
 .seg-wrap button{flex:1 1 30%}
 
-/* reveal (accordion trigger) */
-.reveal{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:var(--sp-4);padding:1.2rem 0;
-  border:0;border-top:1px solid #eef2f9;background:none;color:var(--muted);font-size:var(--ty-label);cursor:pointer;
-  transition:color var(--t-fast) var(--ease)}
-.reveal span{display:flex;align-items:center;gap:var(--sp-2)}
-.reveal span svg{width:1.5rem;height:1.5rem;color:var(--slate);flex:0 0 auto}
-.reveal:hover{color:var(--ink)}
-.reveal .reveal-caret{width:1.6rem;height:1.6rem;transition:transform var(--t-fast) var(--ease)}
-.reveal[aria-expanded="true"] .reveal-caret{transform:rotate(180deg)}
-.reveal:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:var(--r-xs)}
+/* (the .reveal accordion block was dead code — deleted, m-p4) */
 .gear[data-gear="own"],.gear[data-gear="sol"]{padding-top:.2rem}
 #ownRow[hidden]{display:none}
 
@@ -278,12 +280,15 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .stepper{display:inline-flex;align-items:center;gap:.2rem;border:var(--bd-light-2);border-radius:var(--r-xs);overflow:hidden}
 .stepbtn{width:4.4rem;height:4.4rem;border:0;background:#fff;color:var(--ink);font-size:1.8rem;cursor:pointer;line-height:1;
   transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
-.stepbtn:hover{background:#f0f4fb}
+@media (hover:hover) and (pointer:fine){ .stepbtn:hover{background:#f0f4fb} }   /* DM4 */
 .stepbtn:active{transform:scale(.92)}
 .stepbtn:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
-.stepval{min-width:2.6rem;text-align:center;font-size:var(--ty-h);font-weight:500;
-  transition:transform var(--t-fast) var(--ease-out),opacity var(--t-fast) var(--ease-out)}
-.stepval.bump{transform:translateY(-2px);opacity:.55}
+.stepbtn[disabled]{opacity:.35;cursor:default}   /* m-m3: bound state (44px hit box kept) */
+.stepbtn[disabled]:active{transform:none}
+.stepval{min-width:2.6rem;text-align:center;font-size:var(--ty-h);font-weight:500}
+/* m-p1: a real keyframe (retriggered in JS via reflow) — the old transition never painted */
+@keyframes ampyBump{0%{transform:translateY(-2px);opacity:.55}100%{transform:none;opacity:1}}
+.stepval.bump{animation:ampyBump var(--t-fast) var(--ease-out)}
 
 /* ============================ RESULT ============================ */
 .eyebrow-row{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap}
@@ -291,10 +296,12 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .eyebrow::before{content:'';display:inline-block;width:2.4rem;height:2px;background:var(--teal-bright);
   vertical-align:middle;margin-right:var(--sp-2)}
 /* B. anchor — DAGENS kostnad */
-.anchor-num{font-size:var(--ty-display);font-weight:900;line-height:var(--lh-display);
-  letter-spacing:var(--tr-display);color:#fff;margin:var(--sp-3) 0 var(--sp-4);font-variant-numeric:tabular-nums;
-  transition:opacity var(--t-fast) var(--ease)}
-.anchor-num.flash{opacity:.4}
+.anchor-num{font-size:var(--ty-display);font-weight:900;line-height:1.08;   /* m-p3 */
+  letter-spacing:var(--tr-display);color:#fff;margin:var(--sp-3) 0 var(--sp-4);font-variant-numeric:tabular-nums}
+/* m-p1/d-p6: a real keyframe (retriggered in JS via reflow) — the old add/remove never painted */
+@keyframes ampyFlash{0%{opacity:.4}100%{opacity:1}}
+.anchor-num.flash{animation:ampyFlash var(--t-mid) var(--ease)}
+.nowrap{white-space:nowrap}   /* d-m3: the anchor range never wraps mid-figure */
 /* the unit is quiet and NEVER wraps mid-phrase: inline-block + nowrap drops it as one piece */
 .anchor-per{display:inline-block;font-size:var(--ty-body);font-weight:300;color:var(--subtext);
   letter-spacing:0;white-space:nowrap}
@@ -311,7 +318,8 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .storybar .sb-vv{transition-delay:var(--t-stagger)}
 .storybar .sb-house{transition-delay:calc(var(--t-stagger)*2)}
 .sb-legend{list-style:none;margin:var(--sp-3) 0 0;padding:0;display:flex;flex-direction:column;gap:var(--sp-1)}
-@media (min-width:769px){.sb-legend{flex-direction:row;gap:var(--sp-4);flex-wrap:wrap}}
+/* d-p3: width-robust row layout from 481px up (wrap absorbs narrow panes) */
+@media (min-width:481px){.sb-legend{flex-direction:row;gap:var(--sp-4);flex-wrap:wrap}}
 .sb-legend li{display:flex;align-items:baseline;gap:var(--sp-2);font-size:var(--ty-label);font-weight:300;color:var(--subtext)}
 .sb-legend b{font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
 .sb-dot{flex:0 0 auto;width:1rem;height:1rem;border-radius:3px;align-self:center}
@@ -332,16 +340,22 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .sp-lg{display:inline-flex;align-items:center;gap:var(--sp-1h)}
 .sp-sw{display:inline-block;width:1.4rem;height:.8rem;border-radius:var(--r-pill)}
 .sp-sw-low{background:var(--teal-on-dark)} .sp-sw-band{background:rgba(159,225,203,.34)}
-.sp-colhead{margin-left:auto;font-size:var(--ty-micro);color:var(--footnote);white-space:nowrap}
+.sp-colhead{margin-left:auto;font-size:var(--ty-micro);color:var(--footnote);white-space:nowrap;
+  padding-right:3.6rem}   /* d-m2: aligns with the row's value column (row pad + caret + gap) */
 
 .spark-list{margin-top:var(--sp-4);min-height:20rem}   /* reserve height → no CLS on first paint */
+/* MM8: the solar "Planeras" acknowledgement under the list */
+.spark-foot{font-size:var(--ty-label);font-weight:300;color:var(--footnote);margin:var(--sp-3) 0 0;line-height:var(--lh-body)}
+.spark-foot[hidden]{display:none}
 
 .sp-item{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:var(--r-md);
   overflow:hidden;transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease)}
 .sp-item + .sp-item{margin-top:var(--sp-2h)}
 .sp-item.is-rec{border-color:rgba(85,255,154,.55);background:rgba(0,196,167,.06);
   box-shadow:0 0 0 3px rgba(85,255,154,.10)}
-.sp-item.is-off{opacity:.4}
+.sp-item.is-off{opacity:.65}                                   /* MM4: was .4 — ~2:1 contrast */
+.sp-item.is-off .sp-note{opacity:1;color:var(--subtext)}       /* MM4: the reason stays readable */
+.sp-item.is-off .sp-val{color:var(--subtext)}                  /* MM3: the grey comparison number */
 .sp-item--batt .sp-fill{background:var(--mint)} .sp-item--batt .sp-band{background:rgba(159,225,203,.20)}
 .sp-item--batt .sp-val{color:var(--mint)}
 
@@ -349,7 +363,7 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   cursor:pointer;padding:var(--sp-3);margin:0;min-height:4.4rem;transition:background var(--t-fast) var(--ease)}
 .sp-row--static{cursor:default}
 @media (hover:hover) and (pointer:fine){ .sp-row:not(.sp-row--static):hover{background:rgba(255,255,255,.03)} }
-.sp-row:focus-visible{outline:2px solid var(--neon);outline-offset:2px;border-radius:var(--r-md)}
+.sp-row:focus-visible{outline:2px solid var(--neon);outline-offset:-2px;border-radius:var(--r-md)}   /* DM2: inset — never clipped by the item's overflow:hidden */
 
 .sp-flag{display:inline-flex;align-items:center;gap:var(--sp-1);margin-bottom:var(--sp-2);
   padding:.2rem var(--sp-2);border-radius:var(--r-pill);background:var(--mint);color:var(--midnight);
@@ -387,7 +401,8 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 
 /* dropdown — reuses the existing .gear-collapsed grid mechanic (0fr→1fr) */
 .sp-drop-body{padding:var(--sp-3) var(--sp-3) var(--sp-4);border-top:var(--bd-dark);margin-top:var(--sp-3)}
-.sp-verdict{font-size:var(--ty-sub);font-weight:300;color:var(--subtext);line-height:var(--lh-body);margin:0 0 var(--sp-3)}
+.sp-verdict{font-size:var(--ty-sub);font-weight:300;color:var(--subtext);line-height:var(--lh-body);margin:0 0 var(--sp-3);
+  max-width:62ch}   /* d-m4: measure cap */
 .sp-verdict b{font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
 .sp-figs{display:grid;gap:var(--sp-2);margin:0}
 .sp-figs > div{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3)}
@@ -414,32 +429,36 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
 .ctablock .cta{margin-top:0}
 .cta--primary{min-height:5.2rem}
-.cta:hover{transform:translateY(-2px);background:#00b89e;box-shadow:var(--shadow-teal)}
+@media (hover:hover) and (pointer:fine){   /* DM4 */
+  .cta:hover{transform:translateY(-2px);background:#00b89e;box-shadow:var(--shadow-teal)}
+  .cta.is-close:hover{background:rgba(255,255,255,.05);box-shadow:none;transform:none;color:#fff}
+}
 .cta:active{transform:scale(.99)}
 .cta:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
+.cta[disabled]{opacity:.6;cursor:default;transform:none;box-shadow:none}   /* m-m2 sent-state */
 .cta svg{width:1.6rem;height:1.6rem;vertical-align:-.3rem;margin-left:.4rem}
 /* the CTA morphs to a quiet ghost "Stäng" once the inline form is open */
 .cta.is-close{background:transparent;border:1px solid rgba(255,255,255,.18);color:var(--subtext)}
-.cta.is-close:hover{background:rgba(255,255,255,.05);box-shadow:none;transform:none;color:#fff}
-/* soft-branch CTA (honest verdict): quiet ghost, still a full-width action */
-.cta--ghost{background:transparent;border:1px solid rgba(255,255,255,.18)}
-.cta--ghost:hover{background:rgba(255,255,255,.06);box-shadow:none}
+/* MM7 + owner P1-P4: the soft-branch .cta--ghost is RETIRED — every branch leads
+ * with a purchasable action, so the main CTA is always the solid teal primary */
 
 /* share — DEMOTED to a quiet text-level action (R9); still a full ≥44px target */
 .share-btn{display:block;width:100%;min-height:4.4rem;margin-top:var(--sp-1);border-radius:var(--r-md);
   background:transparent;border:1px solid transparent;color:var(--subtext);font-family:inherit;
   font-size:var(--ty-label);font-weight:300;cursor:pointer;
   transition:color var(--t-fast) var(--ease)}
-.share-btn--quiet:hover{color:#fff;text-decoration:underline;text-underline-offset:.3em}
+@media (hover:hover) and (pointer:fine){ .share-btn--quiet:hover{color:#fff;text-decoration:underline;text-underline-offset:.3em} }   /* DM4 */
 .share-btn:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
 
 /* methodology */
 .method{margin-top:var(--sp-4);border-top:1px solid rgba(255,255,255,.08);padding-top:var(--sp-2)}
-.method summary{list-style:none;cursor:pointer;font-size:var(--ty-label);color:var(--subtext);display:flex;align-items:center;gap:var(--sp-1h)}
+.method summary{list-style:none;cursor:pointer;font-size:var(--ty-label);color:var(--subtext);display:flex;align-items:center;gap:var(--sp-1h);min-height:4.4rem}   /* d-m6: ≥44px target at every width */
 .method summary::-webkit-details-marker{display:none}
+@media (hover:hover) and (pointer:fine){ .method summary:hover{color:#fff} }   /* d-m6 + DM4 */
+.method summary:focus-visible{outline:2px solid var(--neon);outline-offset:2px;border-radius:var(--r-xs)}   /* d-m6 */
 .method summary svg{width:1.6rem;height:1.6rem;color:var(--mint);flex:0 0 auto;transition:transform var(--t-fast) var(--ease)}
 .method[open] summary svg{transform:rotate(90deg)}
-.method-body{font-size:var(--ty-label);font-weight:300;color:var(--footnote);line-height:var(--lh-body);margin-top:var(--sp-3)}
+.method-body{font-size:var(--ty-label);font-weight:300;color:var(--footnote);line-height:var(--lh-body);margin-top:var(--sp-3);max-width:70ch}   /* d-m4: measure cap */
 .method-body b{font-weight:500;color:var(--subtext)}
 /* V7: the technical bullet list + the legal fritext (the curve is GONE) */
 .method-list{list-style:disc;margin:0;padding-left:1.8rem}
@@ -473,15 +492,15 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .leadclose{position:absolute;top:1.1rem;right:1.1rem;width:3rem;height:3rem;border:0;background:none;
   color:var(--subtext);cursor:pointer;border-radius:8px;transition:background var(--t-fast) var(--ease)}
 .leadclose svg{width:1.8rem;height:1.8rem}
-.leadclose:hover{background:rgba(255,255,255,.06)}
+@media (hover:hover) and (pointer:fine){ .leadclose:hover{background:rgba(255,255,255,.06)} }   /* DM4 */
 .leadclose:focus-visible{outline:2px solid var(--neon);outline-offset:1px}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .lead-submit{margin-top:var(--sp-4)}
 /* the consent line under the submit button — pressing the button IS the consent */
-.lead-consent{font-size:var(--ty-micro);font-weight:300;color:var(--footnote);margin:var(--sp-2) 0 0;line-height:var(--lh-body)}
+.lead-consent{font-size:var(--ty-label);font-weight:300;color:var(--footnote);margin:var(--sp-2) 0 0;line-height:var(--lh-body)}   /* m-m4: 13.5px — legally load-bearing text is never micro */
 .lead-consent a{color:var(--subtext);text-decoration:underline;text-underline-offset:.2em;
   transition:color var(--t-fast) var(--ease)}
-.lead-consent a:hover{color:#fff}
+@media (hover:hover) and (pointer:fine){ .lead-consent a:hover{color:#fff} }   /* DM4 */
 .lead-consent a:focus-visible{outline:2px solid var(--neon);outline-offset:2px;border-radius:2px}
 .lead-success{text-align:center;padding:var(--sp-4) var(--sp-1);color:var(--subtext)}
 .lead-success[hidden]{display:none}
@@ -509,52 +528,60 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 /* (Sparstaplarna per-bar entrance lives in the #spark block: .spark-list.is-drawing/.is-drawn) */
 
 /* ============================ RESPONSIVE ============================ */
-@media (max-width:992px){
-  .input{position:static;top:auto}
-}
-@media (max-width:768px){
+/* DB1: the 769-991 two-pane band starved the result column (~430px broke .sp-head);
+ * iPad portrait now STACKS with the phones. Bands are contiguous: ≤991 stacked,
+ * ≥992 the true desktop two-pane. The old 769-991 tune block is deleted. */
+@media (max-width:991px){
   .panes{flex-direction:column}
   /* inputs-first on mobile: the visitor builds the number, the bar mirrors it */
-  .input{flex:auto;order:1;width:100%;max-width:none;position:static}
+  .input{flex:auto;order:1;width:100%;max-width:none;position:static;top:auto}
   /* explicit width: .panes has align-items:flex-start (no stretch), and the
    * comparison rows carry nowrap min-content — the card must never grow past
    * the pane (the no-h-scroll floor at 375px) */
   .result{order:2;width:100%}
   /* touch-target floor (>=44px) on every tappable control */
   .seg button{min-height:44px}
-  .hp-card{min-height:8.4rem}
   .stepbtn{width:44px;height:44px}
-  .reveal{padding:1.4rem 0}
   .leadclose{width:44px;height:44px}
-  /* Sparstaplarna: 12px track on mobile; name ellipsizes, value never truncates */
+  /* Sparstaplarna: 12px track on mobile; value never truncates */
   .sp-track{height:1.2rem}
+  /* MM1+MM2: the ★ row head wraps instead of crushing the name — the value
+   * drops to its own line, the name breaks by word, never mid-word ellipsis */
+  .sp-head{flex-wrap:wrap;row-gap:.2rem}
+  .sp-name{flex:1 1 calc(100% - 2.4rem);white-space:normal}
   /* the hint renders only when it has something to say — no phantom reserved slot */
 }
 @media (max-width:480px){
   .page{padding:var(--sp-4) var(--sp-3) var(--sp-8)}
   .result{padding:var(--sp-4)}
   .input{padding:var(--sp-5)}
-  .hp-card{min-height:7.6rem}
   .hp-ic{width:3.4rem;height:3.4rem}
   .hp-ic svg{width:1.9rem;height:1.9rem}
   .storybar{height:3.2rem}
-  /* mobile 375: name may wrap, value never truncates; figures tighten */
-  .sp-name{white-space:normal}
+  /* mobile 375: figures tighten (name-wrap now lives in the ≤991 block, MM2) */
   .sp-figs > div{gap:var(--sp-2)}
   /* "Så har vi räknat" gets a touch larger tap surface for 55+ thumbs (owner ask) */
-  .method summary{font-size:1.5rem;min-height:4.4rem;align-items:center}
+  .method summary{font-size:1.5rem}
   .method summary svg{width:1.8rem;height:1.8rem}
 }
-/* iPad 769-991 (two-pane, tighter result column): one deliberate tune */
-@media (min-width:769px) and (max-width:991px){
-  .sp-track{height:1.1rem}
-  .sp-name{font-size:var(--ty-label)}
-  .sp-row{padding:var(--sp-3)}
-}
-@media (min-width:993px){
+@media (min-width:992px){
   /* desktop: calmer 10px track, rows tighten */
   .sp-track{height:1rem}
   .sp-item + .sp-item{margin-top:var(--sp-2)}
+  .spark-list{min-height:12rem}   /* d-p5: the v2 list is shorter — less reserved void */
+  /* DM1a: three-up system cards shorten the left card ~90-130px → CTA nearer the fold */
+  .hp-grid{grid-template-columns:repeat(3,1fr)}
+  /* d-m5 (partial): the lead form breathes at desktop — capped fields,
+   * Namn + Telefon side by side (pure CSS placement, zero DOM changes) */
+  .lead-field{max-width:48rem}
+  #leadForm{display:grid;grid-template-columns:1fr 1fr;column-gap:var(--sp-3)}
+  #leadForm > *{grid-column:1 / -1}
+  #leadForm label[for="leadName"]{grid-column:1;grid-row:1}
+  #leadForm #leadName{grid-column:1;grid-row:2}
+  #leadForm #errName{grid-column:1;grid-row:3}
+  #leadForm label[for="leadPhone"]{grid-column:2;grid-row:1}
+  #leadForm #leadPhone{grid-column:2;grid-row:2}
+  #leadForm #errPhone{grid-column:2;grid-row:3}
 }
 
 /* reduced motion — belt and braces on top of the zeroed tokens */

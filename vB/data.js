@@ -253,15 +253,19 @@ window.AMPY_DATA = {
    * Replaces the dead free-text override. Bounds [FACT]-anchored
    * (energimarknadsbyran/klimatime via R3 §1b; top ≈350 m² pre-1940 direktel
    * [DERIVED]); edges [GAP-L4 → energiexpert + Julius]. The kr path is DEAD. */
-  own: { min: 5000, max: 45000, step: 500, defaultKwh: 20000 },      // [GAP-L4]
+  own: { min: 5000, max: 60000, step: 500, defaultKwh: 20000 },      // [GAP-L4] V10 m-m6: top raised 45000→60000 (350 m² pre-1940 direktel no longer pinned at max)
 
-  /* --- V7 RECOMMENDATION CONSTITUTION (V7-rec-engine §2.1/§5) ----------------
+  /* --- V10 RECOMMENDATION CONSTITUTION (owner P1-P5, 2026-07-10) -------------
    * Policy constants, not physics — a signature is a one-file edit here. */
   rec: {
-    pbLeadMax:          10,    // år — lead ceiling (H1)                    [GAP-V7-1] Julius
-    pbMentionMax:       15,    // år — "för den som vill" band (H2)         [GAP-V7-1] Julius
-    leadSavingFloor:    3000,  // kr/år — a lead needs a real saving (H4)   [GAP-V7-3] Julius
-    partialShareMin:    0.20,  // pump-complement coverage → delvisLost (H6) [GAP-V7-2] energiexpert
+    /* OWNER POLICY V10: pbComfort no longer suppresses — above it the verdict MUST
+     * state "återbetald först på ~X-Y år" plainly and the ★ stays ON. [owner P2] */
+    pbComfort:          10,    // was pbLeadMax (renamed; same signed value) [GAP-V7-1]
+    pbActionMax:        20,    // NEW ceiling: above it a pump stops being the LEAD (its
+                               // numbers stay fully visible); action lane leads. [GAP-V10-2 Julius]
+    pbMentionMax:       15,    // unchanged (mention band)
+    leadSavingFloor:    3000,  // now a WORDING boundary (litenBesparing register), never a gate
+    partialShareMin:    0.20,  // unchanged; delvisLost now yields a REAL lead
     merLuftluftEnabled: false, // addOn gate — OFF until signed             [GAP-V7-8] energiexpert flips WITH the two below
     merLuftluftMaxCov:  0.60,  //                                            [GAP-V7-8]
     merLuftluftMinM2:   140    //                                            [GAP-V7-8]
@@ -399,8 +403,11 @@ window.AMPY_DATA = {
      * thermostats on direktel). direktel included WITH caveat (thermostat retrofit). */
     controllablePrimaries: ['direktel', 'vattenburenEl', 'olja', 'fjarrvarme', 'franluft',
                             'luftluftCur', 'luftvattenCur', 'bergvarmeCur'], // [MODEL] everything but ved/pellets-primary; [GAP-V4-2] expert confirms
-    /* Q1 primaries that IMPLY a waterborne system (Q3b skipped, hasWaterborne inferred true). */
-    waterborneImplies: ['olja', 'fjarrvarme', 'vattenburenEl', 'luftvattenCur', 'bergvarmeCur'], // [MODEL] app-layer inference, engine untouched
+    /* Q1 primaries that IMPLY a waterborne system (Q3b skipped, hasWaterborne inferred true).
+     * V10 AR-1: + franluft — a frånluftsvärmepump is by construction connected to a
+     * waterborne system (it heats radiators/VV); the old omission mispriced luft-vatten/
+     * bergvärme by 90-110 tkr gross on frånluft houses. [GAP-V10-1: elektriker counter-signs] */
+    waterborneImplies: ['olja', 'fjarrvarme', 'vattenburenEl', 'luftvattenCur', 'bergvarmeCur', 'franluft'], // [MODEL] app-layer inference, engine untouched
     /* An existing luft-luft complement at/above this coverage removes S2 headroom (greyed, never hidden). */
     complementHeadroomMax: 0.20,  // [GAP-V4-9] expert signs; conservative (any real existing luft-luft ⇒ greyed at the 0.40 default stop)
     /* V7: row cap for the comparison visual (I dag + maxRows option rows + chip). */
