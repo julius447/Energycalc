@@ -165,8 +165,8 @@
       },
       /* V10 (P4/AR-3): quiet action rows — "utan pris", no bar, NO invented numbers */
       actionName: { service: 'Service och trimning av värmepumpen', solplan: 'Solceller med batteri' },
-      figInvest: 'Investering efter ROT', figPayback: 'Återbetald på',
-      figBattGross: 'Pris från', figBattNet: 'Efter grön teknik 50 %',
+      figInvest: 'Investering efter ROT', figPayback: 'Återbetald på', figSaving: 'Lägre per år',
+      figBattGross: 'Pris från', figBattNet: 'Efter grön teknik',
       figBehall: 'Noll kronor i investering',
       utanPris: 'utan pris', tagBehall: 'Så ligger du idag'
     },
@@ -1091,62 +1091,53 @@
    * V10 (owner P1-P5): the LEAD row = branchIntro + option sentence + longPbLine
    * (payback stated PLAINLY, ★ stays). Disclose strings = NON-lead rows only.
    * Reuses recNumbers/battSlots for every number; NEVER a fabricated figure. */
+  /* three-column stat block — the dropdown for any row that HAS numbers (owner:
+     numbers over prose; extreme mobile UX). Accepts 2 or 3 columns. */
+  function figCols(items) {
+    return '<div class="sp-cols' + (items.length === 2 ? ' sp-cols--2' : '') + '">' +
+      items.map(function (c) {
+        return '<div class="sp-col"><span class="sp-col-k">' + esc(c.k) +
+               '</span><span class="sp-col-v">' + esc(c.v) + '</span></div>';
+      }).join('') + '</div>';
+  }
+
   function renderSparDrop(o, R, rec, wb) {
-    var verdict = '', figs = '';
     var isLead = (rec.lead.id === o.id);
-    if (o.id === 'behall') {
-      verdict = esc(S.spark.verdict.behall);
-      figs = '<p class="sp-fignote">' + esc(S.spark.figBehall) + '</p>';
-    } else if (!o.eligible) {
-      verdict = esc(S.reason[o.ineligibleReason] || '');
-    } else if (o.numeric === false) {
-      verdict = esc(isLead ? S.spark.verdict.styrningLead : S.spark.verdict.styrning);
-    } else if (o.saving[1] <= 0) {
-      verdict = esc(S.spark.verdict.dyrare);
-    } else {
-      var n = recNumbers(o);
-      var parts = [];
-      if (isLead && S.spark.branchIntro[rec.branch]) {
-        parts.push(fill(S.spark.branchIntro[rec.branch], branchIntroSlots(o, rec)));
-      }
-      /* disclose needs a REAL pb range: when paybackHigh is null (saving low <= 0)
-       * the plain option sentence carries the row instead — the EMPTY readout glyph
-       * belongs in the figure rows, never in prose */
-      var longNonLead = !isLead && o.paybackMid != null && o.paybackMid > D.rec.pbComfort &&
-                        o.paybackLow != null && o.paybackHigh != null;
-      if (o.id === 'luftluft') {
-        parts.push(S.spark.verdict.luftluft);
-      } else if (o.id === 'luftvatten') {
-        parts.push(longNonLead ? fill(S.spark.verdict.discloseLuftvatten, { pbRange: n.pbRange })
-                               : fill(wb ? S.spark.verdict.luftvattenWb : S.spark.verdict.luftvattenNoWb, { vbRange: vbRangeStr() }));
-      } else if (o.id === 'bergvarme') {
-        parts.push(longNonLead ? fill(S.spark.verdict.discloseBergvarme, { pbRange: n.pbRange })
-                               : S.spark.verdict.bergvarme);
-      } else {
-        parts.push(esc(o.label));
-      }
-      // OWNER POLICY V10 (P2): a long payback on the lead is stated plainly, never hidden.
-      // (pbRange guard: prose never carries the EMPTY glyph — the figure row does.)
-      if (isLead && rec.longPb && n.pbRange && n.pbRange !== EMPTY) {
-        parts.push(fill(S.spark.longPbLine, { pbRange: n.pbRange }));
-      }
-      verdict = parts.join(' ');
-      var invest = n.investRange ? '~' + n.investRange + ' kr' : EMPTY;
-      var pb = (n.pbRange && n.pbRange !== EMPTY) ? '~' + n.pbRange + ' år' : EMPTY;
-      figs = '<dl class="sp-figs">' + figRow(S.spark.figInvest, invest) + figRow(S.spark.figPayback, pb) + '</dl>';
+    // qualitative row (no numbers): the ONLY place a text description remains
+    if (o.numeric === false) {
+      return '<p class="sp-verdict">' + esc(isLead ? S.spark.verdict.styrningLead : S.spark.verdict.styrning) + '</p>';
     }
-    return (verdict ? '<p class="sp-verdict">' + verdict + '</p>' : '') + figs;
+    // greyed / ineligible: keep the reason (candour: greyed WITH reason)
+    if (!o.eligible) {
+      return '<p class="sp-verdict">' + esc(S.reason[o.ineligibleReason] || '') + '</p>';
+    }
+    // behåll context row: one quiet figure, no prose
+    if (o.id === 'behall') {
+      return figCols([{ k: S.spark.figInvest, v: 'Noll kronor' }]);
+    }
+    // an option that raises cost: short honest note, no positive figures to column
+    if (o.saving[1] <= 0) {
+      return '<p class="sp-verdict">' + esc(S.spark.verdict.dyrare) + '</p>';
+    }
+    // THE numeric pump rows: three columns, NO paragraph (owner directive)
+    var n = recNumbers(o);
+    var invest = n.investRange ? '~' + n.investRange + ' kr' : EMPTY;
+    var pb = (n.pbRange && n.pbRange !== EMPTY) ? '~' + n.pbRange + ' år' : EMPTY;
+    return figCols([
+      { k: S.spark.figInvest,  v: invest },
+      { k: S.spark.figPayback, v: pb },
+      { k: S.spark.figSaving,  v: '~' + n.savingRange }
+    ]);
   }
 
   function renderBattDrop(R, rec) {
+    // battery HAS numbers → columns, no prose (grön teknik price + the yearly gain)
     var bs = battSlots(R);
-    var isLead = rec.lead.type === 'action' && rec.lead.id === 'batteri';
-    var verdict = isLead ? fill(S.spark.verdict.batteriLead, { battRange: bs.battRange })
-                         : S.spark.verdict.batteri;
-    var figs = '<dl class="sp-figs">' +
-      figRow(S.spark.figBattGross, bs.battGross + ' kr') +
-      figRow(S.spark.figBattNet, '~' + bs.battNet + ' kr') + '</dl>';
-    return '<p class="sp-verdict">' + verdict + '</p>' + figs;
+    return figCols([
+      { k: S.spark.figBattGross, v: bs.battGross + ' kr' },
+      { k: S.spark.figBattNet,   v: '~' + bs.battNet + ' kr' },
+      { k: S.spark.figSaving,    v: '~' + bs.battRange }
+    ]);
   }
 
   var sparkDrawn = false;
