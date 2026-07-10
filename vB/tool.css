@@ -158,13 +158,15 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .gearhead{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--ty-eyebrow);letter-spacing:var(--tr-eyebrow);
   text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:var(--sp-4)}
 .gearcopy{font-size:var(--ty-label);font-weight:300;line-height:var(--lh-body);color:var(--muted);margin:0}
-.lbl{font-size:var(--ty-label);font-weight:300;line-height:var(--lh-body);color:var(--muted);margin-bottom:var(--sp-1h);
+/* the field label follows the SAME methodology as the heat legend (.hp-legend):
+   the question is bold ink (ty-body/500), its helper is soft slate (ty-label/300) */
+.lbl{font-size:var(--ty-body);font-weight:500;line-height:var(--lh-snug);color:var(--ink);margin-bottom:var(--sp-2);
   display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .lbl > svg,.lbl span > svg{width:1.5rem;height:1.5rem;color:var(--slate);flex:0 0 auto}
 .lbl-row{display:flex;align-items:center;justify-content:space-between}
 .lbl-row > span:first-child{display:inline-flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .lbl-val{font-size:var(--ty-body);color:var(--ink);font-weight:500;transition:transform var(--t-fast) var(--ease-out)}
-.lbl-soft{color:var(--slate);font-weight:300}
+.lbl-soft{font-size:var(--ty-label);color:var(--slate);font-weight:300}
 /* the reusable assumption tag — real text, never colour-only */
 .antag{font-size:var(--ty-micro);color:var(--footnote);font-weight:300}
 .antag[hidden]{display:none}
