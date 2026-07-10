@@ -203,9 +203,7 @@
       figInvest: 'Investering efter ROT', figPayback: 'Återbetald på',
       figBattGross: 'Pris från', figBattNet: 'Efter grön teknik 50 %',
       figBehall: 'Noll kronor i investering',
-      utanPris: 'utan pris', tagBehall: 'rimligast just nu', tagBatt: '(kräver solel)',
-      subRedan: ' Du har redan ett effektivt system. Staplarna visar vad ett byte skulle spara, som jämförelse.',
-      hint: 'Har du solceller? Ange det till vänster så räknar vi med din solel.'
+      utanPris: 'utan pris', tagBehall: 'rimligast just nu'
     },
     sbMix: {
       line: '{label} ~{share} % av värmen · ca {kr} kr per år',
@@ -226,7 +224,7 @@
       zip: 'Postnumret ska vara fem siffror.',
       email: 'Kolla e-postadressen, den ser inte komplett ut.'
     },
-    methodLegal: 'Det här är en uppskattning byggd på schabloner och försiktiga antaganden. Den är inte ett erbjudande, inte ett bindande pris och inte ekonomisk rådgivning. Verklig kostnad och besparing beror på huset, avtalet och vädret, och kan bli både högre och lägre. En offert från oss räknas alltid på ditt hus och gäller före kalkylatorn. Vi jobbar i Stockholmsområdet idag.'
+    methodLegal: 'Det här är en uppskattning byggd på schabloner och försiktiga antaganden. Den är inte ett erbjudande, inte ett bindande pris och inte ekonomisk rådgivning. Verklig kostnad och besparing beror på huset, avtalet och vädret, och kan bli både högre och lägre.'
   };
 
   /* ---------- labels for the data-driven inputs ---------- */
@@ -731,9 +729,6 @@
   function firstTouch(silent) {
     if (userTouched) return;
     userTouched = true;
-    document.body.classList.add('has-msum');
-    var m = $('#msum'); if (m) m.classList.add('on');
-    msumSync();
     if (!silent) track('calc_first_touch');
   }
 
@@ -783,7 +778,6 @@
     renderStorybar(R);
     renderSpark(R, rec);
     renderCtaBlock(rec);
-    renderMsum(R);
     renderHpSummary(R);
 
     // complement cap note (engine clamp surfaced, never silent)
@@ -981,7 +975,7 @@
     var br = battRange(R); if (!br) return null;
     var p = {
       id: 'batteri', name: 'Solcellsbatteri', kind: 'batt', batt: true, off: false,
-      isRec: false, showFlag: false, tag: S.spark.tagBatt, valClass: '',
+      isRec: false, showFlag: false, tag: '', valClass: '',   /* the row only renders when solar=Finns — a "kräver solel" tag would be noise */
       hasBar: true, pay: null, payWeak: false
     };
     p.val = (br.lo === br.hi) ? '+' + nf(br.lo) + ' kr/år' : '+' + nf(br.lo) + '-' + nf(br.hi) + ' kr/år';
@@ -1063,13 +1057,6 @@
   function renderSpark(R, rec) {
     var list = $('#sparkList'); if (!list) return;
     var wb = inferWaterborne(heatSelection());
-
-    // sub gains the redan-effektiv sentence on that branch (rec is the truth)
-    var sub = $('#sparkSub');
-    if (sub) {
-      sub.textContent = 'Besparingen gäller värme och varmvatten. Hushållselen ligger kvar oavsett väg.' +
-        (rec.branch === 'redanEffektiv' ? S.spark.subRedan : '');
-    }
 
     // row set: rank.js order EXACTLY; behall pinned first on behållFirst, dropped on standard
     var visible = visibleOptions(R).slice();
@@ -1163,13 +1150,6 @@
       });
     }
     sparkDrawn = true;
-
-    // the no-solar hint (planeras/finns → hidden)
-    var hint = $('#sparkHint');
-    if (hint) {
-      if (state.solarMode === 'nej') { hint.textContent = S.spark.hint; hint.hidden = false; }
-      else { hint.textContent = ''; hint.hidden = true; }
-    }
   }
 
   /* accordion: one dropdown open at a time; tap the open row to collapse it */
@@ -1247,65 +1227,7 @@
     cta.classList.toggle('cta--ghost', soft && !cta.classList.contains('is-close'));
   }
 
-  /* ---------- the sticky mobile bar (frozen mechanic) ---------- */
-  var msumState = { txt: '' };
-  function renderMsum(R) {
-    var v = $('#msumVal'); if (!v) return;
-    var av = anchorVals(R);
-    var txt = anchorText(av) + ' kr per år';
-    if (txt !== msumState.txt) {
-      msumState.txt = txt;
-      if (!REDUCED) {
-        v.classList.add('flash');
-        setTimeout(function () { v.classList.remove('flash'); }, 140);
-      }
-      v.textContent = txt;
-    }
-  }
-
-  var msumSup = { result: false, kb: false, lead: false };
-  function msumSync() {
-    var m = $('#msum'); if (!m) return;
-    var show = userTouched && !msumSup.result && !msumSup.kb && !msumSup.lead;
-    m.classList.toggle('in', show);
-  }
-  function wireMsum() {
-    var m = $('#msum'); if (!m) return;
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        msumSup.result = entries[0].isIntersecting;
-        msumSync();
-      }, { threshold: 0.12, rootMargin: '0px 0px -64px 0px' });
-      io.observe($('#result'));
-    }
-    var kbT;
-    function isKb(t) {
-      return t && t.matches && t.matches('input[type="number"],input[type="text"],input[type="tel"],input[type="email"],select,textarea');
-    }
-    document.addEventListener('focusin', function (e) {
-      if (!isKb(e.target)) return;
-      // near-dormant now: no left-column control opens a keyboard; lead-form fields still do
-      if (window.visualViewport && window.visualViewport.height >= 0.75 * window.innerHeight) {
-        setTimeout(function () {
-          msumSup.kb = !!(document.activeElement && isKb(document.activeElement) &&
-            window.visualViewport.height < 0.75 * window.innerHeight);
-          msumSync();
-        }, 300);
-      }
-      msumSup.kb = true;
-      msumSync();
-    });
-    document.addEventListener('focusout', function (e) {
-      if (!isKb(e.target)) return;
-      clearTimeout(kbT);
-      kbT = setTimeout(function () { msumSup.kb = false; msumSync(); }, 150);
-    });
-    $('#msumGo').addEventListener('click', function () {
-      track('msum_tap');
-      $('#result').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
-    });
-    msumSync();
-  }
+  /* (the sticky mobile bar was removed on owner order — mobile flows inputs-first, result below) */
 
   /* ---------- the multi-system split line under the share rows ---------- */
   function renderHpSummary(R) {
@@ -1619,10 +1541,8 @@
       cta.classList.add('is-close');
       cta.classList.remove('cta--ghost');
       cta.innerHTML = 'Stäng ' + ICONS.chevUp;
-      msumSup.lead = true; msumSync();
       setTimeout(function () { try { $('#leadName').focus(); } catch (e) {} }, REDUCED ? 0 : 220);
     } else {
-      msumSup.lead = false; msumSync();
       restoreCta();
     }
     // NO scrollIntoView.
@@ -1632,7 +1552,6 @@
     var w = $('#leadInline');
     toggleEl(w, false);
     var cta = $('#ctaBtn'); cta.setAttribute('aria-expanded', 'false');
-    msumSup.lead = false; msumSync();
     restoreCta();
     try { cta.focus(); } catch (e) {}
   }
@@ -1701,8 +1620,7 @@
     buildInputs();
     syncAsmTags();
     wireControls();
-    wireMsum();
-    if (decodedAny) firstTouch(true);   // a shared link counts as touched (msum on, no assumed-state notes)
+    if (decodedAny) firstTouch(true);   // a shared link counts as touched (no assumed-state notes)
     recompute();
     booted = true;
 

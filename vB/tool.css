@@ -3,7 +3,7 @@
  * Two-pane single-canvas calculator. LEFT white input card (7 flat controls) /
  * RIGHT midnight result card: energy-TOTAL anchor → story bar → SPARSTAPLARNA
  * (#spark: savings bars + tap-to-expand rec) → CTA block → method
- * (bullets + legal, NO curve). Sticky mobile result bar #msum.
+ * (bullets + legal, NO curve). No sticky bar — mobile flows inputs-first.
  * Single font (Outfit) canonical; hierarchy by weight (300/500/900).
  * All spacing on --sp-* (4px grid, rem on 10px base); all type on --ty-*.
  * Motion is opacity / transform / grid-fraction, <=300ms, reduced-motion safe.
@@ -93,12 +93,21 @@ body{margin:0;font-size:1.6rem;font-family:'Outfit',system-ui,-apple-system,sans
 *{box-sizing:border-box}
 button{font-family:inherit}
 
+/* ---- touch polish: no grey/blue tap flash, no accidental text selection on controls ----
+ * The blue "bubble" the owner saw = iOS tap-highlight + drag-selection. Buttons, sliders
+ * and their label rows are interaction surfaces, not text — selection off, highlight off.
+ * The lead form fields and all body copy stay fully selectable. */
+html{-webkit-tap-highlight-color:transparent}
+button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
+  -webkit-user-select:none;-moz-user-select:none;user-select:none}
+.input .lbl,.sb-legend,.spark-legend{-webkit-user-select:none;user-select:none}
+
 /* screen-reader-only (result live region) */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 /* ---- tabular numerals: SINGLE owner ---- */
 .result,.input{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1}
-.anchor-sub,.lead-sub,.gearcopy,.method-body p{font-variant-numeric:normal}
+.lead-sub,.gearcopy,.method-body p{font-variant-numeric:normal}
 
 /* ============================ LAYOUT — the wide, de-boxed shell ============================ */
 .page{max-width:var(--shell-max);margin:0 auto;padding:var(--sp-8) var(--shell-gutter) var(--sp-9)}
@@ -283,11 +292,12 @@ button{font-family:inherit}
   vertical-align:middle;margin-right:var(--sp-2)}
 /* B. anchor — DAGENS kostnad */
 .anchor-num{font-size:var(--ty-display);font-weight:900;line-height:var(--lh-display);
-  letter-spacing:var(--tr-display);color:#fff;margin:var(--sp-3) 0 0;font-variant-numeric:tabular-nums;
+  letter-spacing:var(--tr-display);color:#fff;margin:var(--sp-3) 0 var(--sp-4);font-variant-numeric:tabular-nums;
   transition:opacity var(--t-fast) var(--ease)}
 .anchor-num.flash{opacity:.4}
-.anchor-per{font-size:var(--ty-lead);font-weight:300;color:var(--subtext);letter-spacing:0}
-.anchor-sub{font-size:var(--ty-label);font-weight:300;color:var(--subtext);margin:var(--sp-1) 0 var(--sp-4)}
+/* the unit is quiet and NEVER wraps mid-phrase: inline-block + nowrap drops it as one piece */
+.anchor-per{display:inline-block;font-size:var(--ty-body);font-weight:300;color:var(--subtext);
+  letter-spacing:0;white-space:nowrap}
 
 /* C. story bar */
 .storybar{display:flex;height:3.6rem;border-radius:var(--r-sm);overflow:hidden;width:100%}
@@ -316,7 +326,6 @@ button{font-family:inherit}
  * two figure lines). Replaces the old #compare cost visual AND the #recs plate/wall. */
 .spark{display:block;margin-top:var(--sp-6);border:0;padding:0}
 .spark-h{font-size:var(--ty-h);font-weight:500;color:#fff;margin:0;line-height:var(--lh-tight)}
-.spark-sub{font-size:var(--ty-label);font-weight:300;color:var(--subtext);margin:var(--sp-1) 0 0;line-height:var(--lh-body)}
 
 .spark-legend{display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap;margin-top:var(--sp-3);
   font-size:var(--ty-micro);color:var(--footnote)}
@@ -386,9 +395,6 @@ button{font-family:inherit}
 .sp-figs dd{font-size:var(--ty-label);font-weight:500;color:#fff;margin:0;font-variant-numeric:tabular-nums;white-space:nowrap}
 .sp-fignote{font-size:var(--ty-label);font-weight:500;color:#fff;margin:0;font-variant-numeric:tabular-nums}
 
-.spark-hint{font-size:var(--ty-label);font-weight:300;color:var(--footnote);margin:var(--sp-3) 0 0;
-  line-height:var(--lh-body)}
-.spark-hint[hidden]{display:none}
 
 /* entrance: bars scaleX, band fades, chip pops last (JS toggles is-drawing/is-drawn) */
 .spark-list.is-drawing .sp-fill{transform:scaleX(0)}
@@ -484,23 +490,6 @@ button{font-family:inherit}
 .lead-success:focus-visible{outline:2px solid var(--neon);outline-offset:2px;border-radius:var(--r-sm)}
 
 /* ============================ STICKY MOBILE RESULT BAR ============================ */
-.msum{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;
-  align-items:center;justify-content:space-between;gap:var(--sp-3);
-  padding:1rem var(--sp-4) calc(1rem + env(safe-area-inset-bottom,0px));
-  background:rgba(9,11,50,.96);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  border-top:1px solid rgba(0,196,167,.35);box-shadow:0 -0.6rem 2.4rem rgba(9,11,50,.28);
-  transform:translateY(102%);transition:transform var(--t-mid) var(--ease-out)}
-.msum.in{transform:translateY(0)}
-@media (max-width:768px){.msum.on{display:flex}}          /* desktop never shows it */
-.msum-txt{min-width:0;display:flex;flex-direction:column;gap:.1rem}
-.msum-k{font-size:var(--ty-micro);letter-spacing:.06em;text-transform:uppercase;color:var(--subtext)}
-.msum-v{font-size:1.8rem;font-weight:500;color:#fff;font-variant-numeric:tabular-nums;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity var(--t-fast) var(--ease)}
-.msum-v.flash{opacity:.4}
-.msum-go{flex:0 0 auto;min-height:44px;padding:0 var(--sp-4);border:0;border-radius:var(--r-md);
-  background:var(--teal);color:#fff;font-family:inherit;font-size:var(--ty-label);font-weight:500;cursor:pointer}
-.msum-go:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
-
 /* ============================ MOTION ============================ */
 /* reveals — grid-template-rows:0fr->1fr (replaces the hidden swap) */
 .gear-collapsed{display:grid;grid-template-rows:0fr;opacity:0;
@@ -539,11 +528,7 @@ button{font-family:inherit}
   .leadclose{width:44px;height:44px}
   /* Sparstaplarna: 12px track on mobile; name ellipsizes, value never truncates */
   .sp-track{height:1.2rem}
-  /* zero CLS: reserve the hint slot so a fjärrvärme/vet-inte notice never shifts the picker */
-  .hp-hint{display:block;min-height:3.6rem;margin:var(--sp-2) 0 0}
-  .hp-hint[hidden]{display:block;visibility:hidden}
-  /* room for the fixed bar (#foot is gone — the page shell carries the clearance) */
-  body.has-msum .page{padding-bottom:calc(6.4rem + env(safe-area-inset-bottom,0px))}
+  /* the hint renders only when it has something to say — no phantom reserved slot */
 }
 @media (max-width:480px){
   .page{padding:var(--sp-4) var(--sp-3) var(--sp-8)}
@@ -556,6 +541,9 @@ button{font-family:inherit}
   /* mobile 375: name may wrap, value never truncates; figures tighten */
   .sp-name{white-space:normal}
   .sp-figs > div{gap:var(--sp-2)}
+  /* "Så har vi räknat" gets a touch larger tap surface for 55+ thumbs (owner ask) */
+  .method summary{font-size:1.5rem;min-height:4.4rem;align-items:center}
+  .method summary svg{width:1.8rem;height:1.8rem}
 }
 /* iPad 769-991 (two-pane, tighter result column): one deliberate tune */
 @media (min-width:769px) and (max-width:991px){

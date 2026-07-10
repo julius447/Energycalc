@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Energikalkylatorn: vad kostar det att värma ditt hus?</title>
 <meta name="description" content="Se vad värmen kostar i ditt hus och vad som är värt att göra. Försiktiga spann, fält-SPF, ROT 30 % på arbetet. Gratis, utan mejl.">
-<link rel="stylesheet" href="tool.css?v=12">
+<link rel="stylesheet" href="tool.css?v=13">
 </head>
 <body>
 <div class="page">
@@ -114,9 +114,8 @@
           <span class="eyebrow" id="eyebrow">Så använder ditt hus energi idag</span>
         </div>
 
-        <!-- B. anchor (now the household-inclusive total, display only) -->
+        <!-- B. anchor (now the household-inclusive total, display only; breakdown = the legend below) -->
         <p class="anchor-num" id="anchorNum">&#8212;</p>
-        <p class="anchor-sub">uppvärmning, varmvatten &amp; hushållsel</p>
 
         <!-- C. story bar (KEEP + member-line upgrade — R2) -->
         <div class="storybar" id="storyBar" aria-hidden="true">
@@ -132,14 +131,12 @@
         <!-- D+E. SPARSTAPLARNA — savings bars + tap-to-expand rec (replaces #compare + #recs) -->
         <section class="spark" id="spark" aria-labelledby="sparkH">
           <h2 class="spark-h" id="sparkH">Så mycket kan du spara per år</h2>
-          <p class="spark-sub" id="sparkSub">Besparingen gäller värme och varmvatten. Hushållselen ligger kvar oavsett väg.</p>
           <div class="spark-legend" aria-hidden="true">
             <span class="sp-lg"><i class="sp-sw sp-sw-low"></i>räknat lågt</span>
             <span class="sp-lg"><i class="sp-sw sp-sw-band"></i>upp till</span>
             <span class="sp-colhead">Du sparar per år</span>
           </div>
           <div class="spark-list" id="sparkList" role="list"><!-- .sp-item rows built by app.js --></div>
-          <p class="spark-hint" id="sparkHint" role="status" aria-live="polite" hidden></p>
         </section>
 
         <!-- sr-only live region (the ONE result announcer) -->
@@ -207,19 +204,10 @@
   </div>
 </div>
 
-<!-- sticky mobile result bar (outside .page) -->
-<div class="msum" id="msum" role="region" aria-label="Ditt resultat">
-  <div class="msum-txt">
-    <span class="msum-k">Idag</span>
-    <b class="msum-v" id="msumVal">&#8212;</b>
-  </div>
-  <button type="button" class="msum-go" id="msumGo">Se resultatet</button>
-</div>
-
 <!-- 5-layer chassis: data -> engine -> rank -> app -->
-<script src="data.js?v=12"></script>
-<script src="engine.js?v=12"></script>
-<script src="rank.js?v=12"></script>
-<script src="app.js?v=12"></script>
+<script src="data.js?v=13"></script>
+<script src="engine.js?v=13"></script>
+<script src="rank.js?v=13"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>
