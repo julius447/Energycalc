@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>OG card — Energikalkylatorn</title>
+<style>
+  @font-face{font-family:Outfit;font-weight:300;src:url(../fonts/Outfit-Light.woff2) format("woff2")}
+  @font-face{font-family:Outfit;font-weight:500;src:url(../fonts/Outfit-Medium.woff2) format("woff2")}
+  @font-face{font-family:Outfit;font-weight:900;src:url(../fonts/Outfit-Black.woff2) format("woff2")}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1200px;height:630px;overflow:hidden}
+  .og{position:relative;width:1200px;height:630px;background:#090b32;overflow:hidden;
+    font-family:Outfit,system-ui,sans-serif;color:#fff;
+    /* the tool's own aurora signature */
+    background-image:
+      radial-gradient(120% 90% at 88% -8%, rgba(0,196,167,.28), transparent 56%),
+      radial-gradient(90% 70% at 4% 6%, rgba(85,255,154,.12), transparent 60%),
+      radial-gradient(100% 120% at 60% 120%, rgba(9,11,50,.55), transparent 60%);}
+  .og::after{content:'';position:absolute;inset:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+  .pad{position:relative;z-index:2;padding:72px 80px;height:100%;display:flex;flex-direction:column;justify-content:space-between}
+  .top{display:flex;align-items:center;gap:18px}
+  .word{font-weight:900;font-size:34px;letter-spacing:-.02em}
+  .word b{color:#00c4a7}
+  .eyebrow{font-weight:500;font-size:18px;letter-spacing:.16em;text-transform:uppercase;color:#5dcaa5;
+    padding-left:20px;border-left:2px solid rgba(85,255,154,.35);line-height:1.1}
+  .mid{max-width:760px}
+  .hook{font-weight:900;font-size:82px;line-height:1.02;letter-spacing:-.02em}
+  .hook em{font-style:normal;color:#00c4a7}
+  .sub{margin-top:26px;font-weight:300;font-size:30px;line-height:1.35;color:#aeb8d4;max-width:680px}
+  .foot{display:flex;align-items:center;gap:20px;font-weight:500;font-size:22px;color:#8a93b5}
+  .foot .dot{width:5px;height:5px;border-radius:50%;background:#3a4477}
+  .foot .url{color:#cfe9e0}
+  /* the Sparstaplarna motif — the tool's signature device */
+  .bars{position:absolute;right:80px;bottom:150px;z-index:2;display:flex;flex-direction:column;gap:16px;width:300px}
+  .bar{height:22px;border-radius:999px;background:#0c1040;position:relative;overflow:hidden}
+  .bar span{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:#00c4a7}
+  .bar .band{background:rgba(159,225,203,.34)}
+  .b1 span{width:44%} .b1 .band{left:44%;width:20%}
+  .b2 span{width:66%} .b2 .band{left:66%;width:24%}
+  .b3 span{width:80%} .b3 .band{left:80%;width:18%}
+  .star{position:absolute;left:-2px;top:-30px;font-size:15px;font-weight:500;color:#04342c;
+    background:#9fe1cb;border-radius:999px;padding:4px 12px;white-space:nowrap}
+</style>
+</head>
+<body>
+  <div class="og">
+    <div class="bars" aria-hidden="true">
+      <div class="bar b1"><span></span><span class="band"></span></div>
+      <div class="bar b2"><span></span><span class="band"></span></div>
+      <div class="bar b3"><span></span><span class="band"></span></div>
+    </div>
+    <div class="pad">
+      <div class="top">
+        <span class="word">Amp<b>y</b></span>
+        <span class="eyebrow">Energikalkylatorn</span>
+      </div>
+      <div class="mid">
+        <div class="hook">Betalar du för<br>mycket för <em>elen?</em></div>
+        <div class="sub">Räkna på ditt hus och se vad som är värt att göra.</div>
+      </div>
+      <div class="foot">
+        <span>Gratis, utan mejl</span><span class="dot"></span><span class="url">ampy.se</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
