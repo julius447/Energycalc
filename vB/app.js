@@ -166,6 +166,7 @@
       /* V10 (P4/AR-3): quiet action rows — "utan pris", no bar, NO invented numbers */
       actionName: { service: 'Service och trimning av värmepumpen', solplan: 'Solceller med batteri' },
       figInvest: 'Investering efter ROT', figPayback: 'Återbetald på', figSaving: 'Lägre per år',
+      figEfter: 'Din kostnad efter',
       figBattGross: 'Pris från', figBattNet: 'Efter grön teknik',
       figBehall: 'Noll kronor i investering',
       utanPris: 'utan pris', tagBehall: 'Så ligger du idag'
@@ -1057,12 +1058,12 @@
       sparCaret() + '</span>';
     var barline = '';
     if (p.hasBar) {
+      // the payback chip lived here; it is now shown once, in the expanded
+      // "Återbetald på" column (owner: the chip duplicated that number)
       barline = '<span class="sp-barline"><span class="sp-track" aria-hidden="true">' +
         '<span class="sp-fill" style="width:' + p.fillPct.toFixed(2) + '%"></span>' +
         (p.bandW > 0 ? '<span class="sp-band" style="left:' + p.bandLeft.toFixed(2) + '%;width:' + p.bandW.toFixed(2) + '%"></span>' : '') +
-        '</span>' +
-        (p.pay ? '<span class="sp-pay' + (p.payWeak ? ' sp-pay--weak' : '') + '">' + esc(p.pay) + '</span>' : '') +
-        '</span>';
+        '</span></span>';
     }
     return flag + head + barline;
   }
@@ -1097,7 +1098,7 @@
     return '<div class="sp-cols' + (items.length === 2 ? ' sp-cols--2' : '') + '">' +
       items.map(function (c) {
         return '<div class="sp-col"><span class="sp-col-k">' + esc(c.k) +
-               '</span><span class="sp-col-v">' + esc(c.v) + '</span></div>';
+               '</span><span class="sp-col-v' + (c.cls ? ' ' + c.cls : '') + '">' + esc(c.v) + '</span></div>';
       }).join('') + '</div>';
   }
 
@@ -1119,24 +1120,30 @@
     if (o.saving[1] <= 0) {
       return '<p class="sp-verdict">' + esc(S.spark.verdict.dyrare) + '</p>';
     }
-    // THE numeric pump rows: three columns, NO paragraph (owner directive)
+    // THE numeric pump rows: three columns, NO paragraph (owner directive).
+    // The saving is the row's hero value; the columns give the CONCRETE result:
+    // the new yearly total (idag total − saving), the cost, the payback.
     var n = recNumbers(o);
     var invest = n.investRange ? '~' + n.investRange + ' kr' : EMPTY;
     var pb = (n.pbRange && n.pbRange !== EMPTY) ? '~' + n.pbRange + ' år' : EMPTY;
+    // efter = today's household-inclusive total minus the mid saving (same base as the anchor)
+    var efterKr = roundTo(R.baseline.currentAnnual + R.baseline.householdCost - o.saving[1], ROUND.hero);
+    var efter = '~' + nf(Math.max(0, efterKr)) + ' kr';
+    var pbWeak = (o.paybackMid != null && o.paybackMid > D.rec.pbComfort);
     return figCols([
+      { k: S.spark.figEfter,   v: efter },
       { k: S.spark.figInvest,  v: invest },
-      { k: S.spark.figPayback, v: pb },
-      { k: S.spark.figSaving,  v: '~' + n.savingRange }
+      { k: S.spark.figPayback, v: pb, cls: pbWeak ? 'sp-col-v--weak' : '' }
     ]);
   }
 
   function renderBattDrop(R, rec) {
-    // battery HAS numbers → columns, no prose (grön teknik price + the yearly gain)
+    // battery is an ADD-ON, not a heating swap → no "efter total". Its yearly gain is
+    // the row hero; the columns show the price (owner: numbers over prose, no redundancy).
     var bs = battSlots(R);
     return figCols([
       { k: S.spark.figBattGross, v: bs.battGross + ' kr' },
-      { k: S.spark.figBattNet,   v: '~' + bs.battNet + ' kr' },
-      { k: S.spark.figSaving,    v: '~' + bs.battRange }
+      { k: S.spark.figBattNet,   v: '~' + bs.battNet + ' kr' }
     ]);
   }
 
