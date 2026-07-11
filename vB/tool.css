@@ -567,6 +567,12 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   .storybar{height:3.2rem}
   /* mobile 375: figures tighten (name-wrap now lives in the ≤991 block, MM2) */
   .sp-figs > div{gap:var(--sp-2)}
+  /* the 3 stat columns: keep each value on ONE line so a range never breaks mid-number
+     (owner: the wrapped "25 500-\n30 500 kr" was hard to read). Tighten gap + drop padding
+     and cap the value type so the widest range fits its column. */
+  .sp-drop-body{padding:var(--sp-3) var(--sp-2) var(--sp-4)}
+  .sp-cols{gap:var(--sp-2)}
+  .sp-col-v{font-size:1.2rem;white-space:nowrap;letter-spacing:-.01em}
   /* "Så har vi räknat" gets a touch larger tap surface for 55+ thumbs (owner ask) */
   .method summary{font-size:1.5rem}
   .method summary svg{width:1.8rem;height:1.8rem}

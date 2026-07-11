@@ -60,7 +60,7 @@
   /* Sparstaplarna saving value: '~lo-hi kr/år' (bulletproof unit), collapses to '~mid kr/år' */
   function savRangeYr(lo, hi, step) {
     var a = Math.max(0, roundTo(lo, step)), b = Math.max(0, roundTo(hi, step));
-    return (a === b) ? '~' + nf(a) + ' kr/år' : '~' + nf(a) + '-' + nf(b) + ' kr/år';
+    return (a === b) ? '~' + nf(a) + ' kr/år' : nf(a) + '-' + nf(b) + ' kr/år';   /* range: no ~ */
   }
   var ROUND = (D.meta && D.meta.rounding) ? D.meta.rounding : { hero: 1000, stat: 500, payback: 0.5 };
 
@@ -165,8 +165,8 @@
       },
       /* V10 (P4/AR-3): quiet action rows — "utan pris", no bar, NO invented numbers */
       actionName: { service: 'Service och trimning av värmepumpen', solplan: 'Solceller med batteri' },
-      figInvest: 'Investering efter ROT', figPayback: 'Återbetald på', figSaving: 'Du sparar per år',
-      figEfter: 'Din nya årskostnad',
+      figInvest: 'Investering efter ROT', figPayback: 'Återbetald på', figSaving: 'Besparing per år',
+      figEfter: 'Årskostnad',
       figBattGross: 'Pris från', figBattNet: 'Efter grön teknik',
       figBehall: 'Noll kronor i investering',
       utanPris: 'utan pris', tagBehall: 'Så ligger du idag'
@@ -844,7 +844,7 @@
       mid: Math.max(0, roundTo(hv + hh,           ROUND.hero))
     };
   }
-  function anchorText(av) { return '~' + (av.single ? nf(av.mid) : nf(av.lo) + '-' + nf(av.hi)); }
+  function anchorText(av) { return av.single ? '~' + nf(av.mid) : nf(av.lo) + '-' + nf(av.hi); }   /* range: no ~ (the span implies approx); single: keep ~ */
 
   function renderAnchor(R) {
     var av = anchorVals(R);
@@ -1135,9 +1135,11 @@
     var sHi = Math.max(0, roundTo(o.saving[2], ROUND.stat));
     var eA = Math.max(0, av.lo - sLo), eB = Math.max(0, av.hi - sHi);
     var efterLo = Math.min(eA, eB), efterHi = Math.max(eA, eB);
-    var efter  = (efterLo === efterHi) ? '~' + nf(efterLo) + ' kr' : '~' + nf(efterLo) + '-' + nf(efterHi) + ' kr';
-    var bespar = (sLo === sHi)         ? '~' + nf(sLo)     + ' kr' : '~' + nf(sLo)     + '-' + nf(sHi)     + ' kr';
-    var pb = (n.pbRange && n.pbRange !== EMPTY) ? '~' + n.pbRange + ' år' : EMPTY;
+    // ranges drop the "~" (the span already means "ungefär, någonstans här" — owner: the ~ made
+    // the wrapped columns hard to read); a lone single value keeps the ~ as its only approx-marker
+    var efter  = (efterLo === efterHi) ? '~' + nf(efterLo) + ' kr' : nf(efterLo) + '-' + nf(efterHi) + ' kr';
+    var bespar = (sLo === sHi)         ? '~' + nf(sLo)     + ' kr' : nf(sLo)     + '-' + nf(sHi)     + ' kr';
+    var pb = (n.pbRange && n.pbRange !== EMPTY) ? ((n.pbRange.indexOf('-') >= 0 ? n.pbRange : '~' + n.pbRange) + ' år') : EMPTY;
     var pbWeak = (o.paybackMid != null && o.paybackMid > D.rec.pbComfort);
     return figCols([
       { k: S.spark.figEfter,   v: efter },
