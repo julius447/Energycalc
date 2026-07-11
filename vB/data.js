@@ -49,11 +49,11 @@ window.AMPY_DATA = {
   pumps: {
     luftluft: {
       id: 'luftluft', label: 'Luft-luft',
-      spf: 2.5, spfRange: [2.5, 3.0],       // point AT band floor = deliberately max-conservative for the komplement device; [GAP-R1-1] expert may symmetrise (e.g. point 2.6 or floor 2.3) — no field source found in the V8 pass
+      spf: 2.7, spfRange: [2.5, 3.0],       // V21 CHANGE (V21-spf §2.1): was 2.5 (point AT floor = double-conservative ~−7 %). Symmetrised to mid-band 2.7 to mirror luft-vatten; still ~40 % under rated SCOP 3,8–5,1 (field ~2,7–3,2, −7 °C rating floor). Range KEPT. src: luftvärmepump bäst-i-test 2026 / polarpumpen.se via web 2026-07-11. [GAP-R1-1 → energiexpert]
       isGround: false,
       isComplement: true,                    // candour invariant 6: komplement, not whole-house
       servedShare: 0.7,                      // [MODEL] caps modelled saving to served area; [GAP] expert signs
-      gross: 30000,                          // [FACT] R2 §1a luft-luft total installerat ~25 000–55 000; conservative ~30 000. V8 corroborated: varmekalkyl.se 2026 ~25 000–55 000 brutto. [GAP-R2-1]
+      gross: 28000,                          // V21 CHANGE (V21-invest §1): was 30000 (top of 2026 premium band). Trimmed to 28000 = top of the 2026 STANDARD band (bytautvärmepumpen/bygghemma: standard 18–28k, mid ~23k). Low payback impact (komplement, servedShare 0.7). src: bytautvarmepumpen.se/bygghemma.se via web 2026-07-11. [GAP-R2-1]
       laborShare: 0.30,                      // [FACT] R2 §2 schablon arbetskostnad luftpump 30 %
       requiresWaterborne: false
     },
@@ -76,12 +76,12 @@ window.AMPY_DATA = {
     },
     bergvarme: {
       id: 'bergvarme', label: 'Bergvärme',
-      spf: 2.9, spfRange: [2.7, 3.2],        // [GAP-R1-1] field anchor 2,7 (Energimyndigheten/SP real-home avg) sets the low end; conservative point 2,9. V8 verified KEEP: Energimyndighetens fältmätning genomsnitt 2,7; marknadens "5-10 år" räknar på SPEC-COP 3,5 (ej fält) — vi ligger rätt.
+      spf: 3.0, spfRange: [2.7, 3.2],        // V21 NUDGE (V21-spf §2.3): was 2.9. The 2,7 floor is Energimyndighetens OLD-fleet field average; a 2026 NEW install on radiators field-performs ~3,0–3,3, so 2,9 anchored an old-fleet avg as a new-install central. Point → 3,0 (modern-install field reality); floor KEPT at 2,7 (citable), top NOT widened past 3,2 (spec-COP 3,5 is not field). src: energimyndigheten.se/klimatsmart.se via web 2026-07-11. [GAP-R1-1 → energiexpert signs the nudge]
       isGround: true,                        // SPF flat across the year (ground temp stable, R1 §1c/§2)
       isComplement: false,
       servedShare: 1.0,
-      gross: 200000,                         // [FACT] R2 §1c ~150 000–280 000 (befintligt vattenburet); conservative ~200 000. V8 corroborated: varmekalkyl.se 2026 150 000–250 000 brutto. [GAP-R2-1]
-      grossNoWaterborne: 290000,             // [FACT] R2 §1c direktel adds ~60 000–120 000. V8 corroborated (adder): varmekalkyl.se 2026. [GAP-R2-1]
+      gross: 190000,                         // V21 CHANGE (V21-invest §1): was 200000 (band-mid, ~7–8 % above the specific 2026 150 m² examples = the one genuine invest pad). 190000 = avg of the two independent 2026 150 m² quotes (brabyggare 180k, varmekalkyl 192k); band 150–250k. src: brabyggare.se/varmekalkyl.se via web 2026-07-11. [GAP-R2-1]
+      grossNoWaterborne: 280000,             // V21 CHANGE (V21-invest §1): was 290000. = 190000 + 90000 waterborne adder (adder UNCHANGED, market-confirmed 60–120k). [GAP-R2-1]
       laborShare: 0.35,                      // [FACT] R2 §2 schablon vätska/vatten 35 % (bergvärme ROT-favourable)
       requiresWaterborne: true,
       // [GAP-R2-4] does Ampy install/quote bergvärme in the live footprint? Owner confirm.
@@ -113,13 +113,14 @@ window.AMPY_DATA = {
   marginalPriceSE3: 1.80, // kr/kWh, all-in marginal, annual baseline
 
   /* --- ELOMRÅDE: price region factor + curve-shape selector -----------------
-   * [FACT] Price region factors on the marginal price: SE1 0,80 / SE2 0,90 /
-   *   SE3 1,00 / SE4 1,10 (B2 §4). NOTE these differ from the BATTERY arbitrage
+   * [FACT] Price region factors on the marginal price: SE1 0,82 / SE2 0,85 /
+   *   SE3 1,00 / SE4 1,10 (V21-prices §2, computed from 2026 YTD elområde spot;
+   *   only spot varies by elområde, nät/skatt/moms are national). NOTE these differ from the BATTERY arbitrage
    *   region factors (see upsideRates.regionFactor): SE1 0,55 / SE2 0,70 /
    *   SE3 1,00 / SE4 1,55 — two different physical quantities, kept separate. */
   priceAreas: {
-    SE1: { id: 'SE1', label: 'SE1', factor: 0.80 },
-    SE2: { id: 'SE2', label: 'SE2', factor: 0.90 },
+    SE1: { id: 'SE1', label: 'SE1', factor: 0.82 }, // V21 (V21-prices §2): was 0.80; exact 2026 = 0,82 (SE1 spot 53,76 öre + 62 öre non-spot base). Minor. [GAP-price-region → energiexpert]
+    SE2: { id: 'SE2', label: 'SE2', factor: 0.85 }, // V21 CHANGE (V21-prices §2): was 0.90 (legacy "smooth ramp" guess, OVERSTATED SE2 → optimistic). 2026 SE2 spot 54,06 öre ≈ SE1, far below SE3; exact factor 0,82 + 0,03 multi-year cushion = 0,85. [GAP-price-region → energiexpert]
     SE3: { id: 'SE3', label: 'SE3', factor: 1.00 },
     SE4: { id: 'SE4', label: 'SE4', factor: 1.10 }
   },
@@ -231,7 +232,7 @@ window.AMPY_DATA = {
   fuelPrice: {
     olja:       2.40, // [GAP-E7-3] was 1.50 — villaolja ~20 900 kr/m³ ÷ (9 950 kWh/m³ × 0,85); energiexpert + Julius sign
     vedpellets: 1.20, // [GAP-E7-3] was 0.80 — pellets ~1,15 / köpt ved ~1,35, blended
-    fjarrvarme: 1.20, // [GAP-E7-3] was 1.10 — Nils Holgersson 2025 riksgenomsnitt 1,23; PRICE comparison framing unchanged
+    fjarrvarme: 1.25, // V21 CHANGE (V21-prices §3): was 1.20 (DOUBLE-CONSERVATIVE — below even the 2025 riks 1,23; understated the fjärrvärme customer's cost = anti-conversion). 2026 riks ~1,30; raised to conservative-exact 1,25. PRICE comparison framing unchanged. src: nilsholgersson.nu 2025 = 1 225 kr/MWh via web 2026-07-11. [GAP-E7-3]
     kamin:      1.45  // [GAP-E7-3] was 0.55 — KÖPT ved ÷ stove eff; egen ved = copy, not math
   },
 
