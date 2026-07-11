@@ -22,7 +22,7 @@
 <meta name="twitter:description" content="Räkna på ditt hus och se vad som är värt att göra. Gratis, utan mejl.">
 <meta name="twitter:image" content="https://julius447.github.io/Energycalc/vB/og.png?v=1">
 
-<link rel="stylesheet" href="tool.css?v=28">
+<link rel="stylesheet" href="tool.css?v=29">
 </head>
 <body>
 <div class="page">
@@ -181,8 +181,8 @@
                 <input class="lead-field" type="text" id="leadZip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="6" placeholder="123 45" required aria-describedby="errZip">
                 <p class="field-err" id="errZip" hidden></p>
 
-                <label class="lead-lbl" for="leadEmail">E-postadress <span class="lbl-soft">valfritt</span></label>
-                <input class="lead-field" type="email" id="leadEmail" name="email" autocomplete="email" placeholder="Namn@email.se" aria-describedby="errEmail">
+                <label class="lead-lbl" for="leadEmail">E-postadress <span class="lead-req" aria-hidden="true">*</span></label>
+                <input class="lead-field" type="email" id="leadEmail" name="email" autocomplete="email" placeholder="Namn@email.se" required aria-describedby="errEmail">
                 <p class="field-err" id="errEmail" hidden></p>
 
                 <!-- honeypot (hidden from humans) -->
@@ -220,9 +220,9 @@
 </div>
 
 <!-- 5-layer chassis: data -> engine -> rank -> app -->
-<script src="data.js?v=28"></script>
-<script src="engine.js?v=28"></script>
-<script src="rank.js?v=28"></script>
-<script src="app.js?v=28"></script>
+<script src="data.js?v=29"></script>
+<script src="engine.js?v=29"></script>
+<script src="rank.js?v=29"></script>
+<script src="app.js?v=29"></script>
 </body>
 </html>

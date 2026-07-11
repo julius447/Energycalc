@@ -190,6 +190,7 @@
       name: 'Skriv ditt namn.',
       phone: 'Skriv ett nummer vi kan nå dig på.',
       zip: 'Postnumret ska vara fem siffror.',
+      emailReq: 'Skriv din e-postadress.',
       email: 'Kolla e-postadressen, den ser inte komplett ut.'
     },
     methodLegal: 'Det här är en uppskattning byggd på schabloner och försiktiga antaganden. Den är inte ett erbjudande, inte ett bindande pris och inte ekonomisk rådgivning. Verklig kostnad och besparing beror på huset, avtalet och vädret, och kan bli både högre och lägre.'
@@ -1670,7 +1671,7 @@
     var s = $('#seAsm'); if (s) s.hidden = state.seTouched;
   }
 
-  /* ---------- lead validation (min = namn + telefon + postnr; consent via submit; e-post optional) ---------- */
+  /* ---------- lead validation (required: namn + telefon + postnr + e-post; consent via submit) ---------- */
   function setErr(fieldSel, errSel, msg) {
     var f = $(fieldSel), e = $(errSel);
     if (msg) { f.setAttribute('aria-invalid', 'true'); e.textContent = msg; e.hidden = false; return false; }
@@ -1694,7 +1695,7 @@
   }
   function validateEmail(live) {
     var v = $('#leadEmail').value.trim();
-    if (!v) return setErr('#leadEmail', '#errEmail', null);  // optional
+    if (!v) return setErr('#leadEmail', '#errEmail', S.err.emailReq);   // now REQUIRED (owner)
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return setErr('#leadEmail', '#errEmail', S.err.email);
     return setErr('#leadEmail', '#errEmail', null);
   }
