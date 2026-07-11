@@ -165,8 +165,8 @@
       },
       /* V10 (P4/AR-3): quiet action rows — "utan pris", no bar, NO invented numbers */
       actionName: { service: 'Service och trimning av värmepumpen', solplan: 'Solceller med batteri' },
-      figInvest: 'Investering efter ROT', figPayback: 'Återbetald på', figSaving: 'Lägre per år',
-      figEfter: 'Din kostnad efter',
+      figInvest: 'Investering efter ROT', figPayback: 'Återbetald på', figSaving: 'Årsbesparing',
+      figEfter: 'Årskostnad efter',
       figBattGross: 'Pris från', figBattNet: 'Efter grön teknik',
       figBehall: 'Noll kronor i investering',
       utanPris: 'utan pris', tagBehall: 'Så ligger du idag'
@@ -1112,39 +1112,43 @@
     if (!o.eligible) {
       return '<p class="sp-verdict">' + esc(S.reason[o.ineligibleReason] || '') + '</p>';
     }
-    // behåll context row: one quiet figure, no prose
+    // behåll context row: a short line, no columns (it is context, not a purchase)
     if (o.id === 'behall') {
-      return figCols([{ k: S.spark.figInvest, v: 'Noll kronor' }]);
+      return '<p class="sp-verdict">' + esc(S.spark.verdict.behall) + '</p>';
     }
     // an option that raises cost: short honest note, no positive figures to column
     if (o.saving[1] <= 0) {
       return '<p class="sp-verdict">' + esc(S.spark.verdict.dyrare) + '</p>';
     }
     // THE numeric pump rows: three columns, NO paragraph (owner directive).
-    // The saving is the row's hero value; the columns give the CONCRETE result:
-    // the new yearly total (idag total − saving), the cost, the payback.
+    // Investering efter ROT is DELIBERATELY not shown — the customer gets that number
+    // by booking the advisory (sales finesse). The three that reconcile against the
+    // anchor: Årskostnad efter · Årsbesparing · Återbetald på.
+    // efter is computed from the DISPLAYED anchor and DISPLAYED saving (matched ends) so
+    // a customer who does idag − årsbesparing lands EXACTLY on årskostnad efter.
     var n = recNumbers(o);
-    var invest = n.investRange ? '~' + n.investRange + ' kr' : EMPTY;
+    var av = anchorVals(R);
+    var sLo = Math.max(0, roundTo(o.saving[0], ROUND.stat));
+    var sHi = Math.max(0, roundTo(o.saving[2], ROUND.stat));
+    var eA = Math.max(0, av.lo - sLo), eB = Math.max(0, av.hi - sHi);
+    var efterLo = Math.min(eA, eB), efterHi = Math.max(eA, eB);
+    var efter  = (efterLo === efterHi) ? '~' + nf(efterLo) + ' kr' : '~' + nf(efterLo) + '-' + nf(efterHi) + ' kr';
+    var bespar = (sLo === sHi)         ? '~' + nf(sLo)     + ' kr' : '~' + nf(sLo)     + '-' + nf(sHi)     + ' kr';
     var pb = (n.pbRange && n.pbRange !== EMPTY) ? '~' + n.pbRange + ' år' : EMPTY;
-    // efter = today's household-inclusive total minus the mid saving (same base as the anchor)
-    var efterKr = roundTo(R.baseline.currentAnnual + R.baseline.householdCost - o.saving[1], ROUND.hero);
-    var efter = '~' + nf(Math.max(0, efterKr)) + ' kr';
     var pbWeak = (o.paybackMid != null && o.paybackMid > D.rec.pbComfort);
     return figCols([
       { k: S.spark.figEfter,   v: efter },
-      { k: S.spark.figInvest,  v: invest },
+      { k: S.spark.figSaving,  v: bespar },
       { k: S.spark.figPayback, v: pb, cls: pbWeak ? 'sp-col-v--weak' : '' }
     ]);
   }
 
   function renderBattDrop(R, rec) {
-    // battery is an ADD-ON, not a heating swap → no "efter total". Its yearly gain is
-    // the row hero; the columns show the price (owner: numbers over prose, no redundancy).
+    // battery is an ADD-ON, not a heating swap (no efter-total, no payback trio) → short text
     var bs = battSlots(R);
-    return figCols([
-      { k: S.spark.figBattGross, v: bs.battGross + ' kr' },
-      { k: S.spark.figBattNet,   v: '~' + bs.battNet + ' kr' }
-    ]);
+    var isLead = rec.lead.type === 'action' && rec.lead.id === 'batteri';
+    var txt = isLead ? fill(S.spark.verdict.batteriLead, { battRange: bs.battRange }) : S.spark.verdict.batteri;
+    return '<p class="sp-verdict">' + txt + '</p>';
   }
 
   var sparkDrawn = false;
