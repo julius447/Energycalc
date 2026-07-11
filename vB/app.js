@@ -165,7 +165,7 @@
       },
       /* V10 (P4/AR-3): quiet action rows — "utan pris", no bar, NO invented numbers */
       actionName: { service: 'Service och trimning av värmepumpen', solplan: 'Solceller med batteri' },
-      figInvest: 'Investering efter ROT', figPayback: 'Återbetald på', figSaving: 'Besparing per år',
+      figInvest: 'Investering efter ROT', figPayback: 'Återbetald på', figSaving: 'Besparing / år',
       figEfter: 'Årskostnad',
       figBattGross: 'Pris från', figBattNet: 'Efter grön teknik',
       figBehall: 'Noll kronor i investering',

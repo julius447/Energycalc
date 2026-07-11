@@ -404,10 +404,10 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .sp-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3);margin:0;align-items:start}
 .sp-cols--2{grid-template-columns:repeat(2,1fr)}
 .sp-col{display:flex;flex-direction:column;gap:var(--sp-1);min-width:0}
-/* the header ALWAYS reserves two lines (line-height 1.3 x 2 = 2.6em) so every value row
-   starts on the same baseline — labels of 1 or 2 lines stay perfectly aligned at any width */
+/* every header now fits ONE line (Årskostnad · Besparing / år · Återbetald på), so no 2-line
+   reserve is needed — they align naturally and the values sit right beneath. */
 .sp-col-k{font-size:var(--ty-micro);font-weight:500;text-transform:uppercase;letter-spacing:.04em;
-  color:var(--footnote);line-height:1.3;min-height:2.6em}
+  color:var(--footnote);line-height:1.3;white-space:nowrap}
 .sp-col-v{font-size:var(--ty-label);font-weight:500;color:#fff;line-height:1.3;font-variant-numeric:tabular-nums}
 .sp-col-v--weak{color:var(--amber)}   /* long payback: honest visual flag, in the column not on the row */
 
