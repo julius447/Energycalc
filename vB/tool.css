@@ -481,6 +481,7 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .lead-title{font-size:var(--ty-h);font-weight:500;line-height:var(--lh-tight);color:#fff;margin:0 0 .4rem;padding-right:3.6rem}
 .lead-sub{font-size:var(--ty-sub);font-weight:300;color:var(--subtext);margin:0 0 var(--sp-3);line-height:var(--lh-body)}
 .lead-lbl{display:block;font-size:var(--ty-eyebrow);color:var(--subtext);margin:var(--sp-2) 0 .4rem}
+.lead-req{color:#ff8a8a;font-weight:500}   /* required marker — Evify convention */
 .lead-field{width:100%;padding:1.0rem 1.1rem;border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);
   font-size:var(--ty-body);font-weight:300;font-family:inherit;color:#fff;background:rgba(255,255,255,.04);
   transition:border-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
@@ -586,6 +587,13 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   #leadForm label[for="leadPhone"]{grid-column:2;grid-row:1}
   #leadForm #leadPhone{grid-column:2;grid-row:2}
   #leadForm #errPhone{grid-column:2;grid-row:3}
+  /* row 2 of the grid: Postnummer (col 1) + E-post (col 2), same shape as Namn/Telefon */
+  #leadForm label[for="leadZip"]{grid-column:1;grid-row:4}
+  #leadForm #leadZip{grid-column:1;grid-row:5}
+  #leadForm #errZip{grid-column:1;grid-row:6}
+  #leadForm label[for="leadEmail"]{grid-column:2;grid-row:4}
+  #leadForm #leadEmail{grid-column:2;grid-row:5}
+  #leadForm #errEmail{grid-column:2;grid-row:6}
 }
 
 /* reduced motion — belt and braces on top of the zeroed tokens */

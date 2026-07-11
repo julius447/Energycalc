@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Energikalkylatorn: vad kostar det att värma ditt hus?</title>
 <meta name="description" content="Se vad värmen kostar i ditt hus och vad som är värt att göra. Försiktiga spann, fält-SPF, ROT 30 % på arbetet. Gratis, utan mejl.">
-<link rel="stylesheet" href="tool.css?v=22">
+<link rel="stylesheet" href="tool.css?v=23">
 </head>
 <body>
 <div class="page">
@@ -152,20 +152,20 @@
               <h3 class="lead-title">En elektriker räknar på ditt hus</h3>
               <p class="lead-sub">Vi hör av oss inom en arbetsdag och ger dig en kostnadsfri rådgivning.</p>
               <form id="leadForm" novalidate>
-                <label class="lead-lbl" for="leadName">Namn</label>
-                <input class="lead-field" type="text" id="leadName" name="name" autocomplete="name" required aria-describedby="errName">
+                <label class="lead-lbl" for="leadName">Ditt namn <span class="lead-req" aria-hidden="true">*</span></label>
+                <input class="lead-field" type="text" id="leadName" name="name" autocomplete="name" placeholder="Johan Svensson" required aria-describedby="errName">
                 <p class="field-err" id="errName" hidden></p>
 
-                <label class="lead-lbl" for="leadPhone">Telefon</label>
-                <input class="lead-field" type="tel" id="leadPhone" name="phone" autocomplete="tel" required aria-describedby="errPhone">
+                <label class="lead-lbl" for="leadPhone">Telefonnummer <span class="lead-req" aria-hidden="true">*</span></label>
+                <input class="lead-field" type="tel" id="leadPhone" name="phone" autocomplete="tel" placeholder="073 XXX XX XX" required aria-describedby="errPhone">
                 <p class="field-err" id="errPhone" hidden></p>
 
-                <label class="lead-lbl" for="leadZip">Postnummer</label>
-                <input class="lead-field" type="text" id="leadZip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="6" required aria-describedby="errZip">
+                <label class="lead-lbl" for="leadZip">Postnummer <span class="lead-req" aria-hidden="true">*</span></label>
+                <input class="lead-field" type="text" id="leadZip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="6" placeholder="123 45" required aria-describedby="errZip">
                 <p class="field-err" id="errZip" hidden></p>
 
-                <label class="lead-lbl" for="leadEmail">E-post <span class="lbl-soft">valfritt</span></label>
-                <input class="lead-field" type="email" id="leadEmail" name="email" autocomplete="email" aria-describedby="errEmail">
+                <label class="lead-lbl" for="leadEmail">E-postadress <span class="lbl-soft">valfritt</span></label>
+                <input class="lead-field" type="email" id="leadEmail" name="email" autocomplete="email" placeholder="Namn@email.se" aria-describedby="errEmail">
                 <p class="field-err" id="errEmail" hidden></p>
 
                 <!-- honeypot (hidden from humans) -->
@@ -203,9 +203,9 @@
 </div>
 
 <!-- 5-layer chassis: data -> engine -> rank -> app -->
-<script src="data.js?v=22"></script>
-<script src="engine.js?v=22"></script>
-<script src="rank.js?v=22"></script>
-<script src="app.js?v=22"></script>
+<script src="data.js?v=23"></script>
+<script src="engine.js?v=23"></script>
+<script src="rank.js?v=23"></script>
+<script src="app.js?v=23"></script>
 </body>
 </html>
