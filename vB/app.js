@@ -777,8 +777,11 @@
     // V10: the composite lead type is DELETED — rec.lead is always a real row.
     var rowIds = compareRowIds(R, rec);
     var defaultSel = rec.lead.id;
-    var surviving = state.selectedByUser && state.selectedOption &&
-      (rowIds.indexOf(state.selectedOption) !== -1 ||
+    // P3: a deliberate collapse (selectedByUser && null) must SURVIVE a recompute — else
+    // the ★ springs back open every time the user nudges a slider.
+    var surviving = state.selectedByUser &&
+      (state.selectedOption === null ||
+       rowIds.indexOf(state.selectedOption) !== -1 ||
        (state.selectedOption === 'batteri' && inp.hasSolar) ||
        (rec.lead.type === 'action' && state.selectedOption === rec.lead.id));
     if (!surviving) { state.selectedOption = defaultSel; state.selectedByUser = false; }

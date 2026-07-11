@@ -111,7 +111,8 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .lead-sub,.gearcopy,.method-body p{font-variant-numeric:normal}
 
 /* ============================ LAYOUT — the wide, de-boxed shell ============================ */
-.page{max-width:var(--shell-max);margin:0 auto;padding:var(--sp-8) var(--shell-gutter) var(--sp-9)}
+.page{max-width:var(--shell-max);margin:0 auto;
+  padding:var(--sp-8) max(var(--shell-gutter),env(safe-area-inset-right)) var(--sp-9) max(var(--shell-gutter),env(safe-area-inset-left))}   /* P2: keep the card clear of the notch in landscape */
 .tool{background:none;border:0;border-radius:0;padding:0}
 
 .tag{display:inline-block;font-size:var(--ty-eyebrow);font-weight:500;letter-spacing:var(--tr-eyebrow);
@@ -482,7 +483,7 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .lead-sub{font-size:var(--ty-sub);font-weight:300;color:var(--subtext);margin:0 0 var(--sp-3);line-height:var(--lh-body)}
 .lead-lbl{display:block;font-size:var(--ty-eyebrow);color:var(--subtext);margin:var(--sp-2) 0 .4rem}
 .lead-req{color:#ff8a8a;font-weight:500}   /* required marker — Evify convention */
-.lead-field{width:100%;padding:1.0rem 1.1rem;border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);
+.lead-field{width:100%;min-height:44px;padding:1.0rem 1.1rem;border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);
   font-size:var(--ty-body);font-weight:300;font-family:inherit;color:#fff;background:rgba(255,255,255,.04);
   transition:border-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
 .lead-field::placeholder{color:var(--footnote)}
@@ -500,7 +501,7 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 /* the consent line under the submit button — pressing the button IS the consent */
 .lead-consent{font-size:var(--ty-label);font-weight:300;color:var(--footnote);margin:var(--sp-2) 0 0;line-height:var(--lh-body)}   /* m-m4: 13.5px — legally load-bearing text is never micro */
 .lead-consent a{color:var(--subtext);text-decoration:underline;text-underline-offset:.2em;
-  transition:color var(--t-fast) var(--ease)}
+  padding:.5rem 0;transition:color var(--t-fast) var(--ease)}   /* P1: taller tap target for the only legal link */
 @media (hover:hover) and (pointer:fine){ .lead-consent a:hover{color:#fff} }   /* DM4 */
 .lead-consent a:focus-visible{outline:2px solid var(--neon);outline-offset:2px;border-radius:2px}
 .lead-success{text-align:center;padding:var(--sp-4) var(--sp-1);color:var(--subtext)}
@@ -594,6 +595,17 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   #leadForm label[for="leadEmail"]{grid-column:2;grid-row:4}
   #leadForm #leadEmail{grid-column:2;grid-row:5}
   #leadForm #errEmail{grid-column:2;grid-row:6}
+  /* M1 fix: the full-width items must sit AFTER the field rows. The error rows (3,6) are
+     display:none when hidden, so without an explicit row grid auto-placement dropped the
+     submit into empty row 3 (mid-form). Pin them past row 6. */
+  #leadForm .lead-submit{grid-row:7}
+  #leadForm .lead-consent{grid-row:8}
+  #leadForm #leadErr{grid-row:9}
+}
+/* N2: at the narrow two-pane band (incl. iPad landscape 1024) the result column is narrower
+   than the wrapped stacked layout, so the ★ row title clipped. Let it wrap here too. */
+@media (min-width:992px) and (max-width:1200px){
+  .sp-name{white-space:normal}
 }
 
 /* reduced motion — belt and braces on top of the zeroed tokens */

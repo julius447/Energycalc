@@ -441,7 +441,7 @@
    * ========================================================================= */
   var SYS_TOKEN = {  // token → engine currentSystem id
     direktel: 'direktel', fjarrvarme: 'fjarrvarme', olja: 'olja', vedpellets: 'vedpellets',
-    vattenburen: 'vattenburenEl', franluft: 'franluft',
+    vattenburen: 'vattenburenEl', franluft: 'franluft', kamin: 'kamin',   // M2: kamin can be the PRIMARY too; without a sys-token a kamin-primary share link round-tripped to direktel
     luftluft: 'luftluftCur', luftvatten: 'luftvattenCur', bergvarme: 'bergvarmeCur'
   };
   var SYS_ID = {};   // reverse
