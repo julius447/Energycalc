@@ -586,12 +586,11 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .jump-pill{position:fixed;left:50%;bottom:calc(1.6rem + env(safe-area-inset-bottom,0px));z-index:60;
   display:none;align-items:center;gap:var(--sp-2);min-height:4.6rem;padding:0 .6rem 0 2rem;
   color:#fff;border-radius:var(--r-pill);
-  /* aurora miniature: a piece of the midnight result card the pill leads to —
-     teal glow bleeding from the chip corner, pure midnight under the text */
-  background:radial-gradient(120% 180% at 88% 10%, rgba(0,196,167,.5) 0%, rgba(0,196,167,.12) 38%, transparent 60%), var(--midnight);
-  border:1px solid rgba(0,196,167,.35);
+  /* solid midnight (owner: no gradient) — the teal chip alone carries the accent */
+  background:var(--midnight);
+  border:1px solid rgba(255,255,255,.16);
   font-family:inherit;font-size:1.5rem;font-weight:500;cursor:pointer;white-space:nowrap;
-  box-shadow:0 1.2rem 3rem -1rem rgba(9,11,50,.55), 0 .2rem 1.4rem -.2rem rgba(0,196,167,.35);
+  box-shadow:0 1.2rem 3rem -1rem rgba(9,11,50,.55);
   opacity:0;transform:translate(-50%,1rem) scale(.97);pointer-events:none;
   transition:opacity var(--t-mid) var(--ease),transform var(--t-mid) var(--ease)}
 .jp-chip{width:3.4rem;height:3.4rem;border-radius:50%;background:var(--teal);flex:0 0 auto;
