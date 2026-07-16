@@ -1728,9 +1728,11 @@
       pillResultVisible = entries[0].isIntersecting;
       pillUpdate();
     }, { threshold: 0.12 }).observe(res);
-    // show from load (the IO callback fires once immediately on observe and
-    // settles the correct initial state; rAF gives the entrance transition a frame)
+    // show from load: rAF gives the entrance transition a frame on visible loads,
+    // the timer is the belt for HIDDEN loads (FB in-app pre-render, background tab)
+    // where rAF and IO callbacks are suspended until the page becomes visible
     requestAnimationFrame(function () { pillUpdate(); });
+    setTimeout(pillUpdate, 400);
     pill.addEventListener('click', function () {
       track('jump_result');
       try { res.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }); }
