@@ -1705,16 +1705,17 @@
   }
 
   /* ---------- v30 mobile jump-pill (fresh minimal build — the old #msum machinery
-   * is long deleted; this shares nothing with it). Appears after the FIRST input
-   * interaction, smooth-scrolls to #result, hides while #result is in view (IO)
-   * and while the lead form is open (= the only keyboard surface). ---------- */
-  var pillArmed = false, pillResultVisible = false;
+   * is long deleted; this shares nothing with it). v35: visible from LOAD on mobile
+   * (owner call — the hesitant cold visitor is exactly who needs the hook; the old
+   * arm-on-first-interaction gate hid it from them). Smooth-scrolls to #result,
+   * hides while #result is in view (IO) and while the lead form is open. ---------- */
+  var pillResultVisible = false;
   function pillUpdate() {
     var pill = $('#jumpPill'); if (!pill) return;
     var lead = $('#leadInline');
     var leadOpen = !!(lead && lead.classList.contains('open'));
     var mobile = window.matchMedia('(max-width:991px)').matches;
-    var show = pillArmed && mobile && !pillResultVisible && !leadOpen;
+    var show = mobile && !pillResultVisible && !leadOpen;
     pill.classList.toggle('show', show);
     pill.tabIndex = show ? 0 : -1;
     pill.setAttribute('aria-hidden', show ? 'false' : 'true');
@@ -1727,13 +1728,9 @@
       pillResultVisible = entries[0].isIntersecting;
       pillUpdate();
     }, { threshold: 0.12 }).observe(res);
-    var form = $('#inputForm');
-    var arm = function () { if (!pillArmed) { pillArmed = true; pillUpdate(); } };
-    if (form) {
-      ['pointerdown', 'input', 'change'].forEach(function (evt) {
-        form.addEventListener(evt, arm, { once: true, passive: true });
-      });
-    }
+    // show from load (the IO callback fires once immediately on observe and
+    // settles the correct initial state; rAF gives the entrance transition a frame)
+    requestAnimationFrame(function () { pillUpdate(); });
     pill.addEventListener('click', function () {
       track('jump_result');
       try { res.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }); }
