@@ -489,7 +489,10 @@
     if (!q) return out;
     q.split('&').forEach(function (pair) {
       var kv = pair.split('='); if (kv.length !== 2) return;
-      var k = kv[0], v = decodeURIComponent(kv[1]);
+      // robustness, not logic: a malformed %-sequence (truncated ad/share link) must
+      // skip THAT param, never throw URIError and kill boot — ad traffic IS query strings
+      var k = kv[0], v;
+      try { v = decodeURIComponent(kv[1]); } catch (eDec) { return; }
       if (k === 'sys' && SYS_TOKEN[v]) out.sys = SYS_TOKEN[v];
       else if (k === 'kmp') {
         v.split(',').forEach(function (tok) {
@@ -503,8 +506,8 @@
       else if (k === 'm2' && /^b[1-4]$/.test(v)) out.m2 = v;
       else if (k === 'era' && /^(e[1-4]|x)$/.test(v)) out.era = v;
       else if (k === 'vb') out.vb = (v === '1') ? true : (v === '0') ? false : (v === 'x') ? 'x' : null;
-      else if (k === 'kwh') { var n1 = parseInt(v, 10); if (n1 > 0) out.kwh = n1; }
-      else if (k === 'kr')  { var n2 = parseInt(v, 10); if (n2 > 0) out.kr = n2; }
+      else if (k === 'kwh') { if (/^\d+$/.test(v)) { var n1 = parseInt(v, 10); if (n1 > 0) out.kwh = n1; } }   // '1.5e4' must not silently become 1
+      else if (k === 'kr')  { if (/^\d+$/.test(v)) { var n2 = parseInt(v, 10); if (n2 > 0) out.kr = n2; } }
       else if (k === 'se' && /^SE[1-4]$/.test(v)) out.se = v;
       else if (k === 'sol') {
         if (v === 'p') out.sol = { mode: 'p' };

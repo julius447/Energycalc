@@ -91,6 +91,21 @@ body{margin:0;font-size:1.6rem;font-family:'Outfit',system-ui,-apple-system,sans
   :root{ --t-fast:0ms; --t-mid:0ms; --t-slow:0ms; --t-stagger:0ms; }
 }
 
+/* iOS <=13.3: clamp() unsupported — var() substitution goes invalid-at-computed-value
+ * (a cascade fallback line does NOT save it), so re-declare static sizes there */
+@supports not (font-size: clamp(1rem, 2vw, 3rem)){
+  :root{ --ty-display:4.0rem; --ty-lead:1.9rem; }
+  .cta{ font-size:1.7rem; }
+}
+
+/* print: backgrounds are OFF by default in every browser — without this the midnight
+ * result card prints white-on-white. exact-adjust keeps the card; the pill never prints. */
+@media print{
+  .jump-pill,#sharePop{display:none !important}
+  .result,.trust{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .input{position:static}
+}
+
 *{box-sizing:border-box}
 button{font-family:inherit}
 
@@ -102,6 +117,10 @@ html{-webkit-tap-highlight-color:transparent}
 button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   -webkit-user-select:none;-moz-user-select:none;user-select:none}
 .input .lbl,.sb-legend{-webkit-user-select:none;user-select:none}
+
+/* JS off / script-fetch failed: say so instead of a silent dead skeleton */
+.noscript-note{background:#fff;border:var(--bd-light);border-radius:var(--r-md);
+  padding:var(--sp-4) var(--sp-5);margin:0 0 var(--sp-6);color:var(--ink);font-size:var(--ty-sub)}
 
 /* screen-reader-only (result live region) */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
@@ -131,8 +150,8 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .result{background:var(--midnight);border-radius:var(--r-xl);padding:var(--sp-7);
   color:#fff;position:relative;overflow:hidden;box-shadow:var(--shadow-3);scroll-margin-top:var(--sp-4)}
 @media (min-width:1200px){ .result{padding:var(--sp-8)} }
-.result::before{content:'';position:absolute;inset:0;background:var(--aurora);pointer-events:none}
-.result::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+.result::before{content:'';position:absolute;top:0;right:0;bottom:0;left:0;inset:0;background:var(--aurora);pointer-events:none}
+.result::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;inset:0;border-radius:inherit;pointer-events:none;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
 .result>*{position:relative;z-index:1}
 
@@ -540,12 +559,12 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
  * 5/5 + 3 000+/year). Render-verified premium at 852 / 560 / 343 px, AA throughout. */
 .trust{position:relative;border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-3);
   background:var(--midnight);isolation:isolate}
-.trust-photo{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;
+.trust-photo{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;z-index:0;display:block;width:100%;height:100%;
   object-fit:cover;object-position:64% 50%}
-.trust-veil{position:absolute;inset:0;z-index:1;background:
+.trust-veil{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;z-index:1;background:
   linear-gradient(103deg, rgba(9,11,50,.94) 0%, rgba(9,11,50,.82) 38%, rgba(9,11,50,.50) 68%, rgba(9,11,50,.28) 100%),
   linear-gradient(to top, rgba(9,11,50,.66) 0%, rgba(9,11,50,0) 52%)}
-.trust::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;
+.trust::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;inset:0;border-radius:inherit;pointer-events:none;z-index:3;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.10),inset 0 0 0 1px rgba(255,255,255,.05)}
 .trust-inner{position:relative;z-index:2;padding:3rem 3.2rem}
 .trust-quote{margin:0;position:relative;max-width:30ch;padding-top:3.4rem}   /* 30ch wraps to 2-3 short lines; padding-top reserves the mark's air */
@@ -565,16 +584,26 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
  * A quiet fixed pill: appears after the first input interaction, smooth-scrolls to
  * #result, hides while the result is in view or the lead form is open. */
 .jump-pill{position:fixed;left:50%;bottom:calc(1.6rem + env(safe-area-inset-bottom,0px));z-index:60;
-  display:none;align-items:center;gap:var(--sp-2);min-height:4.4rem;padding:0 var(--sp-5);
-  background:var(--midnight);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:var(--r-pill);
-  font-family:inherit;font-size:1.4rem;font-weight:500;cursor:pointer;white-space:nowrap;
-  box-shadow:0 .8rem 2.4rem -.8rem rgba(9,11,50,.5);
-  opacity:0;transform:translate(-50%,1rem);pointer-events:none;
+  display:none;align-items:center;gap:var(--sp-2);min-height:4.6rem;padding:0 .6rem 0 2rem;
+  color:#fff;border-radius:var(--r-pill);
+  /* aurora miniature: a piece of the midnight result card the pill leads to —
+     teal glow bleeding from the chip corner, pure midnight under the text */
+  background:radial-gradient(120% 180% at 88% 10%, rgba(0,196,167,.5) 0%, rgba(0,196,167,.12) 38%, transparent 60%), var(--midnight);
+  border:1px solid rgba(0,196,167,.35);
+  font-family:inherit;font-size:1.5rem;font-weight:500;cursor:pointer;white-space:nowrap;
+  box-shadow:0 1.2rem 3rem -1rem rgba(9,11,50,.55), 0 .2rem 1.4rem -.2rem rgba(0,196,167,.35);
+  opacity:0;transform:translate(-50%,1rem) scale(.97);pointer-events:none;
   transition:opacity var(--t-mid) var(--ease),transform var(--t-mid) var(--ease)}
-.jump-pill svg{width:1.6rem;height:1.6rem;color:var(--mint);flex:0 0 auto}
+.jp-chip{width:3.4rem;height:3.4rem;border-radius:50%;background:var(--teal);flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 .2rem .8rem rgba(0,0,0,.25)}
+.jump-pill svg{width:1.7rem;height:1.7rem;color:#fff;flex:0 0 auto}
 @media (max-width:991px){ .jump-pill{display:inline-flex} }
-.jump-pill.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.jump-pill.show{opacity:1;transform:translate(-50%,0) scale(1);pointer-events:auto}
+.jump-pill.show .jp-chip svg{animation:jpNudge 2.6s var(--ease) infinite}
+.jump-pill:active{transform:translate(-50%,0) scale(.97)}
 .jump-pill:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+@keyframes jpNudge{0%,100%{transform:translateY(0)} 12%{transform:translateY(.2rem)} 24%{transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){ .jump-pill.show .jp-chip svg{animation:none} }
 
 /* ============================ MOTION ============================ */
 /* reveals — grid-template-rows:0fr->1fr (replaces the hidden swap) */

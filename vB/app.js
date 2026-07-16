@@ -23,7 +23,18 @@
   var ENGINE = window.AmpyEngine;
   var RANK = window.AmpyRank;
   var CODEC = window.AmpyCodec;
-  if (!D || !ENGINE || !RANK) { return; }
+  if (!D || !ENGINE || !RANK) {
+    // a script failed to load (aborted mobile fetch): SAY so — never a silent dead skeleton
+    try {
+      var deadAnchor = document.getElementById('anchorNum');
+      if (deadAnchor) {
+        deadAnchor.textContent = 'Kalkylatorn kunde inte laddas. Ladda om sidan.';
+        deadAnchor.style.fontSize = '1.8rem';   // not the 5rem hero scale for a sentence
+        deadAnchor.style.fontWeight = '500';
+      }
+    } catch (eDead) {}
+    return;
+  }
 
   /* ---------- tiny DOM + format helpers (KEEP) ---------- */
   function $(s, r) { return (r || document).querySelector(s); }
@@ -680,6 +691,9 @@
   }
 
   function replaceAllPills() {
+    // drop references to segs whose rows were removed (share-rows rebuild) —
+    // without this the array grows a detached-DOM tail for the whole session
+    segBoxes = segBoxes.filter(function (b) { return b.isConnected; });
     segBoxes.forEach(function (box) {
       if (!box.isConnected) return;
       var on = $('button.on', box); if (!on) return;
@@ -995,6 +1009,13 @@
     // dyrare: eligible but the change costs more — no bar, amber value, never rec
     if (o.saving[1] <= 0) {
       p.kind = 'dyrare';
+      if (o.saving[0] === 0 && o.saving[2] === 0) {
+        // exactly zero (slider-min corner: no heat demand left) — zero is not "dyrare"
+        p.val = 'ungefär samma kostnad per år';
+        p.valClass = 'amber';
+        p.aria = p.name + '. Ungefär samma kostnad per år. ' + S.spark.verdict.dyrare + ' Visa mer.';
+        return p;
+      }
       p.val = '~' + savRange(-o.saving[2], -o.saving[0], ROUND.stat) + ' dyrare per år';
       p.valClass = 'amber';
       p.aria = p.name + '. Ungefär ' + savRange(-o.saving[2], -o.saving[0], ROUND.stat) + ' dyrare per år. ' + S.spark.verdict.dyrare + ' Visa mer.';
@@ -1225,6 +1246,13 @@
     });
 
     // build (full rebuild — <=7 rows, cheap; inline widths render final, no re-anim on recalc)
+    // a11y: a keyboard/VoiceOver user focused inside the list must not be dropped to
+    // body when a slider recompute rebuilds it — remember the row, re-focus after
+    var refocusId = null;
+    if (document.activeElement && list.contains(document.activeElement)) {
+      var focusedItem = document.activeElement.closest ? document.activeElement.closest('.sp-item') : null;
+      if (focusedItem) refocusId = focusedItem.dataset.id;
+    }
     list.innerHTML = '';
     function appendRow(id, p, dropHtml) {
       var item = document.createElement('div');
@@ -1256,6 +1284,13 @@
       list.appendChild(item);
     }
     models.forEach(function (m) { appendRow(m.id, m.p, m.drop); });
+
+    // a11y: restore focus to the same row's button after the rebuild (see above)
+    if (refocusId) {
+      var reItem = $('.sp-item[data-id="' + refocusId + '"]', list);
+      var reBtn = reItem ? $('button, [tabindex="0"]', reItem) : null;
+      if (reBtn) { try { reBtn.focus({ preventScroll: true }); } catch (eRf) { try { reBtn.focus(); } catch (eRf2) {} } }
+    }
 
     // MM8: solar "Planeras" acknowledged when the solplan row is not the lead
     var section = $('#spark');
@@ -1555,8 +1590,10 @@
     try {
       var tmp = document.createElement('textarea');
       tmp.value = url; document.body.appendChild(tmp); tmp.select();
-      document.execCommand('copy'); document.body.removeChild(tmp);
-      done();
+      try { tmp.setSelectionRange(0, tmp.value.length); } catch (eSel) {}   // iOS textarea select quirk
+      var ok = document.execCommand('copy');
+      document.body.removeChild(tmp);
+      if (ok) done();   // never show "Länk kopierad" when the copy actually failed
     } catch (e) {}
   }
   function wireShare() {
@@ -1581,7 +1618,12 @@
       if (!pop || pop.hidden) return;
       pop.hidden = true;
       shareBtn.setAttribute('aria-expanded', 'false');
-      if (popCloser) { document.removeEventListener('pointerdown', popCloser, true); popCloser = null; }
+      if (popCloser) {   // remove the SAME set that openPop added
+        document.removeEventListener('pointerdown', popCloser, true);
+        document.removeEventListener('touchstart', popCloser, true);
+        document.removeEventListener('mousedown', popCloser, true);
+        popCloser = null;
+      }
       if (refocus) { try { shareBtn.focus(); } catch (e) {} }
     }
     function openPop() {
@@ -1600,7 +1642,10 @@
       popCloser = function (ev) {
         if (!pop.contains(ev.target) && !shareBtn.contains(ev.target)) closePop(false);
       };
-      document.addEventListener('pointerdown', popCloser, true);
+      // pointerdown = iOS 13+; the popover path serves exactly the OLDER devices
+      // (no navigator.share) so fall back to touch/mouse there
+      if (window.PointerEvent) document.addEventListener('pointerdown', popCloser, true);
+      else { document.addEventListener('touchstart', popCloser, true); document.addEventListener('mousedown', popCloser, true); }
       var first = $('.share-act', pop);
       if (first) { try { first.focus(); } catch (e) {} }
     }
@@ -1965,7 +2010,10 @@
 
   /* ---------- boot ---------- */
   function boot() {
-    var decodedAny = applyDecoded();      // ?-param prefill (house state only, no identity)
+    // belt-and-braces: a throwing decode must NEVER stop the tool from rendering —
+    // fall back to defaults (the codec itself also skips malformed params)
+    var decodedAny = false;
+    try { decodedAny = applyDecoded(); } catch (eBoot) {}   // ?-param prefill (house state only, no identity)
     buildInputs();
     syncAsmTags();
     wireControls();
