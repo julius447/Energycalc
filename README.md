@@ -1,10 +1,19 @@
-# Energikalkylatorn — Ampy (publiceringsklar, variant B · RÄKNINGSCHOCKEN)
+# Energikalkylatorn — Ampy
+
+> ### 👉 Developers: start with [`HANDOVER.md`](HANDOVER.md)
+> The **canonical, current build is [`vB/`](vB/)** — live at **https://julius447.github.io/Energycalc/vB/**.
+> Full technical documentation (CSS / HTML / JS) and the WordPress/Bricks/FluentSnippets implementation
+> guide are in [`docs/`](docs/). The rest of this README describes the tool's intent and is kept for
+> historical context — the build has since evolved (the 12-month curve and the N1/N2/N3 staging described
+> below were replaced by the "Sparstaplarna" result and a flat single-canvas layout; see the docs for the
+> current architecture).
+
+---
 
 En värmepumpskalkylator som jämför kundens **nuvarande uppvärmning** mot **luft-luft / luft-vatten /
 bergvärme**, månad för månad, och visar besparingen som ett ärligt spann. Paid-first, svensk, candour-röst.
 
-**Live:** https://julius447.github.io/Energycalc/
-**A/B/C-bildspecs (wireframe-stadiet):** https://julius447.github.io/Energycalc/bildspecs/
+**Live:** https://julius447.github.io/Energycalc/vB/
 
 ## Vad den gör
 
