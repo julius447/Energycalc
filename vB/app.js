@@ -834,7 +834,7 @@
   function cardName(o) {
     if (o.id === 'luftluft') {
       var prim = shortLabel(heatSelection().primary).toLowerCase();
-      return 'Behåll ' + prim + ' och komplettera med luft-luft';
+      return 'Behåll ' + prim + ' och komplettera med luft‑luft';   // U+2011: never break "luft-/luft" at 390px
     }
     return S.cardName[o.id] || o.label;
   }
@@ -1901,26 +1901,47 @@
       var R = lastRank, rec = lastRec;
       var sel = heatSelection();
       var ownActive = state.ownMode === 'ja' && ownRowAllowed();
-      // webhook stays the console-logged owner-gated stub; payload = bucketed/enum only
+      // the lead row's DISPLAYED numbers, so the advisor calls prepared (null-safe when action-lead)
+      var leadOpt = (R && rec && rec.lead.type === 'option') ? optById(R, rec.lead.id) : null;
+      // attribution: campaign params survive to the CRM (utm_*, fbclid, gclid) + referrer
+      var attr = {};
+      try {
+        var q = new URLSearchParams(location.search);
+        q.forEach(function (v, k) { if (/^(utm_|fbclid|gclid)/.test(k)) attr[k] = v; });
+      } catch (eq) {}
+      // webhook stays the console-logged owner-gated stub — but the payload is CRM-complete
       // pressing the submit button IS the consent (text under the button) — timestamp it
       console.log('[ampy lead]', {
+        leadId: 'lm-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
         consentTs: new Date().toISOString(),
+        name: $('#leadName').value.trim(),
+        phone: $('#leadPhone').value.trim(),
+        email: $('#leadEmail').value.trim(),
         zip: $('#leadZip').value.trim(),
         primary: sel.primary,
         complements: sel.complements.map(function (c) { return c.system; }),
         override: (R && R.baseline.overrideMode) || null,
         area: $('#areaSlider').value,
+        era: state.era,                              // byggår band ('x' = vet inte)
+        occupants: +$('#occupantsField').value,
         priceArea: state.priceArea,
         seAssumed: !state.seTouched,
         solarMode: state.solarMode,
+        solarKwh: state.solarMode === 'finns' ? state.solarKwh : null,
         branch: R ? R.verdict.branch : null,
         recBranch: rec ? rec.branch : null,
         recLead: rec ? rec.lead.id : null,
         recLeadType: rec ? rec.lead.type : null,     // V10: option | action
         recLongPb: rec ? !!rec.longPb : null,        // V10: honest-payback flag
+        recSavingLo: leadOpt ? Math.max(0, roundTo(leadOpt.saving[0], ROUND.stat)) : null,
+        recSavingHi: leadOpt ? Math.max(0, roundTo(leadOpt.saving[2], ROUND.stat)) : null,
+        recPaybackMid: (leadOpt && leadOpt.paybackMid != null) ? roundTo(leadOpt.paybackMid, ROUND.payback) : null,
         best: R ? R.verdict.bestOptionId : null,
         savingBucket: R ? bucketKr(R.verdict.bestSavingMid) : '0',
-        kwhBucket: ownActive ? bucketKwh(state.ownKwh) : null
+        kwhBucket: ownActive ? bucketKwh(state.ownKwh) : null,
+        attribution: attr,
+        referrer: document.referrer || null,
+        page: location.href.split('?')[0]
       });
       track('lead_submit', { branch: rec ? rec.branch : null });
       leadSent = true;   // m-m2: sent-state until the next input change

@@ -26,7 +26,7 @@
 <link rel="preload" href="../fonts/Outfit-Light.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/Outfit-Medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/Outfit-Black.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="tool.css?v=31">
+<link rel="stylesheet" href="tool.css?v=32">
 </head>
 <body>
 <div class="page">
@@ -206,7 +206,9 @@
                 <!-- honeypot (hidden from humans) -->
                 <div class="hp" aria-hidden="true">
                   <label for="leadCompany">Lämna tomt</label>
-                  <input type="text" id="leadCompany" name="company" tabindex="-1" autocomplete="off">
+                  <!-- name must NEVER be an autofill token (company/organization/website…) —
+                       browser autofill can fill off-screen fields and silently drop real leads -->
+                  <input type="text" id="leadCompany" name="hp_extra" tabindex="-1" autocomplete="off">
                 </div>
 
                 <!-- Submit label A/B: shipped = "Boka kostnadsfri rådgivning".
@@ -273,9 +275,9 @@
 <button type="button" class="jump-pill" id="jumpPill" tabindex="-1" aria-hidden="true">Se resultatet <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button>
 
 <!-- 5-layer chassis: data -> engine -> rank -> app -->
-<script src="data.js?v=31"></script>
-<script src="engine.js?v=31"></script>
-<script src="rank.js?v=31"></script>
-<script src="app.js?v=31"></script>
+<script src="data.js?v=32"></script>
+<script src="engine.js?v=32"></script>
+<script src="rank.js?v=32"></script>
+<script src="app.js?v=32"></script>
 </body>
 </html>
