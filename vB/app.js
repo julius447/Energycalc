@@ -180,7 +180,7 @@
     cta: {
       /* MM7 + P1-P4: ONE main-CTA label for every branch (the soft/ghost CTA is retired);
        * sent = the m-m2 post-submit state, cleared by the next input change */
-      plan: 'Få en plan för ditt hus', sent: 'Skickat, vi hör av oss'
+      plan: 'Få kostnadsfri rådgivning', sent: 'Skickat, vi hör av oss'
     },
     share: 'Dela din kalkyl',
     shareCopy: 'Kopiera länk',
@@ -219,7 +219,13 @@
   }
   var ICONS = {
     /* v30 heat-icon set (designer-delivered, render-verified 96/48/22px on midnight):
-     * ac/hearth/building/mountain REPLACED; bolt/droplet/dropbolt/wind kept per owner verdict */
+     * ac/hearth/building/mountain REPLACED; bolt/droplet/dropbolt/wind kept per owner verdict
+     * v31: mountain redrawn as true bergvärme — a house silhouette sitting ON a full-width
+     *      ground line, with a narrow vertical borehole U-loop plunging below the surface
+     *      (reads ground-source, not a volcano/keyhole); hearth refined to a wood stove —
+     *      flue up, rounded body, a firebox line (the door read), a flame inside, short legs.
+     *      Both render-verified at real 19-22px card size + white-on-teal pressed state,
+     *      weight-matched to the kept bolt across the heat-card family. */
     bolt:     icsvg('<path d="M13 3v7h6l-8 11v-7H5l8-11z"/>'),
     dropbolt: icsvg('<path d="M7.5 19.42c2.6 2.11 6.4 2.11 9 0c2.6-2.1 3.26-5.71 1.57-8.55l-4.89-7.26c-.42-.62-1.29-.8-1.94-.4a1.38 1.38 0 0 0-.41.4l-4.89 7.26c-1.7 2.84-1.04 6.44 1.56 8.55z"/><path d="M13 10l-2.5 3h3L11 16"/>'),
     flame:    icsvg('<path d="M12 12c2-2.96 0-7-1-8c0 3.04-1.77 4.74-3 6c-1.23 1.26-2 3.24-2 5a6 6 0 1 0 12 0c0-1.53-1.06-3.94-2-5c-1.79 3-2.79 3-4 2z"/>'),
@@ -228,8 +234,8 @@
     building: icsvg('<path d="M2.5 18H7"/><path d="M17 18h4.5"/><path d="M7 18v-7l5-4.5 5 4.5v7"/><path d="M2.5 21.5h9.5V17"/><path d="M10 19l2-2 2 2"/>'),
     ac:       icsvg('<rect x="3.5" y="3" width="17" height="9" rx="2"/><path d="M7 8.75h10"/><path d="M8 14.75c-1 1.5-1 3.25 0 4.75"/><path d="M12 15.25c-.7 1.6-.7 3.6 0 5.25"/><path d="M16 14.75c1 1.5 1 3.25 0 4.75"/>'),
     droplet:  icsvg('<path d="M7.5 19.42c2.6 2.11 6.4 2.11 9 0c2.6-2.1 3.26-5.71 1.57-8.55l-4.89-7.26c-.42-.62-1.29-.8-1.94-.4a1.38 1.38 0 0 0-.41.4l-4.89 7.26c-1.7 2.84-1.04 6.44 1.56 8.55z"/>'),
-    mountain: icsvg('<path d="M2.5 11h4"/><path d="M17.5 11h4"/><path d="M6.5 11V7L12 2.5 17.5 7v4"/><path d="M9.5 11v6.5a2.5 2.5 0 0 0 5 0V11"/>'),
-    hearth:   icsvg('<path d="M12 2.5v3"/><rect x="6" y="5.5" width="12" height="13" rx="2"/><path d="M12 8.75c-1.5 1.6-2.5 2.8-2.5 4.25a2.5 2.5 0 0 0 5 0c0-1.45-1-2.65-2.5-4.25z"/><path d="M9 18.5V21M15 18.5V21"/>'),
+    mountain: icsvg('<path d="M2.5 11.5h19"/><path d="M4.5 11.5V6.5L12 1.5l7.5 5v5"/><path d="M8 11.5v5a4 4 0 0 0 8 0v-5"/>'),  /* bergvärme: wide house on the ground line + a clear deep U-loop (borehole) below — reads at 22px */
+    hearth:   icsvg('<path d="M12 2v3"/><rect x="6" y="5" width="12" height="12" rx="2.5"/><path d="M6 14h12"/><path d="M12 7.6c-1.3 1.4-2.1 2.4-2.1 3.6a2.1 2.1 0 0 0 4.2 0c0-1.2-.8-2.2-2.1-3.6z"/><path d="M8.5 17v2.5M15.5 17v2.5"/>'),
     sun:      icsvg('<path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 12h1"/><path d="M12 3v1"/><path d="M20 12h1"/><path d="M12 20v1"/><path d="M5.6 5.6l.7 .7"/><path d="M18.4 5.6l-.7 .7"/><path d="M17.7 17.7l.7 .7"/><path d="M6.3 17.7l-.7 .7"/>'),
     check:    icsvg('<path d="M5 12l5 5l10-10"/>', 2.2),
     chevUp:   icsvg('<path d="M6 15l6-6l6 6"/>')
@@ -316,7 +322,6 @@
       return { v: id, label: D.priceAreas[id].label };
     }), 'priceArea', function (v) {
       state.seTouched = true;
-      var a = $('#seAsm'); if (a) a.hidden = true;
       track('se_area_set', { area: v });
       recompute();
     });
@@ -1801,7 +1806,6 @@
 
   function syncAsmTags() {
     var e = $('#eraAsm'); if (e) e.hidden = state.era !== 'x';
-    var s = $('#seAsm'); if (s) s.hidden = state.seTouched;
   }
 
   /* ---------- lead validation (required: namn + telefon + postnr + e-post; consent via submit) ---------- */

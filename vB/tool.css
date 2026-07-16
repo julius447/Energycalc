@@ -532,21 +532,33 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .lead-success:focus-visible{outline:2px solid var(--neon);outline-offset:2px;border-radius:var(--r-sm)}
 
 /* ============================ TRUST BLOCK (right column, below the result card) ============================
- * The tool's own midnight/aurora surface — same radius/shadow family as the result
- * card, compact (~200-260px on desktop). Owner-sanctioned content only. */
-.trust{background:var(--midnight);border-radius:var(--r-xl);padding:var(--sp-6);color:#fff;
-  position:relative;overflow:hidden;box-shadow:var(--shadow-3)}
-.trust::before{content:'';position:absolute;inset:0;background:var(--aurora);pointer-events:none}
-.trust::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
-.trust>*{position:relative;z-index:1}
-.trust-quote{margin:0;font-size:var(--ty-lead);font-weight:500;line-height:var(--lh-snug);color:#fff;max-width:30ch}   /* 30ch: wraps to two lines at desktop column width so the block holds ~200-260px presence */
-.trust-quote p{margin:0}
-.trust-rating{display:flex;align-items:center;gap:var(--sp-3);margin-top:var(--sp-4);flex-wrap:wrap}
-.trust-stars{display:inline-flex;gap:.3rem}
-.trust-stars svg{width:1.8rem;height:1.8rem;fill:var(--amber)}
+ * A real Ampy dusk photo (trust-elinstallation.webp — white gabled villa, warm-glowing
+ * gable notch) is the surface, under a LEFT-weighted midnight veil that guarantees AA white
+ * text on the left while the house breathes on the right, and a bottom veil that seats the
+ * stat line. Same radius/shadow family as the result card (both midnight) so the seam reads
+ * seamless. Owner-sanctioned content only (verbatim Google review + real public reviewer +
+ * 5/5 + 3 000+/year). Render-verified premium at 852 / 560 / 343 px, AA throughout. */
+.trust{position:relative;border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-3);
+  background:var(--midnight);isolation:isolate}
+.trust-photo{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;
+  object-fit:cover;object-position:64% 50%}
+.trust-veil{position:absolute;inset:0;z-index:1;background:
+  linear-gradient(103deg, rgba(9,11,50,.94) 0%, rgba(9,11,50,.82) 38%, rgba(9,11,50,.50) 68%, rgba(9,11,50,.28) 100%),
+  linear-gradient(to top, rgba(9,11,50,.66) 0%, rgba(9,11,50,0) 52%)}
+.trust::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),inset 0 0 0 1px rgba(255,255,255,.05)}
+.trust-inner{position:relative;z-index:2;padding:3rem 3.2rem}
+.trust-quote{margin:0;position:relative;max-width:30ch;padding-top:3.4rem}   /* 30ch wraps to 2-3 short lines; padding-top reserves the mark's air */
+.trust-mark{position:absolute;left:-.2rem;top:0;font-weight:500;font-size:7.2rem;line-height:.62;
+  color:var(--teal-on-dark);opacity:.55;pointer-events:none;letter-spacing:-.02em}   /* oversized decorative ” — Outfit 500 keeps the single-font discipline */
+.trust-quote p{margin:0;color:#fff;font-size:var(--ty-lead);font-weight:500;line-height:1.36;letter-spacing:-.008em}
+.trust-cite{display:block;margin-top:var(--sp-3);font-size:var(--ty-label);font-weight:300;font-style:normal;
+  color:var(--subtext);letter-spacing:.01em}
+.trust-rating{display:flex;align-items:center;gap:var(--sp-2h);margin-top:var(--sp-5);flex-wrap:wrap}
+.trust-stars{display:inline-flex;gap:.35rem}
+.trust-stars svg{width:1.8rem;height:1.8rem;fill:var(--amber);filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}   /* the shadow lifts the gold off any brighter patch of sky */
 .trust-rating-txt{font-size:var(--ty-label);font-weight:300;color:var(--subtext)}
-.trust-divider{height:1px;background:rgba(255,255,255,.10);margin:var(--sp-5) 0}
+.trust-divider{height:1px;width:44%;min-width:22rem;background:rgba(255,255,255,.16);margin:var(--sp-5) 0}   /* lives in the text column, never slashes the house */
 .trust-stat{margin:0;font-size:var(--ty-sub);font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
 
 /* ============================ MOBILE JUMP-PILL (≤991) ============================
@@ -616,7 +628,15 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   .page{padding:var(--sp-4) var(--sp-3) var(--sp-8)}
   .result{padding:var(--sp-4)}
   .input{padding:var(--sp-5)}
-  .trust{padding:var(--sp-5)}
+  /* trust: tighter inner, mobile-tuned crop, a touch smaller mark, full-width divider,
+     and a stronger bottom veil so the stat stays AA over the glowing windows */
+  .trust-inner{padding:2.6rem 2.4rem}
+  .trust-photo{object-position:58% 42%}
+  .trust-mark{font-size:6.4rem}
+  .trust-divider{width:100%;min-width:0}
+  .trust-veil{background:
+    linear-gradient(103deg, rgba(9,11,50,.92) 0%, rgba(9,11,50,.80) 42%, rgba(9,11,50,.55) 100%),
+    linear-gradient(to top, rgba(9,11,50,.74) 0%, rgba(9,11,50,0) 58%)}
   .hp-ic{width:3.4rem;height:3.4rem}
   .hp-ic svg{width:1.9rem;height:1.9rem}
   .storybar{height:3.2rem}

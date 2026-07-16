@@ -26,7 +26,7 @@
 <link rel="preload" href="../fonts/Outfit-Light.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/Outfit-Medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/Outfit-Black.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="tool.css?v=30">
+<link rel="stylesheet" href="tool.css?v=31">
 </head>
 <body>
 <div class="page">
@@ -81,7 +81,7 @@
           <input type="hidden" id="occupantsField" data-input="occupants" value="2">
 
           <!-- 5. elområde (PROMOTED, relabelled) -->
-          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/></svg>Var ligger huset? <span class="lbl-soft">elområdet styr elpriset</span> <span class="antag" id="seAsm">(antagande)</span></div>
+          <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/></svg>Var ligger huset? <span class="lbl-soft">elområdet styr elpriset</span></div>
           <div class="seg" id="priceAreaSeg" role="radiogroup" aria-label="Elområde"></div>
         </div>
 
@@ -158,7 +158,7 @@
 
         <!-- F. CTA BLOCK: dominant primary + quiet share (desktop share opens a popover) -->
         <div class="ctablock">
-          <button type="button" class="cta cta--primary" id="ctaBtn">Få en plan för ditt hus</button>
+          <button type="button" class="cta cta--primary" id="ctaBtn">Få kostnadsfri rådgivning</button>
           <div class="share-wrap">
             <button type="button" class="share-btn share-btn--quiet" id="shareBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="sharePop">Dela din kalkyl</button>
             <div class="share-pop" id="sharePop" role="menu" aria-label="Dela din kalkyl" hidden>
@@ -234,21 +234,34 @@
 
       </div>
 
-      <!-- ============ TRUST BLOCK (extern trovärdighet — owner-sanctioned facts only) ============ -->
+      <!-- ============ TRUST BLOCK (extern trovärdighet — owner-sanctioned facts only) ============
+           A real Ampy dusk photo (trust-elinstallation.webp) is the surface, under a left-weighted
+           midnight veil (guarantees AA white text; lets the gold stars pop). Same radius/shadow
+           family as the result card, so the seam reads seamless. Content is owner-sanctioned only:
+           verbatim Google review + real public reviewer + 5/5 + 3 000+/year. -->
       <aside class="trust" aria-label="Omdöme och erfarenhet">
-        <blockquote class="trust-quote"><p>&#8221;Från start till mål levererades en service i världsklass.&#8221;</p></blockquote>
-        <div class="trust-rating">
-          <span class="trust-stars" aria-hidden="true">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
-          </span>
-          <span class="trust-rating-txt">5 av 5 · Betyg på Google</span>
+        <img class="trust-photo" src="trust-elinstallation.webp" alt="" aria-hidden="true"
+             width="1000" height="827" loading="lazy" decoding="async">
+        <div class="trust-veil" aria-hidden="true"></div>
+        <div class="trust-inner">
+          <blockquote class="trust-quote">
+            <span class="trust-mark" aria-hidden="true">&#8221;</span>
+            <p>Från start till mål levererades en service i världsklass.</p>
+            <cite class="trust-cite">Hugo Grafström Olsson</cite>
+          </blockquote>
+          <div class="trust-rating">
+            <span class="trust-stars" aria-hidden="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
+            </span>
+            <span class="trust-rating-txt">5 av 5 · Betyg på Google</span>
+          </div>
+          <div class="trust-divider" aria-hidden="true"></div>
+          <p class="trust-stat">3&#160;000+ genomförda installationer om året</p>
         </div>
-        <div class="trust-divider" aria-hidden="true"></div>
-        <p class="trust-stat">3&#160;000+ genomförda installationer om året</p>
       </aside>
 
       </div>
@@ -260,9 +273,9 @@
 <button type="button" class="jump-pill" id="jumpPill" tabindex="-1" aria-hidden="true">Se resultatet <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button>
 
 <!-- 5-layer chassis: data -> engine -> rank -> app -->
-<script src="data.js?v=30"></script>
-<script src="engine.js?v=30"></script>
-<script src="rank.js?v=30"></script>
-<script src="app.js?v=30"></script>
+<script src="data.js?v=31"></script>
+<script src="engine.js?v=31"></script>
+<script src="rank.js?v=31"></script>
+<script src="app.js?v=31"></script>
 </body>
 </html>
