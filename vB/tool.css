@@ -115,12 +115,8 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   padding:var(--sp-8) max(var(--shell-gutter),env(safe-area-inset-right)) var(--sp-9) max(var(--shell-gutter),env(safe-area-inset-left))}   /* P2: keep the card clear of the notch in landscape */
 .tool{background:none;border:0;border-radius:0;padding:0}
 
-.tag{display:inline-block;font-size:var(--ty-eyebrow);font-weight:500;letter-spacing:var(--tr-eyebrow);
-  text-transform:uppercase;color:#04342c;background:var(--mint);border-radius:var(--r-pill);padding:var(--sp-1) var(--sp-3);line-height:1.2}
-.toolhead{display:flex;flex-direction:column;align-items:flex-start;gap:var(--sp-2);margin-bottom:var(--sp-6)}
-.toolhead .th-title{font-size:clamp(2.0rem, 1.7rem + 0.8vw, 2.6rem);font-weight:500;line-height:var(--lh-tight);
-  letter-spacing:-.01em;color:var(--ink);max-width:42rem;margin:0}   /* d-p4 */
-.toolhead .th-sub{font-size:var(--ty-label);font-weight:300;color:var(--muted);margin:0;line-height:var(--lh-body)}
+/* (the .toolhead/.tag block is DELETED — the headline lives in the site-built hero;
+ * the standalone page keeps an sr-only h1) */
 
 .panes{display:flex;gap:var(--sp-7);align-items:flex-start}
 @media (min-width:1200px){ .panes{gap:var(--sp-8)} }
@@ -128,7 +124,11 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   padding:var(--sp-7);margin:0;position:sticky;top:var(--sp-6);align-self:flex-start;box-shadow:var(--shadow-2)}
 /* DM1b: the .static kill-switch is retired — a too-tall card gets a sticky-BOTTOM
  * fallback via an inline negative top set by checkStickyIntegrity() */
-.result{flex:1;min-width:0;background:var(--midnight);border-radius:var(--r-xl);padding:var(--sp-7);
+/* the right column: result card + trust block stacked (the trust fills the gap the
+ * taller left column leaves on desktop); it takes over the old .result flex sizing
+ * so the two-pane widths are byte-identical */
+.rightcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--sp-6)}
+.result{background:var(--midnight);border-radius:var(--r-xl);padding:var(--sp-7);
   color:#fff;position:relative;overflow:hidden;box-shadow:var(--shadow-3);scroll-margin-top:var(--sp-4)}
 @media (min-width:1200px){ .result{padding:var(--sp-8)} }
 .result::before{content:'';position:absolute;inset:0;background:var(--aurora);pointer-events:none}
@@ -399,17 +399,19 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .sp-verdict{font-size:var(--ty-sub);font-weight:300;color:var(--subtext);line-height:var(--lh-body);margin:0 0 var(--sp-3);
   max-width:62ch}   /* d-m4: measure cap */
 .sp-verdict b{font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
-/* the three-column stat block: Din nya årskostnad · Du sparar per år · Återbetald på
-   (a clean scannable trio replaces the old prose + label/value rows) */
-.sp-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3);margin:0;align-items:start}
-.sp-cols--2{grid-template-columns:repeat(2,1fr)}
-.sp-col{display:flex;flex-direction:column;gap:var(--sp-1);min-width:0}
-/* every header now fits ONE line (Årskostnad · Besparing / år · Återbetald på), so no 2-line
-   reserve is needed — they align naturally and the values sit right beneath. */
-.sp-col-k{font-size:var(--ty-micro);font-weight:500;text-transform:uppercase;letter-spacing:.04em;
-  color:var(--footnote);line-height:1.3;white-space:nowrap}
-.sp-col-v{font-size:var(--ty-label);font-weight:500;color:#fff;line-height:1.3;font-variant-numeric:tabular-nums}
-.sp-col-v--weak{color:var(--amber)}   /* long payback: honest visual flag, in the column not on the row */
+/* the vertical stat ROWS (owner v30): one stacked row per stat, label left / value
+   right, bigger readable type — Ny kostnad per år · Besparing per år · Återbetalningstid.
+   Same treatment desktop+mobile; hairline separation between rows. */
+.sp-rows{margin:0;display:block}
+.sp-statrow{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3);
+  padding:var(--sp-2h) 0;min-width:0}
+.sp-statrow:first-child{padding-top:0}
+.sp-statrow:last-child{padding-bottom:0}
+.sp-statrow + .sp-statrow{border-top:1px solid rgba(255,255,255,.08)}
+.sp-statrow-k{font-size:var(--ty-label);font-weight:300;color:var(--footnote);line-height:1.3}
+.sp-statrow-v{margin:0;font-size:1.55rem;font-weight:500;color:#fff;line-height:1.3;
+  font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;flex:0 0 auto}
+.sp-statrow-v--weak{color:var(--amber)}   /* long payback: honest visual flag, on the value */
 
 
 /* entrance: bars scaleX, band fades, chip pops last (JS toggles is-drawing/is-drawn) */
@@ -444,12 +446,30 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
  * with a purchasable action, so the main CTA is always the solid teal primary */
 
 /* share — DEMOTED to a quiet text-level action (R9); still a full ≥44px target */
-.share-btn{display:block;width:100%;min-height:4.4rem;margin-top:var(--sp-1);border-radius:var(--r-md);
+.share-wrap{position:relative;margin-top:var(--sp-1)}
+.share-btn{display:block;width:100%;min-height:4.4rem;margin-top:0;border-radius:var(--r-md);
   background:transparent;border:1px solid transparent;color:var(--subtext);font-family:inherit;
   font-size:var(--ty-label);font-weight:300;cursor:pointer;
   transition:color var(--t-fast) var(--ease)}
 @media (hover:hover) and (pointer:fine){ .share-btn--quiet:hover{color:#fff;text-decoration:underline;text-underline-offset:.3em} }   /* DM4 */
 .share-btn:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
+
+/* the desktop/no-native-share popover: three 44px icon+label rows on the chip surface,
+ * anchored above the button (stays inside the card's overflow) */
+.share-pop{position:absolute;bottom:calc(100% + .6rem);left:50%;transform:translateX(-50%);z-index:6;
+  min-width:24rem;background:var(--chip);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-md);
+  padding:var(--sp-1);box-shadow:var(--shadow-3)}
+.share-pop[hidden]{display:none}
+/* flip fallback: when the viewport space above the button is tight, open below instead */
+.share-pop--below{bottom:auto;top:calc(100% + .6rem)}
+.share-act{display:flex;align-items:center;gap:var(--sp-3);width:100%;min-height:4.4rem;
+  padding:0 var(--sp-3);border:0;border-radius:var(--r-sm);background:transparent;color:#fff;
+  font-family:inherit;font-size:var(--ty-label);font-weight:300;text-align:left;text-decoration:none;
+  cursor:pointer;transition:background var(--t-fast) var(--ease)}
+.share-act svg{width:1.8rem;height:1.8rem;color:var(--mint);flex:0 0 auto}
+@media (hover:hover) and (pointer:fine){ .share-act:hover{background:rgba(255,255,255,.06)} }
+.share-act:focus-visible{outline:2px solid var(--neon);outline-offset:-2px}
+.share-act.is-done .share-act-lbl{color:var(--mint)}
 
 /* methodology */
 .method{margin-top:var(--sp-4);border-top:1px solid rgba(255,255,255,.08);padding-top:var(--sp-2)}
@@ -486,11 +506,12 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .lead-field{width:100%;min-height:44px;padding:1.0rem 1.1rem;border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);
   font-size:var(--ty-body);font-weight:300;font-family:inherit;color:#fff;background:rgba(255,255,255,.04);
   transition:border-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
-.lead-field::placeholder{color:var(--footnote)}
 .lead-field:focus-visible{outline:none;border-color:var(--neon);box-shadow:var(--ring-dark)}
-.lead-field[aria-invalid="true"]{border-color:#ff8a8a}
-.field-err,.lead-err{font-size:var(--ty-label);color:#ff8a8a;margin:.4rem 0 0}
-.field-err[hidden],.lead-err[hidden]{display:none}
+/* invalid = RED BORDER ONLY (the messages live in sr-only elements, aria-described) —
+ * a slightly stronger 1.5px border carries the state without any layout shift */
+.lead-field[aria-invalid="true"]{border-color:#ff8a8a;box-shadow:inset 0 0 0 .5px #ff8a8a}
+.lead-err{font-size:var(--ty-label);color:#ff8a8a;margin:.4rem 0 0}
+.lead-err[hidden]{display:none}
 .leadclose{position:absolute;top:1.1rem;right:1.1rem;width:3rem;height:3rem;border:0;background:none;
   color:var(--subtext);cursor:pointer;border-radius:8px;transition:background var(--t-fast) var(--ease)}
 .leadclose svg{width:1.8rem;height:1.8rem}
@@ -510,7 +531,39 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
 .lead-success p{font-size:var(--ty-sub);margin:var(--sp-2) 0 0;color:#fff}
 .lead-success:focus-visible{outline:2px solid var(--neon);outline-offset:2px;border-radius:var(--r-sm)}
 
-/* ============================ STICKY MOBILE RESULT BAR ============================ */
+/* ============================ TRUST BLOCK (right column, below the result card) ============================
+ * The tool's own midnight/aurora surface — same radius/shadow family as the result
+ * card, compact (~200-260px on desktop). Owner-sanctioned content only. */
+.trust{background:var(--midnight);border-radius:var(--r-xl);padding:var(--sp-6);color:#fff;
+  position:relative;overflow:hidden;box-shadow:var(--shadow-3)}
+.trust::before{content:'';position:absolute;inset:0;background:var(--aurora);pointer-events:none}
+.trust::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.trust>*{position:relative;z-index:1}
+.trust-quote{margin:0;font-size:var(--ty-lead);font-weight:500;line-height:var(--lh-snug);color:#fff;max-width:30ch}   /* 30ch: wraps to two lines at desktop column width so the block holds ~200-260px presence */
+.trust-quote p{margin:0}
+.trust-rating{display:flex;align-items:center;gap:var(--sp-3);margin-top:var(--sp-4);flex-wrap:wrap}
+.trust-stars{display:inline-flex;gap:.3rem}
+.trust-stars svg{width:1.8rem;height:1.8rem;fill:var(--amber)}
+.trust-rating-txt{font-size:var(--ty-label);font-weight:300;color:var(--subtext)}
+.trust-divider{height:1px;background:rgba(255,255,255,.10);margin:var(--sp-5) 0}
+.trust-stat{margin:0;font-size:var(--ty-sub);font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
+
+/* ============================ MOBILE JUMP-PILL (≤991) ============================
+ * A quiet fixed pill: appears after the first input interaction, smooth-scrolls to
+ * #result, hides while the result is in view or the lead form is open. */
+.jump-pill{position:fixed;left:50%;bottom:calc(1.6rem + env(safe-area-inset-bottom,0px));z-index:60;
+  display:none;align-items:center;gap:var(--sp-2);min-height:4.4rem;padding:0 var(--sp-5);
+  background:var(--midnight);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:var(--r-pill);
+  font-family:inherit;font-size:1.4rem;font-weight:500;cursor:pointer;white-space:nowrap;
+  box-shadow:0 .8rem 2.4rem -.8rem rgba(9,11,50,.5);
+  opacity:0;transform:translate(-50%,1rem);pointer-events:none;
+  transition:opacity var(--t-mid) var(--ease),transform var(--t-mid) var(--ease)}
+.jump-pill svg{width:1.6rem;height:1.6rem;color:var(--mint);flex:0 0 auto}
+@media (max-width:991px){ .jump-pill{display:inline-flex} }
+.jump-pill.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.jump-pill:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
 /* ============================ MOTION ============================ */
 /* reveals — grid-template-rows:0fr->1fr (replaces the hidden swap) */
 .gear-collapsed{display:grid;grid-template-rows:0fr;opacity:0;
@@ -544,8 +597,9 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   .input{flex:auto;order:1;width:100%;max-width:none;position:static;top:auto}
   /* explicit width: .panes has align-items:flex-start (no stretch), and the
    * comparison rows carry nowrap min-content — the card must never grow past
-   * the pane (the no-h-scroll floor at 375px) */
-  .result{order:2;width:100%}
+   * the pane (the no-h-scroll floor at 375px). The trust block rides inside
+   * .rightcol → renders LAST, after the result card. */
+  .rightcol{order:2;width:100%}
   /* touch-target floor (>=44px) on every tappable control */
   .seg button{min-height:44px}
   .stepbtn{width:44px;height:44px}
@@ -562,17 +616,23 @@ button,.range,.seg,.stepper,.hp-card,.sp-row,.method summary{
   .page{padding:var(--sp-4) var(--sp-3) var(--sp-8)}
   .result{padding:var(--sp-4)}
   .input{padding:var(--sp-5)}
+  .trust{padding:var(--sp-5)}
   .hp-ic{width:3.4rem;height:3.4rem}
   .hp-ic svg{width:1.9rem;height:1.9rem}
   .storybar{height:3.2rem}
-  /* mobile 375: figures tighten (name-wrap now lives in the ≤991 block, MM2) */
-  .sp-figs > div{gap:var(--sp-2)}
-  /* the 3 stat columns: keep each value on ONE line so a range never breaks mid-number
-     (owner: the wrapped "25 500-\n30 500 kr" was hard to read). Tighten gap + drop padding
-     and cap the value type so the widest range fits its column. */
+  /* ---- item 9: the left-column breathing pass (owner: perfect down TO Boyta;
+   * from Byggår down it was chunky/tight). Group rhythm steps UP one notch,
+   * label→control opens to --sp-3, the seg buttons grow taller with more gap. ---- */
+  .gear > .lbl,.gear > #ownRow{margin-top:var(--sp-7)}       /* every group from Byggår down */
+  .gear > .heatpicker + .lbl{margin-top:var(--sp-6)}          /* Boyta keeps its tuned gap */
+  .gear .seg,.gear .range{margin-top:var(--sp-3)}             /* consistent label→control air */
+  #ownRow > * + *{margin-top:var(--sp-3)}
+  .seg{gap:var(--sp-2)}                                       /* the wrapped byggår rows breathe */
+  .seg button{min-height:4.8rem}                              /* taller segs (the 5 byggår segs were cramped) */
+  .gear[data-gear="n2"]{margin-top:var(--sp-7);padding-top:var(--sp-7)}  /* DIN EL header clearly separated */
+  /* the stat rows: the value never breaks mid-number (nowrap lives on .sp-statrow-v);
+     drop-body keeps a touch tighter horizontal padding at 375 */
   .sp-drop-body{padding:var(--sp-3) var(--sp-2) var(--sp-4)}
-  .sp-cols{gap:var(--sp-2)}
-  .sp-col-v{font-size:1.2rem;white-space:nowrap;letter-spacing:-.01em}
   /* "Så har vi räknat" gets a touch larger tap surface for 55+ thumbs (owner ask) */
   .method summary{font-size:1.5rem}
   .method summary svg{width:1.8rem;height:1.8rem}

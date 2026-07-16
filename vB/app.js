@@ -165,8 +165,9 @@
       },
       /* V10 (P4/AR-3): quiet action rows — "utan pris", no bar, NO invented numbers */
       actionName: { service: 'Service och trimning av värmepumpen', solplan: 'Solceller med batteri' },
-      figInvest: 'Investering efter ROT', figPayback: 'Återbetald på', figSaving: 'Besparing / år',
-      figEfter: 'Årskostnad',
+      /* v30 (owner-exact): the dropdown stat-row labels */
+      figInvest: 'Investering efter ROT', figPayback: 'Återbetalningstid', figSaving: 'Besparing per år',
+      figEfter: 'Ny kostnad per år',
       figBattGross: 'Pris från', figBattNet: 'Efter grön teknik',
       figBehall: 'Noll kronor i investering',
       utanPris: 'utan pris', tagBehall: 'Så ligger du idag'
@@ -182,8 +183,10 @@
       plan: 'Få en plan för ditt hus', sent: 'Skickat, vi hör av oss'
     },
     share: 'Dela din kalkyl',
+    shareCopy: 'Kopiera länk',
     shareCopied: 'Länk kopierad',
-    shareText: 'Se vad värmen kostar i ditt hus. Gratis, utan mejl.',
+    shareMailSubject: 'Kolla vad vårt hus kan spara',
+    shareText: 'Räkna på ditt hus och se vad som är värt att göra.',
     shareTitle: 'Energikalkylatorn från Ampy',
     leadErr: 'Det gick inte att skicka just nu. Försök igen om en stund.',
     err: {
@@ -215,16 +218,18 @@
       '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>';
   }
   var ICONS = {
+    /* v30 heat-icon set (designer-delivered, render-verified 96/48/22px on midnight):
+     * ac/hearth/building/mountain REPLACED; bolt/droplet/dropbolt/wind kept per owner verdict */
     bolt:     icsvg('<path d="M13 3v7h6l-8 11v-7H5l8-11z"/>'),
     dropbolt: icsvg('<path d="M7.5 19.42c2.6 2.11 6.4 2.11 9 0c2.6-2.1 3.26-5.71 1.57-8.55l-4.89-7.26c-.42-.62-1.29-.8-1.94-.4a1.38 1.38 0 0 0-.41.4l-4.89 7.26c-1.7 2.84-1.04 6.44 1.56 8.55z"/><path d="M13 10l-2.5 3h3L11 16"/>'),
     flame:    icsvg('<path d="M12 12c2-2.96 0-7-1-8c0 3.04-1.77 4.74-3 6c-1.23 1.26-2 3.24-2 5a6 6 0 1 0 12 0c0-1.53-1.06-3.94-2-5c-1.79 3-2.79 3-4 2z"/>'),
     pellets:  icsvg('<circle cx="7" cy="16" r="3"/><circle cx="15" cy="16" r="3"/><circle cx="11" cy="8.5" r="3"/>'),
     wind:     icsvg('<path d="M5 8h8.5a2.5 2.5 0 1 0-2.34-3.24"/><path d="M3 12h15.5a2.5 2.5 0 1 1-2.34 3.24"/><path d="M4 16h5.5a2.5 2.5 0 1 1-2.34 3.24"/>'),
-    building: icsvg('<path d="M3 21h18"/><path d="M5 21V7l4-4 4 4v14"/><path d="M13 21v-8l6 3v5"/><path d="M9 9h.01"/><path d="M9 13h.01"/>'),
-    ac:       icsvg('<rect x="3" y="7" width="18" height="10" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M17.5 10h.01"/><path d="M17.5 14h.01"/>'),
+    building: icsvg('<path d="M2.5 18H7"/><path d="M17 18h4.5"/><path d="M7 18v-7l5-4.5 5 4.5v7"/><path d="M2.5 21.5h9.5V17"/><path d="M10 19l2-2 2 2"/>'),
+    ac:       icsvg('<rect x="3.5" y="3" width="17" height="9" rx="2"/><path d="M7 8.75h10"/><path d="M8 14.75c-1 1.5-1 3.25 0 4.75"/><path d="M12 15.25c-.7 1.6-.7 3.6 0 5.25"/><path d="M16 14.75c1 1.5 1 3.25 0 4.75"/>'),
     droplet:  icsvg('<path d="M7.5 19.42c2.6 2.11 6.4 2.11 9 0c2.6-2.1 3.26-5.71 1.57-8.55l-4.89-7.26c-.42-.62-1.29-.8-1.94-.4a1.38 1.38 0 0 0-.41.4l-4.89 7.26c-1.7 2.84-1.04 6.44 1.56 8.55z"/>'),
-    mountain: icsvg('<path d="M3 20h18L14.08 5.39a2.3 2.3 0 0 0-4.16 0L3 20z"/><path d="M7.5 12.5l2 2.5l2.5-2.5l2 3l2.5-2"/>'),
-    hearth:   icsvg('<path d="M4 4h16"/><path d="M5 4v16"/><path d="M19 4v16"/><path d="M4 20h4"/><path d="M16 20h4"/><path d="M12 9c-1.8 1.8-3 3.2-3 4.9a3 3 0 0 0 6 0c0-1.7-1.2-3.1-3-4.9z"/>'),
+    mountain: icsvg('<path d="M2.5 11h4"/><path d="M17.5 11h4"/><path d="M6.5 11V7L12 2.5 17.5 7v4"/><path d="M9.5 11v6.5a2.5 2.5 0 0 0 5 0V11"/>'),
+    hearth:   icsvg('<path d="M12 2.5v3"/><rect x="6" y="5.5" width="12" height="13" rx="2"/><path d="M12 8.75c-1.5 1.6-2.5 2.8-2.5 4.25a2.5 2.5 0 0 0 5 0c0-1.45-1-2.65-2.5-4.25z"/><path d="M9 18.5V21M15 18.5V21"/>'),
     sun:      icsvg('<path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 12h1"/><path d="M12 3v1"/><path d="M20 12h1"/><path d="M12 20v1"/><path d="M5.6 5.6l.7 .7"/><path d="M18.4 5.6l-.7 .7"/><path d="M17.7 17.7l.7 .7"/><path d="M6.3 17.7l-.7 .7"/>'),
     check:    icsvg('<path d="M5 12l5 5l10-10"/>', 2.2),
     chevUp:   icsvg('<path d="M6 15l6-6l6 6"/>')
@@ -1072,9 +1077,7 @@
     return flag + head + barline;
   }
 
-  function figRow(dt, dd) {
-    return '<div><dt>' + esc(dt) + '</dt><dd>' + esc(dd) + '</dd></div>';
-  }
+  /* (the dead figRow helper is deleted — the stat renderer is figCols below) */
 
   /* slot map for the lead row's branch intro (V10 §1.5) — every number is a
    * computed engine/rank output or a signed constant, never invented */
@@ -1096,14 +1099,15 @@
    * V10 (owner P1-P5): the LEAD row = branchIntro + option sentence + longPbLine
    * (payback stated PLAINLY, ★ stays). Disclose strings = NON-lead rows only.
    * Reuses recNumbers/battSlots for every number; NEVER a fabricated figure. */
-  /* three-column stat block — the dropdown for any row that HAS numbers (owner:
-     numbers over prose; extreme mobile UX). Accepts 2 or 3 columns. */
+  /* vertical stat ROWS (owner v30) — the dropdown for any row that HAS numbers:
+     one stacked row per stat, label left / value right, bigger readable type.
+     Same markup desktop+mobile; accepts 2 or 3 rows. */
   function figCols(items) {
-    return '<div class="sp-cols' + (items.length === 2 ? ' sp-cols--2' : '') + '">' +
+    return '<dl class="sp-rows">' +
       items.map(function (c) {
-        return '<div class="sp-col"><span class="sp-col-k">' + esc(c.k) +
-               '</span><span class="sp-col-v' + (c.cls ? ' ' + c.cls : '') + '">' + esc(c.v) + '</span></div>';
-      }).join('') + '</div>';
+        return '<div class="sp-statrow"><dt class="sp-statrow-k">' + esc(c.k) +
+               '</dt><dd class="sp-statrow-v' + (c.cls ? ' ' + c.cls : '') + '">' + esc(c.v) + '</dd></div>';
+      }).join('') + '</dl>';
   }
 
   function renderSparDrop(o, R, rec, wb) {
@@ -1145,16 +1149,21 @@
     return figCols([
       { k: S.spark.figEfter,   v: efter },
       { k: S.spark.figSaving,  v: bespar },
-      { k: S.spark.figPayback, v: pb, cls: pbWeak ? 'sp-col-v--weak' : '' }
+      { k: S.spark.figPayback, v: pb, cls: pbWeak ? 'sp-statrow-v--weak' : '' }
     ]);
   }
 
   function renderBattDrop(R, rec) {
-    // battery is an ADD-ON, not a heating swap (no efter-total, no payback trio) → short text
+    // battery is an ADD-ON, not a heating swap (no efter-total, no payback trio):
+    // verdict text + its two PRICE rows in the same vertical stat style (v30).
+    // Both figures come from data.js battery (signed constants, already used in copy).
     var bs = battSlots(R);
     var isLead = rec.lead.type === 'action' && rec.lead.id === 'batteri';
     var txt = isLead ? fill(S.spark.verdict.batteriLead, { battRange: bs.battRange }) : S.spark.verdict.batteri;
-    return '<p class="sp-verdict">' + txt + '</p>';
+    return '<p class="sp-verdict">' + txt + '</p>' + figCols([
+      { k: S.spark.figBattGross, v: nf((D.battery && D.battery.grossFrom) || 33000) + ' kr' },
+      { k: S.spark.figBattNet,   v: '~' + bs.battNet + ' kr' }
+    ]);
   }
 
   var sparkDrawn = false;
@@ -1520,33 +1529,11 @@
 
     // (Sparstaplarna rows wire their own tap-to-expand in renderSpark; no separate toggle)
 
-    // share (AmpyCodec: house state only, NO identity, ever)
-    var shareBtn = $('#shareBtn');
-    if (shareBtn && CODEC) {
-      shareBtn.addEventListener('click', function () {
-        track('share_click');
-        var url = location.origin + location.pathname;
-        var q = CODEC.encode(shareState());
-        if (q) url += '?' + q;
-        var confirm = function () {
-          shareBtn.textContent = S.shareCopied;
-          $('#shareLive').textContent = S.shareCopied;
-          setTimeout(function () { shareBtn.textContent = S.share; $('#shareLive').textContent = ''; }, 2000);
-        };
-        if (navigator.share) {
-          navigator.share({ title: S.shareTitle, text: S.shareText, url: url }).catch(function () {});
-        } else if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(url).then(confirm).catch(function () {});
-        } else {
-          try {
-            var tmp = document.createElement('textarea');
-            tmp.value = url; document.body.appendChild(tmp); tmp.select();
-            document.execCommand('copy'); document.body.removeChild(tmp);
-            confirm();
-          } catch (e) {}
-        }
-      });
-    }
+    // share (AmpyCodec: house state only, NO identity, ever) — v30:
+    // native sheet where navigator.share exists (THE premium mobile pattern);
+    // otherwise a small anchored popover with Kopiera länk / mejl / Facebook.
+    // The legacy button-label clipboard toast is DELETED.
+    wireShare();
 
     // lead form (inline)
     $('#ctaBtn').addEventListener('click', openLead);
@@ -1555,6 +1542,152 @@
     // validate-on-blur per field
     [['#leadName', validateName], ['#leadPhone', validatePhone], ['#leadZip', validateZip], ['#leadEmail', validateEmail]].forEach(function (pair) {
       var f = $(pair[0]); if (f) f.addEventListener('blur', function () { pair[1](true); });
+    });
+  }
+
+  /* ---------- v30 share UX: native sheet OR anchored popover ---------- */
+  function legacyCopy(url, done) {
+    try {
+      var tmp = document.createElement('textarea');
+      tmp.value = url; document.body.appendChild(tmp); tmp.select();
+      document.execCommand('copy'); document.body.removeChild(tmp);
+      done();
+    } catch (e) {}
+  }
+  function wireShare() {
+    var shareBtn = $('#shareBtn');
+    if (!shareBtn || !CODEC) return;
+    var pop = $('#sharePop');
+    var popCloser = null;
+    // the popup ARIA only holds where the popover path actually runs;
+    // with navigator.share the button opens the native sheet instead
+    if (navigator.share) {
+      shareBtn.removeAttribute('aria-haspopup');
+      shareBtn.removeAttribute('aria-expanded');
+      shareBtn.removeAttribute('aria-controls');
+    }
+    function shareUrl() {
+      var url = location.origin + location.pathname;
+      var q = CODEC.encode(shareState());
+      if (q) url += '?' + q;
+      return url;
+    }
+    function closePop(refocus) {
+      if (!pop || pop.hidden) return;
+      pop.hidden = true;
+      shareBtn.setAttribute('aria-expanded', 'false');
+      if (popCloser) { document.removeEventListener('pointerdown', popCloser, true); popCloser = null; }
+      if (refocus) { try { shareBtn.focus(); } catch (e) {} }
+    }
+    function openPop() {
+      var url = shareUrl();
+      var mail = $('#shareMail');
+      if (mail) mail.href = 'mailto:?subject=' + encodeURIComponent(S.shareMailSubject) + '&body=' + encodeURIComponent(url);
+      var fb = $('#shareFb');
+      if (fb) fb.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+      pop.hidden = false;
+      // flip below when the viewport space above the button is tight
+      // (measure with the pop visible so offsetHeight is real)
+      pop.classList.remove('share-pop--below');
+      var btnRect = shareBtn.getBoundingClientRect();
+      if (btnRect.top < pop.offsetHeight + 12) pop.classList.add('share-pop--below');
+      shareBtn.setAttribute('aria-expanded', 'true');
+      popCloser = function (ev) {
+        if (!pop.contains(ev.target) && !shareBtn.contains(ev.target)) closePop(false);
+      };
+      document.addEventListener('pointerdown', popCloser, true);
+      var first = $('.share-act', pop);
+      if (first) { try { first.focus(); } catch (e) {} }
+    }
+    shareBtn.addEventListener('click', function () {
+      track('share_click');
+      if (navigator.share) {
+        navigator.share({ title: S.shareTitle, text: S.shareText, url: shareUrl() }).catch(function () {});
+        return;
+      }
+      if (!pop) return;
+      if (pop.hidden) openPop(); else closePop(true);
+    });
+    if (!pop) return;
+    // Escape closes; ArrowUp/Down walk the menu (role="menu" contract);
+    // Home/End jump; Tab wraps lightly over the three rows
+    pop.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closePop(true); return; }
+      var items = el('.share-act', pop);
+      if (!items.length) return;
+      var i = items.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); return; }
+      if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); return; }
+      if (e.key === 'Home') { e.preventDefault(); items[0].focus(); return; }
+      if (e.key === 'End') { e.preventDefault(); items[items.length - 1].focus(); return; }
+      if (e.key === 'Tab') {
+        if (e.shiftKey && i <= 0) { e.preventDefault(); items[items.length - 1].focus(); }
+        else if (!e.shiftKey && i === items.length - 1) { e.preventDefault(); items[0].focus(); }
+      }
+    });
+    var copyBtn = $('#shareCopy');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var url = shareUrl();
+        var done = function () {
+          // inline confirmation swap ON THE ROW — no floating toast
+          var lbl = $('.share-act-lbl', copyBtn);
+          if (lbl) {
+            lbl.textContent = S.shareCopied;
+            copyBtn.classList.add('is-done');
+            setTimeout(function () { lbl.textContent = S.shareCopy; copyBtn.classList.remove('is-done'); }, 2000);
+          }
+          $('#shareLive').textContent = S.shareCopied;
+          setTimeout(function () { $('#shareLive').textContent = ''; }, 2000);
+          track('share_channel', { ch: 'copy' });
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(done).catch(function () { legacyCopy(url, done); });
+        } else {
+          legacyCopy(url, done);
+        }
+      });
+    }
+    var mailA = $('#shareMail');
+    if (mailA) mailA.addEventListener('click', function () { track('share_channel', { ch: 'mail' }); closePop(false); });
+    var fbA = $('#shareFb');
+    if (fbA) fbA.addEventListener('click', function () { track('share_channel', { ch: 'fb' }); closePop(false); });
+  }
+
+  /* ---------- v30 mobile jump-pill (fresh minimal build — the old #msum machinery
+   * is long deleted; this shares nothing with it). Appears after the FIRST input
+   * interaction, smooth-scrolls to #result, hides while #result is in view (IO)
+   * and while the lead form is open (= the only keyboard surface). ---------- */
+  var pillArmed = false, pillResultVisible = false;
+  function pillUpdate() {
+    var pill = $('#jumpPill'); if (!pill) return;
+    var lead = $('#leadInline');
+    var leadOpen = !!(lead && lead.classList.contains('open'));
+    var mobile = window.matchMedia('(max-width:991px)').matches;
+    var show = pillArmed && mobile && !pillResultVisible && !leadOpen;
+    pill.classList.toggle('show', show);
+    pill.tabIndex = show ? 0 : -1;
+    pill.setAttribute('aria-hidden', show ? 'false' : 'true');
+  }
+  function wireJumpPill() {
+    var pill = $('#jumpPill'), res = $('#result');
+    if (!pill || !res) return;
+    if (!('IntersectionObserver' in window)) { pill.remove(); return; }   // no IO → no pill, never a stuck one
+    new IntersectionObserver(function (entries) {
+      pillResultVisible = entries[0].isIntersecting;
+      pillUpdate();
+    }, { threshold: 0.12 }).observe(res);
+    var form = $('#inputForm');
+    var arm = function () { if (!pillArmed) { pillArmed = true; pillUpdate(); } };
+    if (form) {
+      ['pointerdown', 'input', 'change'].forEach(function (evt) {
+        form.addEventListener(evt, arm, { once: true, passive: true });
+      });
+    }
+    pill.addEventListener('click', function () {
+      track('jump_result');
+      try { res.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }); }
+      catch (e) { res.scrollIntoView(); }
     });
   }
 
@@ -1707,6 +1840,7 @@
     $('#leadSuccess').hidden = !leadSent;
     var cta = $('#ctaBtn'); var open = !w.classList.contains('open');
     toggleEl(w, open); cta.setAttribute('aria-expanded', open ? 'true' : 'false');
+    pillUpdate();   // the jump-pill hides while the lead form is open
     if (open) {
       track('lead_open');
       cta.classList.add('is-close');
@@ -1733,6 +1867,7 @@
     toggleEl(w, false);
     var cta = $('#ctaBtn'); cta.setAttribute('aria-expanded', 'false');
     restoreCta();
+    pillUpdate();
     try { cta.focus(); } catch (e) {}
   }
 
@@ -1800,6 +1935,7 @@
   window.addEventListener('resize', function () {
     replaceAllPills();
     checkStickyIntegrity();
+    pillUpdate();   // crossing the 991 breakpoint re-gates the jump-pill
   });
 
   /* ---------- boot ---------- */
@@ -1808,6 +1944,7 @@
     buildInputs();
     syncAsmTags();
     wireControls();
+    wireJumpPill();
     if (decodedAny) firstTouch(true);   // a shared link counts as touched (no assumed-state notes)
     recompute();
     booted = true;

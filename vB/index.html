@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Energikalkylatorn: vad kostar det att värma ditt hus?</title>
-<meta name="description" content="Se vad värmen kostar i ditt hus och vad som är värt att göra. Försiktiga spann, fält-SPF, ROT 30 % på arbetet. Gratis, utan mejl.">
+<meta name="description" content="Räkna på ditt hus och se vad som är värt att göra. Ärliga siffror, räknat försiktigt.">
 
 <!-- Open Graph / social share unfurl (Facebook, LinkedIn, iMessage, WhatsApp) -->
 <meta property="og:type" content="website">
@@ -12,28 +12,29 @@
 <meta property="og:locale" content="sv_SE">
 <meta property="og:url" content="https://julius447.github.io/Energycalc/vB/">
 <meta property="og:title" content="Betalar du för mycket för elen?">
-<meta property="og:description" content="Räkna på ditt hus och se vad som är värt att göra. Gratis, utan mejl.">
-<meta property="og:image" content="https://julius447.github.io/Energycalc/vB/og.png?v=1">
+<meta property="og:description" content="Räkna på ditt hus och se vad som är värt att göra. Ärliga siffror, räknat försiktigt.">
+<meta property="og:image" content="https://julius447.github.io/Energycalc/vB/og.png?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Ampy Energikalkylatorn — betalar du för mycket för elen?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Betalar du för mycket för elen?">
-<meta name="twitter:description" content="Räkna på ditt hus och se vad som är värt att göra. Gratis, utan mejl.">
-<meta name="twitter:image" content="https://julius447.github.io/Energycalc/vB/og.png?v=1">
+<meta name="twitter:description" content="Räkna på ditt hus och se vad som är värt att göra. Ärliga siffror, räknat försiktigt.">
+<meta name="twitter:image" content="https://julius447.github.io/Energycalc/vB/og.png?v=2">
 
-<link rel="stylesheet" href="tool.css?v=29">
+<!-- perf: preload the three Outfit weights before the CSS asks for them -->
+<link rel="preload" href="../fonts/Outfit-Light.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/Outfit-Medium.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/Outfit-Black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="tool.css?v=30">
 </head>
 <body>
 <div class="page">
   <div class="tool" id="ampyTool">
 
-    <!-- ============ TOOL HEAD ============ -->
-    <div class="toolhead">
-      <span class="tag">Energikalkylatorn</span>
-      <h1 class="th-title">Betalar du för mycket för elen?</h1>
-      <p class="th-sub">Räkna på ditt hus och se vad som är värt att göra.</p>
-    </div>
+    <!-- the headline lives in the site-built hero above the tool; the standalone
+         page keeps an sr-only h1 for a11y/SEO -->
+    <h1 class="sr-only">Energikalkylatorn</h1>
 
     <div class="panes">
 
@@ -123,12 +124,13 @@
         </div>
       </form>
 
-      <!-- ============ RIGHT: RESULT CARD ============ -->
+      <!-- ============ RIGHT COLUMN: RESULT CARD + TRUST BLOCK ============ -->
+      <div class="rightcol">
       <div class="result" id="result">
 
         <!-- A. head (#ownBadge deleted — R1) -->
         <div class="eyebrow-row">
-          <span class="eyebrow" id="eyebrow">Så använder ditt hus energi idag</span>
+          <span class="eyebrow" id="eyebrow">Så förbrukar ditt hus energi idag</span>
         </div>
 
         <!-- B. anchor (now the household-inclusive total, display only; breakdown = the legend below) -->
@@ -154,10 +156,26 @@
         <!-- sr-only live region (the ONE result announcer) -->
         <div class="sr-only" id="resultLive" aria-live="polite" aria-atomic="true"></div>
 
-        <!-- F. CTA BLOCK: dominant primary + quiet share -->
+        <!-- F. CTA BLOCK: dominant primary + quiet share (desktop share opens a popover) -->
         <div class="ctablock">
           <button type="button" class="cta cta--primary" id="ctaBtn">Få en plan för ditt hus</button>
-          <button type="button" class="share-btn share-btn--quiet" id="shareBtn">Dela din kalkyl</button>
+          <div class="share-wrap">
+            <button type="button" class="share-btn share-btn--quiet" id="shareBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="sharePop">Dela din kalkyl</button>
+            <div class="share-pop" id="sharePop" role="menu" aria-label="Dela din kalkyl" hidden>
+              <button type="button" class="share-act" id="shareCopy" role="menuitem">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                <span class="share-act-lbl">Kopiera länk</span>
+              </button>
+              <a class="share-act" id="shareMail" role="menuitem" href="#">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6l9 -6"/></svg>
+                <span class="share-act-lbl">Dela via mejl</span>
+              </a>
+              <a class="share-act" id="shareFb" role="menuitem" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2h-3a5 5 0 0 0-5 5v3H6v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                <span class="share-act-lbl">Dela på Facebook</span>
+              </a>
+            </div>
+          </div>
         </div>
         <p class="sr-only" id="shareLive" role="status"></p>
 
@@ -170,20 +188,20 @@
               <p class="lead-sub">Vi hör av oss inom en arbetsdag och ger dig en kostnadsfri rådgivning.</p>
               <form id="leadForm" novalidate>
                 <label class="lead-lbl" for="leadName">Ditt namn <span class="lead-req" aria-hidden="true">*</span></label>
-                <input class="lead-field" type="text" id="leadName" name="name" autocomplete="name" placeholder="Johan Svensson" required aria-describedby="errName">
-                <p class="field-err" id="errName" hidden></p>
+                <input class="lead-field" type="text" id="leadName" name="name" autocomplete="name" required aria-describedby="errName">
+                <p class="field-err sr-only" id="errName" hidden></p>
 
                 <label class="lead-lbl" for="leadPhone">Telefonnummer <span class="lead-req" aria-hidden="true">*</span></label>
-                <input class="lead-field" type="tel" id="leadPhone" name="phone" autocomplete="tel" placeholder="073 XXX XX XX" required aria-describedby="errPhone">
-                <p class="field-err" id="errPhone" hidden></p>
+                <input class="lead-field" type="tel" id="leadPhone" name="phone" autocomplete="tel" required aria-describedby="errPhone">
+                <p class="field-err sr-only" id="errPhone" hidden></p>
 
                 <label class="lead-lbl" for="leadZip">Postnummer <span class="lead-req" aria-hidden="true">*</span></label>
-                <input class="lead-field" type="text" id="leadZip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="6" placeholder="123 45" required aria-describedby="errZip">
-                <p class="field-err" id="errZip" hidden></p>
+                <input class="lead-field" type="text" id="leadZip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="6" required aria-describedby="errZip">
+                <p class="field-err sr-only" id="errZip" hidden></p>
 
                 <label class="lead-lbl" for="leadEmail">E-postadress <span class="lead-req" aria-hidden="true">*</span></label>
-                <input class="lead-field" type="email" id="leadEmail" name="email" autocomplete="email" placeholder="Namn@email.se" required aria-describedby="errEmail">
-                <p class="field-err" id="errEmail" hidden></p>
+                <input class="lead-field" type="email" id="leadEmail" name="email" autocomplete="email" required aria-describedby="errEmail">
+                <p class="field-err sr-only" id="errEmail" hidden></p>
 
                 <!-- honeypot (hidden from humans) -->
                 <div class="hp" aria-hidden="true">
@@ -215,14 +233,36 @@
         </details>
 
       </div>
+
+      <!-- ============ TRUST BLOCK (extern trovärdighet — owner-sanctioned facts only) ============ -->
+      <aside class="trust" aria-label="Omdöme och erfarenhet">
+        <blockquote class="trust-quote"><p>&#8221;Från start till mål levererades en service i världsklass.&#8221;</p></blockquote>
+        <div class="trust-rating">
+          <span class="trust-stars" aria-hidden="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17.8 6 21l1.2-6.6L2.4 9.7l6.6-.9z"/></svg>
+          </span>
+          <span class="trust-rating-txt">5 av 5 · Betyg på Google</span>
+        </div>
+        <div class="trust-divider" aria-hidden="true"></div>
+        <p class="trust-stat">3&#160;000+ genomförda installationer om året</p>
+      </aside>
+
+      </div>
     </div>
   </div>
 </div>
 
+<!-- mobile jump-pill (≤991): appears after the first input interaction, hides at the result -->
+<button type="button" class="jump-pill" id="jumpPill" tabindex="-1" aria-hidden="true">Se resultatet <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button>
+
 <!-- 5-layer chassis: data -> engine -> rank -> app -->
-<script src="data.js?v=29"></script>
-<script src="engine.js?v=29"></script>
-<script src="rank.js?v=29"></script>
-<script src="app.js?v=29"></script>
+<script src="data.js?v=30"></script>
+<script src="engine.js?v=30"></script>
+<script src="rank.js?v=30"></script>
+<script src="app.js?v=30"></script>
 </body>
 </html>
